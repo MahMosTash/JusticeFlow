@@ -14,14 +14,14 @@ export const AdminDashboard: React.FC = () => {
       title: 'Manage Users',
       description: 'View and manage all system users',
       icon: <People />,
-      action: () => navigate('/admin/users'),
+      action: () => navigate(ROUTES.ADMIN_USERS),
       color: '#1976d2',
     },
     {
       title: 'Manage Roles',
       description: 'Create and edit roles',
       icon: <AdminPanelSettings />,
-      action: () => navigate('/admin/roles'),
+      action: () => navigate(ROUTES.ADMIN_ROLES),
       color: '#2e7d32',
     },
     {
