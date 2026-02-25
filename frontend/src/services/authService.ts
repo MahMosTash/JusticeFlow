@@ -2,7 +2,7 @@
  * Authentication service
  */
 import api from './api';
-import { User, LoginResponse, PaginatedResponse } from '@/types/api';
+import { User, LoginResponse } from '@/types/api';
 
 export interface RegisterData {
   username: string;

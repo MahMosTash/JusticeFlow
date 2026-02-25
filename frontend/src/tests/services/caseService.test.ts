@@ -106,7 +106,7 @@ describe('caseService', () => {
     const newCaseData = {
       title: 'New Case',
       description: 'New Description',
-      severity: 'Level 1',
+      severity: 'Level 1' as const,
     };
 
     const mockCreatedCase: Case = {

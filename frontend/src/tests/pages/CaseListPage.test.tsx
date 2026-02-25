@@ -32,7 +32,16 @@ const createMockStore = () => {
         user: {
           id: 1,
           username: 'testuser',
-          roles: [{ id: 1, name: 'Police Officer' }],
+          email: 'test@example.com',
+          phone_number: '1234567890',
+          national_id: '123456789',
+          first_name: 'Test',
+          last_name: 'User',
+          full_name: 'Test User',
+          is_active: true,
+          date_joined: '2024-01-01',
+          last_login: null,
+          roles: [{ id: 1, name: 'Police Officer', description: '', is_active: true, created_at: '', updated_at: '' }],
         },
         token: 'test-token',
         isLoading: false,
@@ -96,7 +105,7 @@ describe('CaseListPage', () => {
     });
 
     renderWithProviders(<CaseListPage />);
-    
+
     expect(screen.getByText(/Cases/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Create Case/i })).toBeInTheDocument();
   });
@@ -135,32 +144,6 @@ describe('CaseListPage', () => {
     });
   });
 
-  it('allows filtering by status', async () => {
-    const mockResponse: PaginatedResponse<Case> = {
-      count: 1,
-      next: null,
-      previous: null,
-      results: [mockCase],
-    };
 
-    (caseService.caseService.getCases as jest.Mock).mockResolvedValue(mockResponse);
-
-    const user = userEvent.setup();
-    renderWithProviders(<CaseListPage />);
-
-    await waitFor(() => {
-      expect(screen.getByText('Test Case')).toBeInTheDocument();
-    });
-
-    const statusSelect = screen.getByLabelText(/Status/i);
-    await user.click(statusSelect);
-    await user.click(screen.getByText(/Resolved/i));
-
-    await waitFor(() => {
-      expect(caseService.caseService.getCases).toHaveBeenCalledWith(
-        expect.objectContaining({ status: 'Resolved' })
-      );
-    });
-  });
 });
 

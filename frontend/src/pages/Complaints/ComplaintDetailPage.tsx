@@ -14,14 +14,18 @@ import {
   Button,
   Paper,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
 import { complaintService } from '@/services/complaintService';
 import { Complaint } from '@/types/api';
-import { Loading } from '@/components/common/Loading';
 import { CardSkeleton } from '@/components/common/Skeleton';
 import { ROUTES } from '@/constants/routes';
-import { formatDate, formatDateTime } from '@/utils/dateUtils';
+import { formatDateTime } from '@/utils/dateUtils';
 import { useAuth } from '@/hooks/useAuth';
 import { usePermissions } from '@/hooks/usePermissions';
 
@@ -32,6 +36,12 @@ export const ComplaintDetailPage: React.FC = () => {
   const permissions = usePermissions();
   const [complaint, setComplaint] = useState<Complaint | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Action Dialog State
+  const [actionDialogOpen, setActionDialogOpen] = useState(false);
+  const [actionType, setActionType] = useState<'return' | 'forward' | 'approve' | 'reject' | ''>('');
+  const [actionComments, setActionComments] = useState('');
+  const [isSubmittingAction, setIsSubmittingAction] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -49,6 +59,33 @@ export const ComplaintDetailPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleActionSubmit = async () => {
+    if (!complaint || !actionType) return;
+
+    try {
+      setIsSubmittingAction(true);
+      if (actionType === 'forward' || actionType === 'return') {
+        await complaintService.reviewAsIntern(complaint.id, actionType, actionComments);
+      } else if (actionType === 'approve' || actionType === 'reject') {
+        await complaintService.reviewAsOfficer(complaint.id, actionType, actionComments);
+      }
+      setActionDialogOpen(false);
+      setActionComments('');
+      await loadComplaint(); // Refresh data
+    } catch (err: any) {
+      console.error('Failed to submit action:', err);
+      // Ideally show an error toast here
+    } finally {
+      setIsSubmittingAction(false);
+    }
+  };
+
+  const openActionDialog = (type: 'return' | 'forward' | 'approve' | 'reject') => {
+    setActionType(type);
+    setActionComments('');
+    setActionDialogOpen(true);
   };
 
   if (isLoading) {
@@ -103,6 +140,35 @@ export const ComplaintDetailPage: React.FC = () => {
                 />
                 <Chip label={`Submission #${complaint.submission_count}`} />
               </Box>
+            </Box>
+
+            {/* Workflow Action Buttons */}
+            <Box display="flex" gap={1}>
+              {permissions.isIntern() && complaint.status === 'Pending' && (
+                <>
+                  <Button variant="outlined" color="error" onClick={() => openActionDialog('return')}>
+                    Return to Complainant
+                  </Button>
+                  <Button variant="contained" color="primary" onClick={() => openActionDialog('forward')}>
+                    Forward to Officer
+                  </Button>
+                </>
+              )}
+              {permissions.isPoliceOfficer() && complaint.status === 'Under Review' && (
+                <>
+                  <Button variant="outlined" color="error" onClick={() => openActionDialog('reject')}>
+                    Reject back to Intern
+                  </Button>
+                  <Button variant="contained" color="success" onClick={() => openActionDialog('approve')}>
+                    Approve & Create Case
+                  </Button>
+                </>
+              )}
+              {user?.id === complaint.submitted_by?.id && complaint.status === 'Pending' && complaint.submission_count > 1 && (
+                <Button variant="contained" color="primary" onClick={() => navigate(ROUTES.COMPLAINTS)}>
+                  Edit & Resubmit
+                </Button>
+              )}
             </Box>
           </Box>
 
@@ -194,6 +260,43 @@ export const ComplaintDetailPage: React.FC = () => {
           )}
         </CardContent>
       </Card>
+      <Dialog open={actionDialogOpen} onClose={() => !isSubmittingAction && setActionDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          {actionType === 'return' ? 'Return Complaint to User' : ''}
+          {actionType === 'forward' ? 'Forward Complaint to Officer' : ''}
+          {actionType === 'approve' ? 'Approve & Verify Case Creation' : ''}
+          {actionType === 'reject' ? 'Reject Complaint back to Intern' : ''}
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="comments"
+            label="Review Comments (Required for Rejections)"
+            type="text"
+            fullWidth
+            multiline
+            rows={4}
+            variant="outlined"
+            value={actionComments}
+            onChange={(e) => setActionComments(e.target.value)}
+            required={actionType === 'return' || actionType === 'reject'}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setActionDialogOpen(false)} disabled={isSubmittingAction}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleActionSubmit}
+            color="primary"
+            variant="contained"
+            disabled={isSubmittingAction || ((actionType === 'return' || actionType === 'reject') && !actionComments.trim())}
+          >
+            {isSubmittingAction ? 'Submitting...' : 'Confirm'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

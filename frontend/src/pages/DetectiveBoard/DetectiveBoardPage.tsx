@@ -15,7 +15,6 @@ import {
 import { ArrowBack, Save, Download } from '@mui/icons-material';
 import ReactFlow, {
   Node,
-  Edge,
   addEdge,
   Connection,
   useNodesState,
@@ -59,14 +58,14 @@ const nodeTypes = {
 export const DetectiveBoardPage: React.FC = () => {
   const { caseId } = useParams<{ caseId?: string }>();
   const navigate = useNavigate();
-  
+
   // If no caseId, redirect to cases page to select a case
   useEffect(() => {
     if (!caseId) {
       navigate(ROUTES.CASES);
     }
   }, [caseId, navigate]);
-  const [evidence, setEvidence] = useState<Evidence[]>([]);
+
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -79,9 +78,7 @@ export const DetectiveBoardPage: React.FC = () => {
 
       try {
         setIsLoading(true);
-        // Load evidence for the case
         const evidenceData = await evidenceService.getEvidence({ case: parseInt(caseId) });
-        setEvidence(evidenceData.results);
 
         // Load or create detective board
         try {

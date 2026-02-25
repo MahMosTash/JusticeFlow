@@ -1,7 +1,7 @@
 /**
  * Basic User Dashboard
  */
-import { Grid, Card, CardContent, Typography, Box, Button } from '@mui/material';
+import { Grid, Card, CardContent, Typography, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/constants/routes';
 import { Assignment, AddCircle, Info } from '@mui/icons-material';

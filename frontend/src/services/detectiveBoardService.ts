@@ -9,7 +9,7 @@ export const detectiveBoardService = {
    * Get detective board for a case
    */
   getDetectiveBoard: async (caseId: number): Promise<DetectiveBoard> => {
-    const response = await api.get<DetectiveBoard>('/detective-board/', {
+    const response = await api.get<{ results: DetectiveBoard[] }>('/detective-board/', {
       params: { case: caseId },
     });
     return response.data.results[0] || null;

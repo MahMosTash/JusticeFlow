@@ -3,14 +3,14 @@
  */
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Typography, Box, Grid, Card, CardContent, Button } from '@mui/material';
+import { Container, Typography } from '@mui/material';
 import { useAuth } from '@/hooks/useAuth';
 import { usePermissions } from '@/hooks/usePermissions';
-import { ROLES } from '@/constants/roles';
 import { ROUTES } from '@/constants/routes';
 import { AdminDashboard } from './AdminDashboard';
 import { OfficerDashboard } from './OfficerDashboard';
 import { DetectiveDashboard } from './DetectiveDashboard';
+import { InternDashboard } from './InternDashboard';
 import { UserDashboard } from './UserDashboard';
 import { Loading } from '@/components/common/Loading';
 
@@ -43,6 +43,9 @@ export const DashboardPage: React.FC = () => {
     }
     if (permissions.isDetective()) {
       return <DetectiveDashboard />;
+    }
+    if (permissions.isIntern()) {
+      return <InternDashboard />;
     }
     return <UserDashboard />;
   };

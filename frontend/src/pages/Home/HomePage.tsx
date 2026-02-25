@@ -6,7 +6,6 @@ import { Container, Grid, Card, CardContent, Typography, Box, Button } from '@mu
 import { Assignment, CheckCircle, People } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { statsService, HomeStats } from '@/services/statsService';
-import { Loading } from '@/components/common/Loading';
 import { CardSkeleton } from '@/components/common/Skeleton';
 import { useAuth } from '@/hooks/useAuth';
 

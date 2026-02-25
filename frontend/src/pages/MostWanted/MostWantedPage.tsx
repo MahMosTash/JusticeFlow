@@ -5,10 +5,6 @@ import { useEffect, useState } from 'react';
 import {
   Container,
   Typography,
-  Grid,
-  Card,
-  CardContent,
-  Box,
   Chip,
   Table,
   TableBody,
@@ -20,9 +16,7 @@ import {
 } from '@mui/material';
 import { investigationService } from '@/services/investigationService';
 import { Suspect } from '@/types/api';
-import { Loading } from '@/components/common/Loading';
 import { TableSkeleton } from '@/components/common/Skeleton';
-import { formatDate } from '@/utils/dateUtils';
 
 export const MostWantedPage: React.FC = () => {
   const [mostWanted, setMostWanted] = useState<Array<{ suspect: Suspect; ranking: number }>>([]);

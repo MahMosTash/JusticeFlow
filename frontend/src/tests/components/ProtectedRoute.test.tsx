@@ -2,7 +2,7 @@
  * Protected route tests
  */
 import { render, screen } from '@testing-library/react';
-import { BrowserRouter, MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
@@ -19,15 +19,15 @@ const createMockStore = (initialAuthState?: any) => {
     },
     preloadedState: initialAuthState
       ? {
-          auth: {
-            user: null,
-            token: null,
-            isAuthenticated: false,
-            isLoading: false,
-            error: null,
-            ...initialAuthState,
-          },
-        }
+        auth: {
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          isLoading: false,
+          error: null,
+          ...initialAuthState,
+        },
+      }
       : undefined,
   });
 };

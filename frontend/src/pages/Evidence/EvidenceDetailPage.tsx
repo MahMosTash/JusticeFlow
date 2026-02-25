@@ -16,10 +16,9 @@ import {
 import { ArrowBack } from '@mui/icons-material';
 import { evidenceService } from '@/services/evidenceService';
 import { Evidence } from '@/types/api';
-import { Loading } from '@/components/common/Loading';
 import { CardSkeleton } from '@/components/common/Skeleton';
 import { ROUTES } from '@/constants/routes';
-import { formatDate, formatDateTime } from '@/utils/dateUtils';
+import { formatDateTime } from '@/utils/dateUtils';
 
 export const EvidenceDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();

@@ -20,6 +20,7 @@ import * as yup from 'yup';
 import { caseService } from '@/services/caseService';
 import { CRIME_SEVERITY_OPTIONS } from '@/constants/crimeSeverity';
 import { ROUTES } from '@/constants/routes';
+import { Case } from '@/types/api';
 
 const schema = yup.object({
   title: yup.string().required('Title is required'),
@@ -56,7 +57,7 @@ export const CaseCreatePage: React.FC = () => {
     try {
       setIsSubmitting(true);
       setError(null);
-      const newCase = await caseService.createCase(data);
+      const newCase = await caseService.createCase(data as Partial<Case>);
       navigate(ROUTES.CASE_DETAIL(newCase.id));
     } catch (err: any) {
       setError(err.response?.data?.detail || err.message || 'Failed to create case');

@@ -3,18 +3,33 @@
  */
 import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import authSlice from '@/store/slices/authSlice';
+import caseSlice from '@/store/slices/caseSlice';
+import uiSlice from '@/store/slices/uiSlice';
 import { HomePage } from '@/pages/Home/HomePage';
 import * as statsService from '@/services/statsService';
 
 // Mock the stats service
 jest.mock('@/services/statsService');
 
+const createMockStore = () => {
+  return configureStore({
+    reducer: {
+      auth: authSlice,
+      cases: caseSlice,
+      ui: uiSlice,
+    },
+  });
+};
+
 describe('HomePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders home page title', () => {
+  it('renders home page title', async () => {
     (statsService.statsService.getHomeStats as jest.Mock).mockResolvedValue({
       total_cases: 0,
       solved_cases: 0,
@@ -22,12 +37,14 @@ describe('HomePage', () => {
     });
 
     render(
-      <BrowserRouter>
-        <HomePage />
-      </BrowserRouter>
+      <Provider store={createMockStore()}>
+        <BrowserRouter>
+          <HomePage />
+        </BrowserRouter>
+      </Provider>
     );
 
-    expect(screen.getByText(/Police Case Management System/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Dashboard/i)).toBeInTheDocument();
   });
 
   it('displays statistics cards', async () => {
@@ -38,9 +55,11 @@ describe('HomePage', () => {
     });
 
     render(
-      <BrowserRouter>
-        <HomePage />
-      </BrowserRouter>
+      <Provider store={createMockStore()}>
+        <BrowserRouter>
+          <HomePage />
+        </BrowserRouter>
+      </Provider>
     );
 
     await waitFor(() => {
@@ -55,17 +74,19 @@ describe('HomePage', () => {
 
   it('shows loading state initially', () => {
     (statsService.statsService.getHomeStats as jest.Mock).mockImplementation(
-      () => new Promise(() => {}) // Never resolves
+      () => new Promise(() => { }) // Never resolves
     );
 
     render(
-      <BrowserRouter>
-        <HomePage />
-      </BrowserRouter>
+      <Provider store={createMockStore()}>
+        <BrowserRouter>
+          <HomePage />
+        </BrowserRouter>
+      </Provider>
     );
 
-    // Should show skeleton loaders or title
-    expect(screen.getByText(/Police Case Management/i)).toBeInTheDocument();
+    // Should show skeleton loaders
+    expect(document.querySelector('.MuiSkeleton-root')).toBeInTheDocument();
   });
 });
 

@@ -1,7 +1,7 @@
 /**
  * Officer Dashboard (Police Chief, Captain, Sergeant)
  */
-import { Grid, Card, CardContent, Typography, Button, Box } from '@mui/material';
+import { Grid, Card, CardContent, Typography, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/constants/routes';
 import { Assignment, AddCircle, List } from '@mui/icons-material';

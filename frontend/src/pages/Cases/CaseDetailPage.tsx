@@ -19,7 +19,6 @@ import {
 import { ArrowBack } from '@mui/icons-material';
 import { caseService } from '@/services/caseService';
 import { Case } from '@/types/api';
-import { Loading } from '@/components/common/Loading';
 import { CardSkeleton } from '@/components/common/Skeleton';
 import { ROUTES } from '@/constants/routes';
 import { formatDate, formatDateTime } from '@/utils/dateUtils';

@@ -18,7 +18,6 @@ import {
   Chip,
   IconButton,
   TablePagination,
-  TextField,
   Select,
   MenuItem,
   FormControl,
@@ -26,8 +25,7 @@ import {
 } from '@mui/material';
 import { Add, Visibility } from '@mui/icons-material';
 import { caseService } from '@/services/caseService';
-import { Case, PaginatedResponse } from '@/types/api';
-import { Loading } from '@/components/common/Loading';
+import { Case } from '@/types/api';
 import { TableSkeleton } from '@/components/common/Skeleton';
 import { ROUTES } from '@/constants/routes';
 import { formatDate } from '@/utils/dateUtils';

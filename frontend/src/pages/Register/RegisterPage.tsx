@@ -22,7 +22,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useAuth } from '@/hooks/useAuth';
 import { ROUTES } from '@/constants/routes';
-import { validateEmail, validatePhoneNumber, validateNationalID } from '@/utils/validation';
+import { validatePhoneNumber, validateNationalID } from '@/utils/validation';
 
 const schema = yup.object({
   username: yup.string().required('Username is required').min(3, 'Username must be at least 3 characters'),
@@ -183,6 +183,7 @@ export const RegisterPage: React.FC = () => {
                       endAdornment: (
                         <InputAdornment position="end">
                           <IconButton
+                            aria-label="toggle password visibility"
                             onClick={() => setShowPassword(!showPassword)}
                             edge="end"
                           >
@@ -191,6 +192,7 @@ export const RegisterPage: React.FC = () => {
                         </InputAdornment>
                       ),
                     }}
+                    inputProps={{ 'data-testid': 'password-input' }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -206,6 +208,7 @@ export const RegisterPage: React.FC = () => {
                       endAdornment: (
                         <InputAdornment position="end">
                           <IconButton
+                            aria-label="toggle password visibility"
                             onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
                             edge="end"
                           >
@@ -214,6 +217,7 @@ export const RegisterPage: React.FC = () => {
                         </InputAdornment>
                       ),
                     }}
+                    inputProps={{ 'data-testid': 'password-confirm-input' }}
                   />
                 </Grid>
               </Grid>
