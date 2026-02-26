@@ -135,6 +135,8 @@ export const ComplaintDetailPage: React.FC = () => {
     switch (status) {
       case 'Approved':
         return 'success';
+      case 'Returned':
+        return 'warning';
       case 'Rejected':
       case 'Permanently Rejected':
         return 'error';
@@ -145,14 +147,9 @@ export const ComplaintDetailPage: React.FC = () => {
     }
   };
 
-  const isAwaitingUser = complaint.status === 'Pending' &&
-    !!complaint.review_comments &&
-    complaint.reviews &&
-    complaint.reviews.length > 0 &&
-    complaint.reviews[0].action === 'Returned';
+  const isAwaitingUser = complaint.status === 'Returned';
 
-  const isAwaitingIntern = complaint.status === 'Pending' &&
-    (!complaint.review_comments || (complaint.reviews && complaint.reviews.length > 0 && complaint.reviews[0].action === 'Rejected'));
+  const isAwaitingIntern = complaint.status === 'Pending' || complaint.status === 'Rejected';
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
