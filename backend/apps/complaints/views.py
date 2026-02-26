@@ -71,16 +71,10 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         serializer.save(submitted_by=self.request.user)
     
     def _is_awaiting_user(self, complaint):
-        if complaint.status != 'Pending': return False
-        if not complaint.review_comments: return False
-        last_review = complaint.reviews.first()
-        return last_review and last_review.action == 'Returned'
+        return complaint.status == 'Returned'
 
     def _is_awaiting_intern(self, complaint):
-        if complaint.status != 'Pending': return False
-        if not complaint.review_comments: return True
-        last_review = complaint.reviews.first()
-        return last_review and last_review.action == 'Rejected'
+        return complaint.status == 'Pending' or complaint.status == 'Rejected'
 
     @action(detail=True, methods=['post'], permission_classes=[IsIntern])
     def review_as_intern(self, request, pk=None):
@@ -101,7 +95,7 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         
         if action_type == 'return':
             # Return to complainant with error message
-            complaint.status = 'Pending'
+            complaint.status = 'Returned'
             complaint.review_comments = comments
             complaint.reviewed_by_intern = request.user
             complaint.increment_submission_count()

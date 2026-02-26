@@ -13,6 +13,7 @@ class Complaint(models.Model):
     """
     STATUS_CHOICES = [
         ('Pending', 'Pending'),
+        ('Returned', 'Returned (Requires Modification)'),
         ('Under Review', 'Under Review'),
         ('Approved', 'Approved'),
         ('Rejected', 'Rejected'),
