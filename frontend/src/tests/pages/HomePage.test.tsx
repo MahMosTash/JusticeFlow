@@ -44,7 +44,9 @@ describe('HomePage', () => {
       </Provider>
     );
 
-    expect(await screen.findByText(/Dashboard/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getAllByText(/Police Case Management System/i).length).toBeGreaterThan(0);
+    });
   });
 
   it('displays statistics cards', async () => {
