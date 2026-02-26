@@ -20,8 +20,10 @@ import {
 import { ArrowBack, CheckCircle } from '@mui/icons-material';
 import { caseService } from '@/services/caseService';
 import { evidenceService } from '@/services/evidenceService';
-import { Case, Evidence } from '@/types/api';
+import { suspectService } from '@/services/suspectService';
+import { Case, Evidence, Suspect } from '@/types/api';
 import { CardSkeleton } from '@/components/common/Skeleton';
+import { SuspectFormDialog } from '@/components/suspects/SuspectFormDialog';
 import { ROUTES } from '@/constants/routes';
 import { formatDate, formatDateTime } from '@/utils/dateUtils';
 import { useAuth } from '@/hooks/useAuth';
@@ -35,6 +37,9 @@ export const CaseDetailPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [evidenceList, setEvidenceList] = useState<Evidence[]>([]);
   const [evidenceLoading, setEvidenceLoading] = useState(false);
+  const [suspectsList, setSuspectsList] = useState<Suspect[]>([]);
+  const [suspectsLoading, setSuspectsLoading] = useState(false);
+  const [suspectDialogOpen, setSuspectDialogOpen] = useState(false);
   const [approving, setApproving] = useState(false);
   const [approveSuccess, setApproveSuccess] = useState(false);
 
@@ -68,11 +73,31 @@ export const CaseDetailPage: React.FC = () => {
     }
   };
 
+  const loadSuspects = async () => {
+    try {
+      setSuspectsLoading(true);
+      const response = await suspectService.getSuspects({ case: parseInt(id!) });
+      setSuspectsList(response.results);
+    } catch (err: any) {
+      console.error('Failed to load suspects:', err);
+    } finally {
+      setSuspectsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    if (activeTab === 0 && id) {
-      loadEvidence();
+    if (id) {
+      if (activeTab === 0) loadEvidence();
+      if (activeTab === 1) loadSuspects();
     }
   }, [activeTab, id]);
+
+  const handleSuspectAdded = (suspect: Suspect) => {
+    setSuspectsList((prev) => [suspect, ...prev]);
+    if (caseData) {
+      setCaseData({ ...caseData, suspects_count: (caseData.suspects_count || 0) + 1 });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -319,9 +344,74 @@ export const CaseDetailPage: React.FC = () => {
           )}
           {activeTab === 1 && (
             <Box>
-              <Typography variant="h6" gutterBottom>
-                Suspects ({caseData.suspects_count || 0})
-              </Typography>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Typography variant="h6">
+                  Suspects ({caseData.suspects_count || 0})
+                </Typography>
+                {(hasRole('Detective') || hasRole('Sergeant')) && (
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() => setSuspectDialogOpen(true)}
+                  >
+                    Add Suspect
+                  </Button>
+                )}
+              </Box>
+
+              {suspectsLoading ? (
+                <CardSkeleton />
+              ) : suspectsList.length === 0 ? (
+                <Typography color="text.secondary">No suspects recorded yet.</Typography>
+              ) : (
+                <Grid container spacing={2}>
+                  {suspectsList.map((suspect) => (
+                    <Grid item xs={12} sm={6} key={suspect.id}>
+                      <Card variant="outlined">
+                        <CardContent>
+                          <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                            <Typography variant="subtitle1" fontWeight="bold">
+                              {suspect.name}
+                            </Typography>
+                            <Chip
+                              label={suspect.status}
+                              size="small"
+                              color={
+                                suspect.status === 'Arrested' ? 'error' :
+                                  suspect.status === 'Cleared' ? 'success' :
+                                    suspect.status === 'Under Severe Surveillance' ? 'warning' : 'info'
+                              }
+                            />
+                          </Box>
+                          <Typography variant="body2" color="text.secondary">
+                            National ID: {suspect.national_id}
+                          </Typography>
+                          {suspect.phone_number && (
+                            <Typography variant="body2" color="text.secondary">
+                              Phone: {suspect.phone_number}
+                            </Typography>
+                          )}
+                          {suspect.notes && (
+                            <Typography variant="body2" sx={{ mt: 1 }}>
+                              {suspect.notes}
+                            </Typography>
+                          )}
+                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                            Added: {formatDate(suspect.created_date)}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
+
+              <SuspectFormDialog
+                open={suspectDialogOpen}
+                onClose={() => setSuspectDialogOpen(false)}
+                caseId={caseData.id}
+                onSuspectAdded={handleSuspectAdded}
+              />
             </Box>
           )}
           {activeTab === 2 && (
