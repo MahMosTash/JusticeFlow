@@ -164,13 +164,18 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         comments = request.data.get('comments', '')
         
         if action_type == 'approve':
+            # Extract case details if provided, fallback to complaint defaults
+            case_title = request.data.get('case_title', complaint.title)
+            case_description = request.data.get('case_description', complaint.description)
+            case_severity = request.data.get('case_severity', 'Level 3')
+
             # Approve and create case
             with transaction.atomic():
                 # Create case from complaint
                 case = Case.objects.create(
-                    title=complaint.title,
-                    description=complaint.description,
-                    severity='Level 3',  # Default, can be updated
+                    title=case_title,
+                    description=case_description,
+                    severity=case_severity,
                     status='Open',
                     created_by=request.user
                 )

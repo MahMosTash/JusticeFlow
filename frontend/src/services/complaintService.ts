@@ -65,12 +65,16 @@ export const complaintService = {
   reviewAsOfficer: async (
     id: number,
     action: 'approve' | 'reject',
-    comments: string
+    comments: string,
+    caseDetails?: { title: string; description: string; severity: string }
   ): Promise<Complaint> => {
-    const response = await api.post<Complaint>(`/complaints/${id}/review_as_officer/`, {
-      action,
-      comments,
-    });
+    const payload: any = { action, comments };
+    if (caseDetails && action === 'approve') {
+      payload.case_title = caseDetails.title;
+      payload.case_description = caseDetails.description;
+      payload.case_severity = caseDetails.severity;
+    }
+    const response = await api.post<Complaint>(`/complaints/${id}/review_as_officer/`, payload);
     return response.data;
   },
 };

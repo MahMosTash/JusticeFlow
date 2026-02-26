@@ -48,13 +48,17 @@ class CaseViewSet(viewsets.ModelViewSet):
         if severity_filter:
             queryset = queryset.filter(severity=severity_filter)
         
-        # Filter by assigned detective
-        if self.request.user.has_role('Detective'):
-            queryset = queryset.filter(assigned_detective=self.request.user)
-        
-        # Filter by assigned sergeant
-        if self.request.user.has_role('Sergeant'):
-            queryset = queryset.filter(assigned_sergeant=self.request.user)
+        # Role-based visibility logic
+        if self.request.user.is_staff or self.request.user.has_role('System Administrator') or self.request.user.has_role('Police Chief'):
+            pass # Admins and Chiefs can see all cases
+        else:
+            # Filter by assigned detective
+            if self.request.user.has_role('Detective'):
+                queryset = queryset.filter(assigned_detective=self.request.user)
+            
+            # Filter by assigned sergeant
+            elif self.request.user.has_role('Sergeant'):
+                queryset = queryset.filter(assigned_sergeant=self.request.user)
         
         return queryset
     
