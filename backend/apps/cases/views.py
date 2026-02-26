@@ -36,8 +36,9 @@ class CaseViewSet(viewsets.ModelViewSet):
         """Filter cases based on user role and permissions."""
         user = self.request.user
 
-        # Interns (Cadets) cannot see any cases
-        if user.is_authenticated and user.has_role('Intern (Cadet)'):
+        # Interns (Cadets) cannot see any cases unless they hold another valid role
+        police_roles = ['Police Officer', 'Patrol Officer', 'Detective', 'Sergeant', 'Captain', 'Police Chief', 'System Administrator']
+        if user.is_authenticated and user.has_role('Intern (Cadet)') and not any(user.has_role(role) for role in police_roles):
             return Case.objects.none()
 
         queryset = Case.objects.select_related(
