@@ -163,6 +163,13 @@ class User(AbstractUser):
             assignment.assigned_by = assigned_by
             assignment.save()
         
+        if getattr(role, 'name', role) != 'Basic User':
+            try:
+                basic_role = Role.objects.get(name='Basic User')
+                RoleAssignment.objects.filter(user=self, role=basic_role).update(is_active=False)
+            except Role.DoesNotExist:
+                pass
+                
         return assignment
     
     def remove_role(self, role):
