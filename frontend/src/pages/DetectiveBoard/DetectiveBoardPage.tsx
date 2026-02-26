@@ -226,19 +226,20 @@ export const DetectiveBoardPage: React.FC = () => {
 
       try {
         const board = await detectiveBoardService.getDetectiveBoard(parseInt(caseId));
-        setBoardId(board.id ?? null);
-        if (board.board_data?.nodes?.length) {
-          // Re-hydrate evidence data into nodes (in case evidence was updated)
-          const hydratedNodes = board.board_data.nodes.map((n: Node) => {
-            const evId = parseInt(n.id.replace('evidence-', ''));
-            const ev = evList.find(e => e.id === evId);
-            if (ev) {
-              return { ...n, data: { label: ev.title, evidence: ev } };
-            }
-            return n;
-          });
-          setNodes(hydratedNodes);
-          setEdges(board.board_data.edges ?? []);
+        if (board) {
+          setBoardId(board.id ?? null);
+          if (board.board_data?.nodes?.length) {
+            const hydratedNodes = board.board_data.nodes.map((n: Node) => {
+              const evId = parseInt(n.id.replace('evidence-', ''));
+              const ev = evList.find(e => e.id === evId);
+              if (ev) return { ...n, data: { label: ev.title, evidence: ev } };
+              return n;
+            });
+            setNodes(hydratedNodes);
+            setEdges(board.board_data.edges ?? []);
+          } else {
+            initNodesFromEvidence(evList);
+          }
         } else {
           initNodesFromEvidence(evList);
         }
@@ -279,7 +280,6 @@ export const DetectiveBoardPage: React.FC = () => {
     setIsSaving(true);
     try {
       const saved = await detectiveBoardService.saveDetectiveBoard({
-        id: boardId ?? undefined,
         case: parseInt(caseId),
         board_data: { nodes, edges },
       });
@@ -292,6 +292,7 @@ export const DetectiveBoardPage: React.FC = () => {
       setIsSaving(false);
     }
   };
+
 
   const handleAddEvidence = (ev: Evidence) => {
     const existingNode = nodes.find(n => n.id === `evidence-${ev.id}`);

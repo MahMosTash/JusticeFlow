@@ -1,20 +1,10 @@
+/**
+ * Detective Board service
+ */
 import api from './api';
-
-export interface BoardData {
-  nodes: any[];
-  edges: any[];
-}
-
-export interface DetectiveBoard {
-  id?: number;
-  case: number;
-  board_data: BoardData;
-  last_modified?: string;
-}
+import { DetectiveBoard } from '@/types/api';
 
 export interface BoardConnection {
-  id?: number;
-  board: number;
   source_evidence_id: number;
   target_evidence_id: number;
   connection_type: string;
@@ -22,34 +12,78 @@ export interface BoardConnection {
 }
 
 export const detectiveBoardService = {
-  async getDetectiveBoard(caseId: number): Promise<DetectiveBoard> {
-    const response = await api.get(`/detective-board/?case=${caseId}`);
+  /**
+   * Get detective board for a case
+   */
+  getDetectiveBoard: async (caseId: number): Promise<DetectiveBoard | null> => {
+    const response = await api.get<{ results: DetectiveBoard[] }>('/detective-board/', {
+      params: { case: caseId },
+    });
     const results = response.data.results ?? response.data;
-    if (Array.isArray(results) && results.length > 0) return results[0];
-    throw new Error('No board found');
+    return Array.isArray(results) && results.length > 0 ? results[0] : null;
   },
 
-  async saveDetectiveBoard(data: DetectiveBoard): Promise<DetectiveBoard> {
-    // Try to get existing board first
-    try {
-      const response = await api.get(`/detective-board/?case=${data.case}`);
-      const results = response.data.results ?? response.data;
-      if (Array.isArray(results) && results.length > 0) {
-        const existing = results[0];
-        const updateResponse = await api.patch(`/detective-board/${existing.id}/`, {
-          board_data: data.board_data,
-        });
-        return updateResponse.data;
-      }
-    } catch {
-      // Board doesn't exist, create it
+  /**
+   * Create or update detective board
+   */
+  saveDetectiveBoard: async (data: {
+    case: number;
+    board_data: Record<string, any>;
+  }): Promise<DetectiveBoard> => {
+    const existing = await detectiveBoardService.getDetectiveBoard(data.case);
+    if (existing) {
+      const response = await api.patch<DetectiveBoard>(`/detective-board/${existing.id}/`, {
+        board_data: data.board_data,
+      });
+      return response.data;
     }
-    const createResponse = await api.post('/detective-board/', data);
-    return createResponse.data;
+    const response = await api.post<DetectiveBoard>('/detective-board/', data);
+    return response.data;
   },
 
-  async addConnection(boardId: number, connection: Omit<BoardConnection, 'id' | 'board'>): Promise<any> {
-    const response = await api.post(`/detective-board/${boardId}/add_connection/`, connection);
+  /**
+   * Add connection between evidence
+   */
+  addConnection: async (boardId: number, data: BoardConnection): Promise<any> => {
+    const response = await api.post(`/detective-board/${boardId}/add_connection/`, data);
+    return response.data;
+  },
+
+  /**
+   * Propose suspect from detective board
+   */
+  proposeSuspect: async (
+    boardId: number,
+    data: {
+      suspect_id?: number;
+      user_id?: number;
+      name?: string;
+      national_id?: string;
+      phone_number?: string;
+    }
+  ): Promise<{ message: string; suspect_id: number }> => {
+    const response = await api.post<{ message: string; suspect_id: number }>(
+      `/detective-board/${boardId}/propose_suspect/`,
+      data
+    );
+    return response.data;
+  },
+
+  /**
+   * Sergeant review suspect proposal
+   */
+  reviewSuspect: async (
+    boardId: number,
+    data: {
+      action: 'approve' | 'reject';
+      suspect_id: number;
+      comments?: string;
+    }
+  ): Promise<{ message: string }> => {
+    const response = await api.post<{ message: string }>(
+      `/detective-board/${boardId}/review/`,
+      data
+    );
     return response.data;
   },
 };
