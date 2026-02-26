@@ -77,8 +77,10 @@ export const CaseListPage: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
+  const getStatusColor = (caseStatus: string) => {
+    switch (caseStatus) {
+      case 'Pending':
+        return 'warning';
       case 'Resolved':
         return 'success';
       case 'Closed':
@@ -117,6 +119,7 @@ export const CaseListPage: React.FC = () => {
             }}
           >
             <MenuItem value="">All</MenuItem>
+            <MenuItem value="Pending">Pending</MenuItem>
             <MenuItem value="Open">Open</MenuItem>
             <MenuItem value="Under Investigation">Under Investigation</MenuItem>
             <MenuItem value="Resolved">Resolved</MenuItem>
