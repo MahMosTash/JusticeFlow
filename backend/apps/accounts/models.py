@@ -149,6 +149,12 @@ class User(AbstractUser):
         if isinstance(role, str):
             role = Role.objects.get(name=role)
         
+        # If assigning a specific professional role, remove 'Basic User'
+        if role.name != 'Basic User':
+            basic_user_role = Role.objects.filter(name='Basic User').first()
+            if basic_user_role:
+                RoleAssignment.objects.filter(user=self, role=basic_user_role).update(is_active=False)
+        
         assignment, created = RoleAssignment.objects.get_or_create(
             user=self,
             role=role,
@@ -179,4 +185,10 @@ class User(AbstractUser):
             user=self,
             role=role
         ).update(is_active=False)
+        
+        # If the user has no active roles left, default them back to Basic User
+        active_roles_count = self.get_active_roles().count()
+        if active_roles_count == 0:
+            basic_user_role, _ = Role.objects.get_or_create(name='Basic User')
+            self.assign_role(basic_user_role)
 
