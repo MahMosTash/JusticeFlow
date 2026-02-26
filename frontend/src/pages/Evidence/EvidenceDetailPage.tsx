@@ -120,9 +120,15 @@ export const EvidenceDetailPage: React.FC = () => {
               </Typography>
               <Button
                 variant="text"
-                onClick={() => navigate(ROUTES.CASE_DETAIL(evidence.case))}
+                onClick={() => {
+                  const caseId = typeof evidence.case === 'object' ? evidence.case.id : evidence.case;
+                  navigate(ROUTES.CASE_DETAIL(caseId));
+                }}
               >
-                View Case #{evidence.case}
+                {typeof evidence.case === 'object'
+                  ? `View Case #${evidence.case.id}: ${evidence.case.title}`
+                  : `View Case #${evidence.case}`
+                }
               </Button>
             </Grid>
           </Grid>

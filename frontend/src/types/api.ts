@@ -96,7 +96,7 @@ export interface Evidence {
   title: string;
   description: string;
   evidence_type: EvidenceType;
-  case: number;
+  case: { id: number; title: string; severity: string; status: string; created_by: string; assigned_detective: string | null; created_date: string } | number;
   recorded_by: User;
   created_date: string;
   // Witness Statement fields
