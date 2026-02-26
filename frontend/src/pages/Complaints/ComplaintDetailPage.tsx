@@ -39,8 +39,10 @@ export const ComplaintDetailPage: React.FC = () => {
 
   // Action Dialog State
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
-  const [actionType, setActionType] = useState<'return' | 'forward' | 'approve' | 'reject' | ''>('');
+  const [actionType, setActionType] = useState<'return' | 'forward' | 'approve' | 'reject' | 'resubmit' | ''>('');
   const [actionComments, setActionComments] = useState('');
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
   const [isSubmittingAction, setIsSubmittingAction] = useState(false);
 
   useEffect(() => {
@@ -66,7 +68,9 @@ export const ComplaintDetailPage: React.FC = () => {
 
     try {
       setIsSubmittingAction(true);
-      if (actionType === 'forward' || actionType === 'return') {
+      if (actionType === 'resubmit') {
+        await complaintService.resubmitComplaint(complaint.id, { title: editTitle, description: editDescription });
+      } else if (actionType === 'forward' || actionType === 'return') {
         await complaintService.reviewAsIntern(complaint.id, actionType, actionComments);
       } else if (actionType === 'approve' || actionType === 'reject') {
         await complaintService.reviewAsOfficer(complaint.id, actionType, actionComments);
@@ -82,9 +86,13 @@ export const ComplaintDetailPage: React.FC = () => {
     }
   };
 
-  const openActionDialog = (type: 'return' | 'forward' | 'approve' | 'reject') => {
+  const openActionDialog = (type: 'return' | 'forward' | 'approve' | 'reject' | 'resubmit') => {
     setActionType(type);
     setActionComments('');
+    if (type === 'resubmit' && complaint) {
+      setEditTitle(complaint.title);
+      setEditDescription(complaint.description);
+    }
     setActionDialogOpen(true);
   };
 
@@ -165,7 +173,7 @@ export const ComplaintDetailPage: React.FC = () => {
                 </>
               )}
               {user?.id === complaint.submitted_by?.id && complaint.status === 'Pending' && complaint.submission_count > 1 && (
-                <Button variant="contained" color="primary" onClick={() => navigate(ROUTES.COMPLAINTS)}>
+                <Button variant="contained" color="primary" onClick={() => openActionDialog('resubmit')}>
                   Edit & Resubmit
                 </Button>
               )}
@@ -266,22 +274,53 @@ export const ComplaintDetailPage: React.FC = () => {
           {actionType === 'forward' ? 'Forward Complaint to Officer' : ''}
           {actionType === 'approve' ? 'Approve & Verify Case Creation' : ''}
           {actionType === 'reject' ? 'Reject Complaint back to Intern' : ''}
+          {actionType === 'resubmit' ? 'Edit & Resubmit Complaint' : ''}
         </DialogTitle>
         <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="comments"
-            label="Review Comments (Required for Rejections)"
-            type="text"
-            fullWidth
-            multiline
-            rows={4}
-            variant="outlined"
-            value={actionComments}
-            onChange={(e) => setActionComments(e.target.value)}
-            required={actionType === 'return' || actionType === 'reject'}
-          />
+          {actionType === 'resubmit' ? (
+            <>
+              <TextField
+                autoFocus
+                margin="dense"
+                label="Title"
+                type="text"
+                fullWidth
+                variant="outlined"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                required
+                sx={{ mb: 2, mt: 1 }}
+              />
+              <TextField
+                margin="dense"
+                label="Description"
+                type="text"
+                fullWidth
+                multiline
+                rows={6}
+                variant="outlined"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                required
+              />
+            </>
+          ) : (
+            <TextField
+              autoFocus
+              margin="dense"
+              id="comments"
+              label="Review Comments (Required for Rejections)"
+              type="text"
+              fullWidth
+              multiline
+              rows={4}
+              variant="outlined"
+              value={actionComments}
+              onChange={(e) => setActionComments(e.target.value)}
+              required={actionType === 'return' || actionType === 'reject'}
+              sx={{ mt: 1 }}
+            />
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setActionDialogOpen(false)} disabled={isSubmittingAction}>
@@ -291,7 +330,11 @@ export const ComplaintDetailPage: React.FC = () => {
             onClick={handleActionSubmit}
             color="primary"
             variant="contained"
-            disabled={isSubmittingAction || ((actionType === 'return' || actionType === 'reject') && !actionComments.trim())}
+            disabled={
+              isSubmittingAction ||
+              ((actionType === 'return' || actionType === 'reject') && !actionComments.trim()) ||
+              (actionType === 'resubmit' && (!editTitle.trim() || !editDescription.trim()))
+            }
           >
             {isSubmittingAction ? 'Submitting...' : 'Confirm'}
           </Button>
