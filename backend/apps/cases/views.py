@@ -34,6 +34,12 @@ class CaseViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         """Filter cases based on user role and permissions."""
+        user = self.request.user
+
+        # Interns (Cadets) cannot see any cases
+        if user.is_authenticated and user.has_role('Intern (Cadet)'):
+            return Case.objects.none()
+
         queryset = Case.objects.select_related(
             'created_by', 'assigned_detective', 'assigned_sergeant'
         ).prefetch_related('complainants', 'witnesses')
@@ -49,16 +55,22 @@ class CaseViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(severity=severity_filter)
         
         # Role-based visibility logic
-        if self.request.user.is_staff or self.request.user.has_role('System Administrator') or self.request.user.has_role('Police Chief'):
-            pass # Admins and Chiefs can see all cases
-        else:
-            # Filter by assigned detective
-            if self.request.user.has_role('Detective'):
-                queryset = queryset.filter(assigned_detective=self.request.user)
-            
-            # Filter by assigned sergeant
-            elif self.request.user.has_role('Sergeant'):
-                queryset = queryset.filter(assigned_sergeant=self.request.user)
+        if user.is_authenticated and (user.is_staff or user.has_role('System Administrator') or user.has_role('Police Chief')):
+            pass # Admins and Chiefs can see all cases (including Pending)
+        elif user.is_authenticated:
+            # Others only see their own pending cases + all non-pending
+            if user.has_role('Detective'):
+                queryset = queryset.filter(assigned_detective=user) | queryset.exclude(status='Pending')
+                queryset = queryset.distinct()
+            elif user.has_role('Sergeant'):
+                queryset = queryset.filter(assigned_sergeant=user) | queryset.exclude(status='Pending')
+                queryset = queryset.distinct()
+            else:
+                # Police Officers see their own pending + all non-pending
+                from django.db.models import Q
+                queryset = queryset.filter(
+                    Q(status='Pending', created_by=user) | ~Q(status='Pending')
+                )
         
         return queryset
     
@@ -70,29 +82,41 @@ class CaseViewSet(viewsets.ModelViewSet):
             # Allow public viewing of cases and stats
             return [AllowAny()]
         elif self.action == 'create':
-            # Police Officer, Patrol Officer, or Police Chief can create
+            # Police Officer, Patrol Officer, or Police Chief can create (NOT Interns)
             return [IsPoliceOfficerOrPatrolOfficerOrChief()]
         elif self.action in ['update', 'partial_update']:
-            # Creator, assigned detective, or assigned sergeant can update
             return [IsAuthenticated()]
         elif self.action == 'destroy':
-            # Only Police Chief or System Administrator
-            return [IsAuthenticated()]  # Will check in perform_destroy
+            return [IsAuthenticated()]
         return [IsAuthenticated()]
     
     def perform_create(self, serializer):
         """Create case with workflow logic."""
         user = self.request.user
         
-        # Police Chief doesn't need approval
+        # Police Chief: case opens immediately
         if user.has_role('Police Chief'):
-            case = serializer.save(created_by=user)
+            case = serializer.save(created_by=user, status='Open')
         else:
-            # Police Officer or Patrol Officer needs approval
-            # For now, create the case (approval workflow can be added)
-            case = serializer.save(created_by=user)
+            # Police Officer / Patrol Officer: case starts as Pending
+            case = serializer.save(created_by=user, status='Pending')
         
         return case
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsPoliceChief])
+    def approve(self, request, pk=None):
+        """Police Chief approves a pending case."""
+        case = self.get_object()
+        
+        if case.status != 'Pending':
+            return Response(
+                {'error': f'Case is already {case.status}. Only Pending cases can be approved.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        case.status = 'Open'
+        case.save()
+        return Response(CaseDetailSerializer(case).data)
     
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def assign_detective(self, request, pk=None):

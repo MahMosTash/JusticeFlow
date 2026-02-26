@@ -15,23 +15,28 @@ import {
   Tabs,
   Tab,
   Paper,
+  Alert,
 } from '@mui/material';
-import { ArrowBack } from '@mui/icons-material';
+import { ArrowBack, CheckCircle } from '@mui/icons-material';
 import { caseService } from '@/services/caseService';
 import { evidenceService } from '@/services/evidenceService';
 import { Case, Evidence } from '@/types/api';
 import { CardSkeleton } from '@/components/common/Skeleton';
 import { ROUTES } from '@/constants/routes';
 import { formatDate, formatDateTime } from '@/utils/dateUtils';
+import { useAuth } from '@/hooks/useAuth';
 
 export const CaseDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { hasRole } = useAuth();
   const [caseData, setCaseData] = useState<Case | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
   const [evidenceList, setEvidenceList] = useState<Evidence[]>([]);
   const [evidenceLoading, setEvidenceLoading] = useState(false);
+  const [approving, setApproving] = useState(false);
+  const [approveSuccess, setApproveSuccess] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -98,13 +103,65 @@ export const CaseDetailPage: React.FC = () => {
     }
   };
 
+  const getStatusColor = (caseStatus: string) => {
+    switch (caseStatus) {
+      case 'Pending':
+        return 'warning';
+      case 'Resolved':
+        return 'success';
+      case 'Closed':
+        return 'default';
+      case 'Under Investigation':
+        return 'info';
+      default:
+        return 'primary';
+    }
+  };
+
+  const handleApprove = async () => {
+    if (!caseData) return;
+    try {
+      setApproving(true);
+      const updated = await caseService.approveCase(caseData.id);
+      setCaseData(updated);
+      setApproveSuccess(true);
+    } catch (err: any) {
+      console.error('Failed to approve case:', err);
+    } finally {
+      setApproving(false);
+    }
+  };
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box display="flex" alignItems="center" mb={3}>
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
         <Button startIcon={<ArrowBack />} onClick={() => navigate(ROUTES.CASES)}>
           Back to Cases
         </Button>
+        {caseData.status === 'Pending' && hasRole('Police Chief') && (
+          <Button
+            variant="contained"
+            color="success"
+            startIcon={<CheckCircle />}
+            onClick={handleApprove}
+            disabled={approving}
+          >
+            {approving ? 'Approving...' : 'Approve Case'}
+          </Button>
+        )}
       </Box>
+
+      {approveSuccess && (
+        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setApproveSuccess(false)}>
+          Case approved successfully!
+        </Alert>
+      )}
+
+      {caseData.status === 'Pending' && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          This case is pending approval by the Police Chief.
+        </Alert>
+      )}
 
       <Card sx={{ mb: 3 }}>
         <CardContent>
@@ -118,7 +175,7 @@ export const CaseDetailPage: React.FC = () => {
                   label={caseData.severity}
                   color={getSeverityColor(caseData.severity)}
                 />
-                <Chip label={caseData.status} />
+                <Chip label={caseData.status} color={getStatusColor(caseData.status)} />
               </Box>
             </Box>
           </Box>

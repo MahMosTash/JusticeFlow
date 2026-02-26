@@ -283,7 +283,7 @@ export interface Notification {
 
 // Enums and Types
 export type CrimeSeverity = 'Level 3' | 'Level 2' | 'Level 1' | 'Critical';
-export type CaseStatus = 'Open' | 'Under Investigation' | 'Resolved' | 'Closed';
+export type CaseStatus = 'Pending' | 'Open' | 'Under Investigation' | 'Resolved' | 'Closed';
 export type ComplaintStatus = 'Pending' | 'Under Review' | 'Approved' | 'Rejected' | 'Permanently Rejected';
 export type ComplaintReviewAction = 'Returned' | 'Forwarded' | 'Approved' | 'Rejected';
 export type EvidenceType = 'witness_statement' | 'biological' | 'vehicle' | 'identification' | 'other';
