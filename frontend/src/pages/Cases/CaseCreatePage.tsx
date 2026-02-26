@@ -108,6 +108,7 @@ export const CaseCreatePage: React.FC = () => {
                   select
                   label="Severity"
                   SelectProps={{ native: true }}
+                  InputLabelProps={{ shrink: true }}
                   {...register('severity')}
                   error={!!errors.severity}
                   helperText={errors.severity?.message}
