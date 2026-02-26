@@ -58,19 +58,18 @@ class CaseViewSet(viewsets.ModelViewSet):
         if user.is_authenticated and (user.is_staff or user.has_role('System Administrator') or user.has_role('Police Chief')):
             pass # Admins and Chiefs can see all cases (including Pending)
         elif user.is_authenticated:
-            # Others only see their own pending cases + all non-pending
+            from django.db.models import Q
+            
+            # Base visibility: Everyone can see cases they created AND all non-pending cases
+            visible_q = Q(created_by=user) | ~Q(status='Pending')
+            
+            # Role-specific visibility (in case a pending case is assigned to them but not created by them)
             if user.has_role('Detective'):
-                queryset = queryset.filter(assigned_detective=user) | queryset.exclude(status='Pending')
-                queryset = queryset.distinct()
-            elif user.has_role('Sergeant'):
-                queryset = queryset.filter(assigned_sergeant=user) | queryset.exclude(status='Pending')
-                queryset = queryset.distinct()
-            else:
-                # Police Officers see their own pending + all non-pending
-                from django.db.models import Q
-                queryset = queryset.filter(
-                    Q(status='Pending', created_by=user) | ~Q(status='Pending')
-                )
+                visible_q |= Q(assigned_detective=user, status='Pending')
+            if user.has_role('Sergeant'):
+                visible_q |= Q(assigned_sergeant=user, status='Pending')
+                
+            queryset = queryset.filter(visible_q).distinct()
         
         return queryset
     

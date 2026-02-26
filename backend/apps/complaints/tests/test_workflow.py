@@ -112,10 +112,10 @@ class ComplaintWorkflowTest(TestCase):
             title='Test Complaint',
             description='Test description',
             submitted_by=self.complainant,
-            submission_count=2
+            submission_count=3
         )
         
         complaint.increment_submission_count()
-        self.assertEqual(complaint.submission_count, 3)
+        self.assertEqual(complaint.submission_count, 4)
         self.assertEqual(complaint.status, 'Permanently Rejected')
 

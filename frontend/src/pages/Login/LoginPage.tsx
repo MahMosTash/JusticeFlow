@@ -54,7 +54,13 @@ export const LoginPage: React.FC = () => {
       const from = (location.state as any)?.from?.pathname || ROUTES.DASHBOARD;
       navigate(from, { replace: true });
     } catch (err: any) {
-      setError(err.response?.data?.detail || err.message || 'Login failed');
+      const errorMessage = err.response?.data;
+      if (errorMessage && typeof errorMessage === 'object' && !errorMessage.detail) {
+        const firstError = Object.values(errorMessage)[0];
+        setError(Array.isArray(firstError) ? firstError[0] : String(firstError));
+      } else {
+        setError(err.response?.data?.detail || err.message || 'Login failed');
+      }
     }
   };
 

@@ -36,16 +36,21 @@ class ComplaintViewSet(viewsets.ModelViewSet):
             'submitted_by', 'reviewed_by_intern', 'reviewed_by_officer', 'case'
         ).prefetch_related('reviews')
         
+        user = self.request.user
+        
         # Role-based filtering
-        if self.request.user.has_role('Intern (Cadet)') or self.request.user.is_staff:
-            # Interns and staff can see all complaints
-            pass
-        elif self.request.user.has_role('Police Officer'):
-            # Police Officers can see all complaints EXCEPT 'Pending' ones that haven't passed the intern layer yet
-            queryset = queryset.exclude(status='Pending')
-        else:
-            # Regular users (Complainants, Basic Users, etc) can only see their own complaints
-            queryset = queryset.filter(submitted_by=self.request.user)
+        from django.db.models import Q
+        visible_q = Q(submitted_by=user) # Everyone can see their own complaints
+        if user.is_authenticated:
+            if user.has_role('Intern (Cadet)') or user.is_staff:
+                # Interns and staff can see all complaints
+                visible_q = Q() # No filter, select all
+            elif user.has_role('Police Officer'):
+                # Police Officers see their own + all EXCEPT 'Pending'
+                visible_q |= ~Q(status='Pending')
+        
+        if visible_q:
+            queryset = queryset.filter(visible_q).distinct()
         
         # Apply status filter from query params if present
         status_param = self.request.query_params.get('status')
@@ -163,6 +168,9 @@ class ComplaintViewSet(viewsets.ModelViewSet):
             case_description = request.data.get('case_description', complaint.description)
             case_severity = request.data.get('case_severity', 'Level 3')
 
+            # Status depends on the role of the creator
+            status_to_set = 'Open' if request.user.has_role('Police Chief') else 'Pending'
+
             # Approve and create case
             with transaction.atomic():
                 # Create case from complaint
@@ -170,7 +178,7 @@ class ComplaintViewSet(viewsets.ModelViewSet):
                     title=case_title,
                     description=case_description,
                     severity=case_severity,
-                    status='Open',
+                    status=status_to_set,
                     created_by=request.user
                 )
                 
