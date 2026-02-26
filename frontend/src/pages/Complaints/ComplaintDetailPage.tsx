@@ -23,6 +23,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Alert,
+  AlertTitle,
 } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
 import { complaintService } from '@/services/complaintService';
@@ -162,6 +164,13 @@ export const ComplaintDetailPage: React.FC = () => {
 
       <Card sx={{ mb: 3 }}>
         <CardContent>
+          {user?.id === complaint.submitted_by?.id && isAwaitingUser && complaint.review_comments && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              <AlertTitle>Action Required: Complaint Returned</AlertTitle>
+              {complaint.review_comments}
+            </Alert>
+          )}
+
           <Box display="flex" justifyContent="space-between" alignItems="start" mb={2}>
             <Box>
               <Typography variant="h4" component="h1" gutterBottom>
