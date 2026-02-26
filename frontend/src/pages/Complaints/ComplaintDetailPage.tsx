@@ -418,7 +418,8 @@ export const ComplaintDetailPage: React.FC = () => {
             variant="contained"
             disabled={
               isSubmittingAction ||
-              ((actionType === 'return' || actionType === 'reject') && !actionComments.trim()) ||
+              (actionType === 'return' && !actionComments.trim()) ||
+              (actionType === 'reject' && !actionComments.trim()) ||
               (actionType === 'resubmit' && (!editTitle.trim() || !editDescription.trim())) ||
               (actionType === 'approve' && (!caseTitle.trim() || !caseDescription.trim()))
             }
