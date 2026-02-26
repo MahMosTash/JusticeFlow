@@ -18,7 +18,7 @@ import { CaseCreatePage } from './pages/Cases/CaseCreatePage';
 import { ComplaintListPage } from './pages/Complaints/ComplaintListPage';
 import { ComplaintSubmitPage } from './pages/Complaints/ComplaintSubmitPage';
 import { ComplaintDetailPage } from './pages/Complaints/ComplaintDetailPage';
-import { DetectiveBoardPage } from './pages/DetectiveBoard/DetectiveBoardPage';
+import DetectiveBoardPage from './pages/DetectiveBoardPage';
 import { MostWantedPage } from './pages/MostWanted/MostWantedPage';
 import { EvidenceListPage } from './pages/Evidence/EvidenceListPage';
 import { EvidenceCreatePage } from './pages/Evidence/EvidenceCreatePage';
@@ -65,6 +65,7 @@ const AppRoutes: React.FC = () => {
         <Route path={ROUTES.COMPLAINT_DETAIL(':id')} element={<ComplaintDetailPage />} />
         <Route path={ROUTES.DETECTIVE_BOARD} element={<DetectiveBoardPage />} />
         <Route path="/detective-board/:caseId" element={<DetectiveBoardPage />} />
+        <Route path="/cases/:caseId/board" element={<DetectiveBoardPage />} />
         <Route path={ROUTES.MOST_WANTED} element={<MostWantedPage />} />
         <Route path={ROUTES.EVIDENCE} element={<EvidenceListPage />} />
         <Route path={ROUTES.EVIDENCE_CREATE} element={<EvidenceCreatePage />} />
