@@ -126,6 +126,15 @@ export const ComplaintDetailPage: React.FC = () => {
     }
   };
 
+  const isAwaitingUser = complaint.status === 'Pending' &&
+    !!complaint.review_comments &&
+    complaint.reviews &&
+    complaint.reviews.length > 0 &&
+    complaint.reviews[0].action === 'Returned';
+
+  const isAwaitingIntern = complaint.status === 'Pending' &&
+    (!complaint.review_comments || (complaint.reviews && complaint.reviews.length > 0 && complaint.reviews[0].action === 'Rejected'));
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Box display="flex" alignItems="center" mb={3}>
@@ -152,7 +161,7 @@ export const ComplaintDetailPage: React.FC = () => {
 
             {/* Workflow Action Buttons */}
             <Box display="flex" gap={1}>
-              {permissions.isIntern() && complaint.status === 'Pending' && (
+              {permissions.isIntern() && isAwaitingIntern && (
                 <>
                   <Button variant="outlined" color="error" onClick={() => openActionDialog('return')}>
                     Return to Complainant
@@ -172,7 +181,7 @@ export const ComplaintDetailPage: React.FC = () => {
                   </Button>
                 </>
               )}
-              {user?.id === complaint.submitted_by?.id && complaint.status === 'Pending' && complaint.submission_count > 1 && (
+              {user?.id === complaint.submitted_by?.id && isAwaitingUser && (
                 <Button variant="contained" color="primary" onClick={() => openActionDialog('resubmit')}>
                   Edit & Resubmit
                 </Button>

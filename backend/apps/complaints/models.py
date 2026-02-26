@@ -75,16 +75,16 @@ class Complaint(models.Model):
     
     def can_be_resubmitted(self):
         """Check if complaint can be resubmitted (not permanently rejected)."""
-        return self.status != 'Permanently Rejected' and self.submission_count < 3
+        return self.status != 'Permanently Rejected' and self.submission_count <= 3
     
     def is_permanently_rejected(self):
         """Check if complaint is permanently rejected (3 strikes)."""
-        return self.submission_count >= 3 or self.status == 'Permanently Rejected'
+        return self.submission_count > 3 or self.status == 'Permanently Rejected'
     
     def increment_submission_count(self):
         """Increment submission count and check for permanent rejection."""
         self.submission_count += 1
-        if self.submission_count >= 3:
+        if self.submission_count > 3:
             self.status = 'Permanently Rejected'
         self.save()
 

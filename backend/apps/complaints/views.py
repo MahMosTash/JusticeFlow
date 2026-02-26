@@ -70,6 +70,18 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         """Create complaint."""
         serializer.save(submitted_by=self.request.user)
     
+    def _is_awaiting_user(self, complaint):
+        if complaint.status != 'Pending': return False
+        if not complaint.review_comments: return False
+        last_review = complaint.reviews.first()
+        return last_review and last_review.action == 'Returned'
+
+    def _is_awaiting_intern(self, complaint):
+        if complaint.status != 'Pending': return False
+        if not complaint.review_comments: return True
+        last_review = complaint.reviews.first()
+        return last_review and last_review.action == 'Rejected'
+
     @action(detail=True, methods=['post'], permission_classes=[IsIntern])
     def review_as_intern(self, request, pk=None):
         """
@@ -78,9 +90,9 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         """
         complaint = self.get_object()
         
-        if complaint.status != 'Pending':
+        if not self._is_awaiting_intern(complaint):
             return Response(
-                {'error': 'Complaint is not in Pending status'},
+                {'error': 'Complaint is not ready for intern review (it may be awaiting complainant resubmission)'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -228,6 +240,12 @@ class ComplaintViewSet(viewsets.ModelViewSet):
             return Response(
                 {'error': 'You can only resubmit your own complaints'},
                 status=status.HTTP_403_FORBIDDEN
+            )
+            
+        if not self._is_awaiting_user(complaint):
+            return Response(
+                {'error': 'Complaint is not awaiting resubmission'},
+                status=status.HTTP_400_BAD_REQUEST
             )
         
         # Check if complaint can be resubmitted
