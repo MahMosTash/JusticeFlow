@@ -19,6 +19,10 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
 import { complaintService } from '@/services/complaintService';
@@ -44,6 +48,9 @@ export const ComplaintDetailPage: React.FC = () => {
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [isSubmittingAction, setIsSubmittingAction] = useState(false);
+  const [caseTitle, setCaseTitle] = useState('');
+  const [caseDescription, setCaseDescription] = useState('');
+  const [caseSeverity, setCaseSeverity] = useState('Level 3');
 
   useEffect(() => {
     if (id) {
@@ -72,7 +79,13 @@ export const ComplaintDetailPage: React.FC = () => {
         await complaintService.resubmitComplaint(complaint.id, { title: editTitle, description: editDescription });
       } else if (actionType === 'forward' || actionType === 'return') {
         await complaintService.reviewAsIntern(complaint.id, actionType, actionComments);
-      } else if (actionType === 'approve' || actionType === 'reject') {
+      } else if (actionType === 'approve') {
+        await complaintService.reviewAsOfficer(complaint.id, actionType, actionComments, {
+          title: caseTitle,
+          description: caseDescription,
+          severity: caseSeverity,
+        });
+      } else if (actionType === 'reject') {
         await complaintService.reviewAsOfficer(complaint.id, actionType, actionComments);
       }
       setActionDialogOpen(false);
@@ -92,6 +105,10 @@ export const ComplaintDetailPage: React.FC = () => {
     if (type === 'resubmit' && complaint) {
       setEditTitle(complaint.title);
       setEditDescription(complaint.description);
+    } else if (type === 'approve' && complaint) {
+      setCaseTitle(complaint.title);
+      setCaseDescription(complaint.description);
+      setCaseSeverity('Level 3');
     }
     setActionDialogOpen(true);
   };
@@ -313,6 +330,60 @@ export const ComplaintDetailPage: React.FC = () => {
                 required
               />
             </>
+          ) : actionType === 'approve' ? (
+            <>
+              <TextField
+                autoFocus
+                margin="dense"
+                label="Case Title"
+                type="text"
+                fullWidth
+                variant="outlined"
+                value={caseTitle}
+                onChange={(e) => setCaseTitle(e.target.value)}
+                required
+                sx={{ mb: 2, mt: 1 }}
+              />
+              <TextField
+                margin="dense"
+                label="Case Description"
+                type="text"
+                fullWidth
+                multiline
+                rows={4}
+                variant="outlined"
+                value={caseDescription}
+                onChange={(e) => setCaseDescription(e.target.value)}
+                required
+                sx={{ mb: 2 }}
+              />
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <InputLabel id="severity-label">Case Severity</InputLabel>
+                <Select
+                  labelId="severity-label"
+                  value={caseSeverity}
+                  label="Case Severity"
+                  onChange={(e) => setCaseSeverity(e.target.value as string)}
+                >
+                  <MenuItem value="Level 3">Level 3 - Minor crimes</MenuItem>
+                  <MenuItem value="Level 2">Level 2 - Major crimes</MenuItem>
+                  <MenuItem value="Level 1">Level 1 - Severe crimes</MenuItem>
+                  <MenuItem value="Critical">Critical - Terrorism, etc.</MenuItem>
+                </Select>
+              </FormControl>
+              <TextField
+                margin="dense"
+                id="comments"
+                label="Review Comments (Optional)"
+                type="text"
+                fullWidth
+                multiline
+                rows={2}
+                variant="outlined"
+                value={actionComments}
+                onChange={(e) => setActionComments(e.target.value)}
+              />
+            </>
           ) : (
             <TextField
               autoFocus
@@ -342,7 +413,8 @@ export const ComplaintDetailPage: React.FC = () => {
             disabled={
               isSubmittingAction ||
               ((actionType === 'return' || actionType === 'reject') && !actionComments.trim()) ||
-              (actionType === 'resubmit' && (!editTitle.trim() || !editDescription.trim()))
+              (actionType === 'resubmit' && (!editTitle.trim() || !editDescription.trim())) ||
+              (actionType === 'approve' && (!caseTitle.trim() || !caseDescription.trim()))
             }
           >
             {isSubmittingAction ? 'Submitting...' : 'Confirm'}
