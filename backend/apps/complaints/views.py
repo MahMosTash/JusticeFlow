@@ -37,12 +37,12 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         ).prefetch_related('reviews')
         
         # Role-based filtering
-        if self.request.user.has_role('Intern (Cadet)'):
-            # Interns can see all complaints (will be filtered by status via query params if needed)
+        if self.request.user.has_role('Intern (Cadet)') or self.request.user.is_staff:
+            # Interns and staff can see all complaints
             pass
-        elif self.request.user.has_role('Police Officer') or self.request.user.is_staff:
-            # Police Officers and staff can see all complaints
-            pass
+        elif self.request.user.has_role('Police Officer'):
+            # Police Officers can see all complaints EXCEPT 'Pending' ones that haven't passed the intern layer yet
+            queryset = queryset.exclude(status='Pending')
         else:
             # Regular users (Complainants, Basic Users, etc) can only see their own complaints
             queryset = queryset.filter(submitted_by=self.request.user)
