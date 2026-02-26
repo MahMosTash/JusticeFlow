@@ -119,3 +119,42 @@ class ComplaintWorkflowTest(TestCase):
         self.assertEqual(complaint.submission_count, 4)
         self.assertEqual(complaint.status, 'Permanently Rejected')
 
+    def test_officer_approve_creates_case_with_incident_details(self):
+        """Test officer approval creates case with incident date, time, and location."""
+        complaint = Complaint.objects.create(
+            title='Test Complaint',
+            description='Test description',
+            submitted_by=self.complainant,
+            status='Under Review',
+            reviewed_by_intern=self.intern
+        )
+        
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.officer_token.key)
+        response = self.client.post(
+            f'/api/complaints/{complaint.id}/review_as_officer/',
+            {
+                'action': 'approve',
+                'comments': 'Approved',
+                'case_title': 'Special Case',
+                'case_description': 'Special Description',
+                'case_severity': 'Level 2',
+                'case_incident_date': '2025-01-01',
+                'case_incident_time': '14:30:00',
+                'case_incident_location': '123 Main St'
+            },
+            format='json'
+        )
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        complaint.refresh_from_db()
+        self.assertEqual(complaint.status, 'Approved')
+        self.assertIsNotNone(complaint.case)
+        
+        case = complaint.case
+        self.assertEqual(case.title, 'Special Case')
+        self.assertEqual(case.description, 'Special Description')
+        self.assertEqual(case.severity, 'Level 2')
+        self.assertEqual(str(case.incident_date), '2025-01-01')
+        self.assertEqual(str(case.incident_time), '14:30:00')
+        self.assertEqual(case.incident_location, '123 Main St')
+

@@ -167,6 +167,9 @@ class ComplaintViewSet(viewsets.ModelViewSet):
             case_title = request.data.get('case_title', complaint.title)
             case_description = request.data.get('case_description', complaint.description)
             case_severity = request.data.get('case_severity', 'Level 3')
+            case_incident_date = request.data.get('case_incident_date')
+            case_incident_time = request.data.get('case_incident_time')
+            case_incident_location = request.data.get('case_incident_location')
 
             # Status depends on the role of the creator
             status_to_set = 'Open' if request.user.has_role('Police Chief') else 'Pending'
@@ -178,6 +181,9 @@ class ComplaintViewSet(viewsets.ModelViewSet):
                     title=case_title,
                     description=case_description,
                     severity=case_severity,
+                    incident_date=case_incident_date or None,
+                    incident_time=case_incident_time or None,
+                    incident_location=case_incident_location or None,
                     status=status_to_set,
                     created_by=request.user
                 )

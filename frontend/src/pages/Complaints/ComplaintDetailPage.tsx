@@ -53,6 +53,9 @@ export const ComplaintDetailPage: React.FC = () => {
   const [caseTitle, setCaseTitle] = useState('');
   const [caseDescription, setCaseDescription] = useState('');
   const [caseSeverity, setCaseSeverity] = useState('Level 3');
+  const [caseIncidentDate, setCaseIncidentDate] = useState('');
+  const [caseIncidentTime, setCaseIncidentTime] = useState('');
+  const [caseIncidentLocation, setCaseIncidentLocation] = useState('');
 
   useEffect(() => {
     if (id) {
@@ -83,9 +86,12 @@ export const ComplaintDetailPage: React.FC = () => {
         await complaintService.reviewAsIntern(complaint.id, actionType, actionComments);
       } else if (actionType === 'approve') {
         await complaintService.reviewAsOfficer(complaint.id, actionType, actionComments, {
-          title: caseTitle,
-          description: caseDescription,
-          severity: caseSeverity,
+          case_title: caseTitle,
+          case_description: caseDescription,
+          case_severity: caseSeverity,
+          case_incident_date: caseIncidentDate || undefined,
+          case_incident_time: caseIncidentTime || undefined,
+          case_incident_location: caseIncidentLocation || undefined,
         });
       } else if (actionType === 'reject') {
         await complaintService.reviewAsOfficer(complaint.id, actionType, actionComments);
@@ -111,6 +117,9 @@ export const ComplaintDetailPage: React.FC = () => {
       setCaseTitle(complaint.title);
       setCaseDescription(complaint.description);
       setCaseSeverity('Level 3');
+      setCaseIncidentDate('');
+      setCaseIncidentTime('');
+      setCaseIncidentLocation('');
     }
     setActionDialogOpen(true);
   };
@@ -377,6 +386,36 @@ export const ComplaintDetailPage: React.FC = () => {
                   <MenuItem value="Critical">Critical - Terrorism, etc.</MenuItem>
                 </Select>
               </FormControl>
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    type="date"
+                    label="Incident Date"
+                    InputLabelProps={{ shrink: true }}
+                    value={caseIncidentDate}
+                    onChange={(e) => setCaseIncidentDate(e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    type="time"
+                    label="Incident Time"
+                    InputLabelProps={{ shrink: true }}
+                    value={caseIncidentTime}
+                    onChange={(e) => setCaseIncidentTime(e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Incident Location"
+                    value={caseIncidentLocation}
+                    onChange={(e) => setCaseIncidentLocation(e.target.value)}
+                  />
+                </Grid>
+              </Grid>
               <TextField
                 margin="dense"
                 id="comments"
