@@ -18,6 +18,7 @@ class Case(models.Model):
     ]
     
     STATUS_CHOICES = [
+        ('Pending', 'Pending'),
         ('Open', 'Open'),
         ('Under Investigation', 'Under Investigation'),
         ('Resolved', 'Resolved'),
@@ -27,7 +28,7 @@ class Case(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     severity = models.CharField(max_length=20, choices=SEVERITY_CHOICES)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Open')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     
     # Incident details
     incident_date = models.DateField(null=True, blank=True)

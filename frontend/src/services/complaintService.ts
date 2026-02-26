@@ -66,13 +66,18 @@ export const complaintService = {
     id: number,
     action: 'approve' | 'reject',
     comments: string,
-    caseDetails?: { title: string; description: string; severity: string }
+    caseDetails?: {
+      case_title?: string;
+      case_description?: string;
+      case_severity?: string;
+      case_incident_date?: string;
+      case_incident_time?: string;
+      case_incident_location?: string;
+    }
   ): Promise<Complaint> => {
     const payload: any = { action, comments };
     if (caseDetails && action === 'approve') {
-      payload.case_title = caseDetails.title;
-      payload.case_description = caseDetails.description;
-      payload.case_severity = caseDetails.severity;
+      Object.assign(payload, caseDetails);
     }
     const response = await api.post<Complaint>(`/complaints/${id}/review_as_officer/`, payload);
     return response.data;

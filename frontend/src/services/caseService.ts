@@ -96,5 +96,13 @@ export const caseService = {
     const response = await api.post<Case>(`/cases/${id}/update_status/`, { status });
     return response.data;
   },
+
+  /**
+   * Approve a pending case (Police Chief only)
+   */
+  approveCase: async (id: number): Promise<Case> => {
+    const response = await api.post<Case>(`/cases/${id}/approve/`);
+    return response.data;
+  },
 };
 
