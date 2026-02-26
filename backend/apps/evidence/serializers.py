@@ -5,18 +5,20 @@ from rest_framework import serializers
 from apps.evidence.models import Evidence
 from apps.accounts.serializers import UserDetailSerializer
 from apps.cases.serializers import CaseListSerializer
+from apps.cases.models import Case
 
 
 class EvidenceSerializer(serializers.ModelSerializer):
     """Serializer for Evidence model."""
     case = CaseListSerializer(read_only=True)
+    case_id = serializers.IntegerField(write_only=True, required=False)
     recorded_by = UserDetailSerializer(read_only=True)
     verified_by_forensic_doctor = UserDetailSerializer(read_only=True)
     
     class Meta:
         model = Evidence
         fields = [
-            'id', 'title', 'description', 'evidence_type', 'case',
+            'id', 'title', 'description', 'evidence_type', 'case', 'case_id',
             'recorded_by', 'created_date',
             # Witness Statement fields
             'transcript', 'witness_name', 'witness_national_id', 'witness_phone',
@@ -31,7 +33,7 @@ class EvidenceSerializer(serializers.ModelSerializer):
             'full_name', 'metadata'
         ]
         read_only_fields = ['id', 'recorded_by', 'created_date', 'verification_date']
-    
+
     def validate(self, attrs):
         """Validate type-specific requirements."""
         evidence_type = attrs.get('evidence_type', self.instance.evidence_type if self.instance else None)
@@ -62,6 +64,8 @@ class EvidenceSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         """Create evidence and set recorded_by."""
+        # Remove case_id — case is set in perform_create
+        validated_data.pop('case_id', None)
         validated_data['recorded_by'] = self.context['request'].user
         return super().create(validated_data)
 
@@ -99,4 +103,3 @@ class EvidenceVerificationSerializer(serializers.ModelSerializer):
         validated_data['verified_by_forensic_doctor'] = self.context['request'].user
         validated_data['verification_date'] = timezone.now()
         return super().update(instance, validated_data)
-

@@ -66,8 +66,29 @@ class EvidenceViewSet(viewsets.ModelViewSet):
         return [IsAuthenticated()]
     
     def perform_create(self, serializer):
-        """Create evidence and set recorded_by."""
-        serializer.save(recorded_by=self.request.user)
+        """Create evidence — resolve case from request data (accepts both 'case' and 'case_id')."""
+        from apps.cases.models import Case
+        
+        # Accept both field names: case_id (new) or case (legacy)
+        case_id = (
+            self.request.data.get('case_id')
+            or self.request.data.get('case')
+        )
+        
+        if not case_id:
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError({'case_id': 'Case is required.'})
+        
+        try:
+            case = Case.objects.get(pk=int(case_id))
+        except (Case.DoesNotExist, ValueError, TypeError):
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError({'case_id': f'Invalid case ID: {case_id}'})
+        
+        serializer.save(
+            recorded_by=self.request.user,
+            case=case,
+        )
     
     @action(detail=True, methods=['post'], permission_classes=[IsForensicDoctor])
     def verify(self, request, pk=None):

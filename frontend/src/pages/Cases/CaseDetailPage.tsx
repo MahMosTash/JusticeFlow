@@ -18,7 +18,8 @@ import {
 } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
 import { caseService } from '@/services/caseService';
-import { Case } from '@/types/api';
+import { evidenceService } from '@/services/evidenceService';
+import { Case, Evidence } from '@/types/api';
 import { CardSkeleton } from '@/components/common/Skeleton';
 import { ROUTES } from '@/constants/routes';
 import { formatDate, formatDateTime } from '@/utils/dateUtils';
@@ -29,6 +30,8 @@ export const CaseDetailPage: React.FC = () => {
   const [caseData, setCaseData] = useState<Case | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
+  const [evidenceList, setEvidenceList] = useState<Evidence[]>([]);
+  const [evidenceLoading, setEvidenceLoading] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -47,6 +50,24 @@ export const CaseDetailPage: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  const loadEvidence = async () => {
+    try {
+      setEvidenceLoading(true);
+      const response = await evidenceService.getEvidence({ case: parseInt(id!) });
+      setEvidenceList(response.results);
+    } catch (err: any) {
+      console.error('Failed to load evidence:', err);
+    } finally {
+      setEvidenceLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 0 && id) {
+      loadEvidence();
+    }
+  }, [activeTab, id]);
 
   if (isLoading) {
     return (
@@ -175,15 +196,68 @@ export const CaseDetailPage: React.FC = () => {
         <Box p={3}>
           {activeTab === 0 && (
             <Box>
-              <Typography variant="h6" gutterBottom>
-                Evidence ({caseData.evidence_count || 0})
-              </Typography>
-              <Button
-                variant="outlined"
-                onClick={() => navigate(`/evidence/create?case=${caseData.id}`)}
-              >
-                Add Evidence
-              </Button>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Typography variant="h6">
+                  Evidence ({caseData.evidence_count || 0})
+                </Typography>
+                <Box display="flex" gap={1}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => navigate(`${ROUTES.EVIDENCE}?case=${caseData.id}`)}
+                  >
+                    View All Evidence
+                  </Button>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() => navigate(`/evidence/create?case=${caseData.id}`)}
+                  >
+                    Add Evidence
+                  </Button>
+                </Box>
+              </Box>
+              {evidenceLoading ? (
+                <CardSkeleton />
+              ) : evidenceList.length === 0 ? (
+                <Typography color="text.secondary">No evidence recorded yet.</Typography>
+              ) : (
+                <Grid container spacing={2}>
+                  {evidenceList.map((item) => (
+                    <Grid item xs={12} sm={6} key={item.id}>
+                      <Card variant="outlined" sx={{ cursor: 'pointer', '&:hover': { boxShadow: 2 } }}
+                        onClick={() => navigate(ROUTES.EVIDENCE_DETAIL(item.id))}
+                      >
+                        <CardContent>
+                          <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                            <Typography variant="subtitle1" fontWeight="bold">
+                              {item.title}
+                            </Typography>
+                            <Chip
+                              label={item.evidence_type.replace('_', ' ')}
+                              size="small"
+                              color={
+                                item.evidence_type === 'witness_statement' ? 'info' :
+                                  item.evidence_type === 'biological' ? 'error' :
+                                    item.evidence_type === 'vehicle' ? 'warning' :
+                                      item.evidence_type === 'identification' ? 'primary' : 'default'
+                              }
+                            />
+                          </Box>
+                          {item.description && (
+                            <Typography variant="body2" color="text.secondary" noWrap>
+                              {item.description}
+                            </Typography>
+                          )}
+                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                            Recorded: {formatDate(item.created_date)}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
             </Box>
           )}
           {activeTab === 1 && (
