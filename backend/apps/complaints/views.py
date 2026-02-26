@@ -36,18 +36,22 @@ class ComplaintViewSet(viewsets.ModelViewSet):
             'submitted_by', 'reviewed_by_intern', 'reviewed_by_officer', 'case'
         ).prefetch_related('reviews')
         
-        # Complainants can see their own complaints
-        if self.request.user.has_role('Complainant') or self.request.user.has_role('Basic User'):
+        # Role-based filtering
+        if self.request.user.has_role('Intern (Cadet)'):
+            # Interns can see all complaints (will be filtered by status via query params if needed)
+            pass
+        elif self.request.user.has_role('Police Officer') or self.request.user.is_staff:
+            # Police Officers and staff can see all complaints
+            pass
+        else:
+            # Regular users (Complainants, Basic Users, etc) can only see their own complaints
             queryset = queryset.filter(submitted_by=self.request.user)
         
-        # Interns can see pending complaints
-        if self.request.user.has_role('Intern (Cadet)'):
-            queryset = queryset.filter(status='Pending')
-        
-        # Police Officers can see complaints forwarded to them
-        if self.request.user.has_role('Police Officer'):
-            queryset = queryset.filter(status__in=['Under Review', 'Pending'])
-        
+        # Apply status filter from query params if present
+        status_param = self.request.query_params.get('status')
+        if status_param:
+            queryset = queryset.filter(status=status_param)
+            
         return queryset
     
     def get_permissions(self):

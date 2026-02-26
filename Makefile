@@ -12,8 +12,8 @@ build: ## Build Docker images
 up: ## Start all services
 	docker-compose up -d
 
-down: ## Stop all services
-	docker-compose down
+down: ## Stop all services and remove volumes to refresh database
+	docker-compose down -v
 
 logs: ## View logs
 	docker-compose logs -f

@@ -8,8 +8,8 @@ services:
       POSTGRES_DB: ${DB_NAME:-karagah_db}
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    tmpfs:
+      - /var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
@@ -71,7 +71,6 @@ services:
     restart: unless-stopped
 
 volumes:
-  postgres_data:
   static_volume:
   media_volume:
 
