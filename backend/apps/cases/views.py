@@ -76,6 +76,13 @@ class CaseViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         """Set permissions based on action."""
+        
+        # If the action has its own specific permission_classes from the @action decorator
+        if hasattr(self, 'action') and self.action:
+            action_func = getattr(self, self.action, None)
+            if action_func and hasattr(action_func, 'kwargs') and 'permission_classes' in action_func.kwargs:
+                return [permission() for permission in action_func.kwargs['permission_classes']]
+                
         from rest_framework.permissions import AllowAny, IsAuthenticated
         
         if self.action in ['list', 'retrieve', 'stats']:

@@ -68,6 +68,38 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS('Reset default admin user password to admin'))
             
         admin_user.assign_role('System Administrator')
+
+        # Create other default users for testing
+        default_users = [
+            {'username': 'intern', 'role': 'Intern (Cadet)', 'first': 'Test', 'last': 'Intern'},
+            {'username': 'officer', 'role': 'Police Officer', 'first': 'Test', 'last': 'Officer'},
+            {'username': 'detective', 'role': 'Detective', 'first': 'Test', 'last': 'Detective'},
+            {'username': 'chief', 'role': 'Police Chief', 'first': 'Test', 'last': 'Chief'},
+            {'username': 'user', 'role': 'Basic User', 'first': 'Test', 'last': 'User'},
+        ]
+        
+        for u_data in default_users:
+            uname = u_data['username']
+            user_obj = User.objects.filter(username=uname).first()
+            if not user_obj:
+                import uuid
+                suffix = str(uuid.uuid4())[:8]
+                user_obj = User.objects.create_user(
+                    username=uname,
+                    email=f'{uname}_{suffix}@example.com',
+                    password='1234',
+                    first_name=u_data['first'],
+                    last_name=u_data['last'],
+                    phone_number=f'100000{suffix[:4]}',
+                    national_id=f'200000{suffix[:4]}'
+                )
+                self.stdout.write(self.style.SUCCESS(f'Created default user (username: {uname}, password: 1234)'))
+            else:
+                user_obj.set_password('1234')
+                user_obj.save()
+                self.stdout.write(self.style.SUCCESS(f'Reset {uname} password to 1234'))
+            
+            user_obj.assign_role(u_data['role'])
         
         self.stdout.write(
             self.style.SUCCESS(
