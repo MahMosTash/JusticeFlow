@@ -35,7 +35,7 @@ class RoleAssignmentSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for User model."""
-    roles = RoleSerializer(many=True, read_only=True)
+    roles = serializers.SerializerMethodField()
     role_ids = serializers.PrimaryKeyRelatedField(
         queryset=Role.objects.filter(is_active=True),
         many=True,
@@ -57,6 +57,9 @@ class UserSerializer(serializers.ModelSerializer):
             'phone_number': {'required': True},
             'national_id': {'required': True},
         }
+        
+    def get_roles(self, obj):
+        return RoleSerializer(obj.get_active_roles(), many=True).data
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -124,7 +127,7 @@ class UserLoginSerializer(serializers.Serializer):
 
 class UserDetailSerializer(serializers.ModelSerializer):
     """Detailed serializer for user with roles."""
-    roles = RoleSerializer(many=True, read_only=True)
+    roles = serializers.SerializerMethodField()
     full_name = serializers.CharField(source='get_full_name', read_only=True)
     
     class Meta:
@@ -135,4 +138,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
             'date_joined', 'last_login', 'roles'
         ]
         read_only_fields = ['id', 'date_joined', 'last_login']
+    
+    def get_roles(self, obj):
+        return RoleSerializer(obj.get_active_roles(), many=True).data
 

@@ -6,7 +6,6 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authtoken.models import Token
-from django.contrib.auth import login
 from core.permissions import IsSystemAdministrator
 from .models import User, Role, RoleAssignment
 from .serializers import (
@@ -68,7 +67,6 @@ class UserViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             user = serializer.validated_data['user']
             token, created = Token.objects.get_or_create(user=user)
-            login(request, user)
             return Response({
                 'user': UserDetailSerializer(user).data,
                 'token': token.key
