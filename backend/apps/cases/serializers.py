@@ -49,8 +49,8 @@ class CaseSerializer(serializers.ModelSerializer):
     created_by = UserDetailSerializer(read_only=True)
     assigned_detective = UserDetailSerializer(read_only=True)
     assigned_sergeant = UserDetailSerializer(read_only=True)
-    complainants = CaseComplainantSerializer(many=True, read_only=True)
-    witnesses = CaseWitnessSerializer(many=True, read_only=True)
+    complainants = CaseComplainantSerializer(source='case_complainants', many=True, read_only=True)
+    witnesses = CaseWitnessSerializer(source='case_witnesses', many=True, read_only=True)
     
     # Write-only fields for assignment
     from apps.accounts.models import User
