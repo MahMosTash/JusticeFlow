@@ -283,9 +283,7 @@ export const DetectiveBoardPage: React.FC = () => {
   const { caseId } = useParams<{ caseId?: string }>();
   const navigate = useNavigate();
 
-  // If no caseId, show case selector instead of redirecting
-  if (!caseId) return <CaseSelector />;
-
+  // ✅ ALL hooks must come before any conditional return
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [boardId, setBoardId] = useState<number | null>(null);
@@ -295,15 +293,16 @@ export const DetectiveBoardPage: React.FC = () => {
   const [snackbar, setSnackbar] = useState<{ open: boolean; msg: string; severity: 'success' | 'error' }>({
     open: false, msg: '', severity: 'success',
   });
-
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   useEffect(() => {
+    if (!caseId) return; // ✅ Guard inside effect, not before hooks
     loadData();
   }, [caseId]);
 
   const loadData = async () => {
+    if (!caseId) return;
     setIsLoading(true);
     try {
       const evidenceData = await evidenceService.getEvidence({ case: parseInt(caseId) });
@@ -362,6 +361,7 @@ export const DetectiveBoardPage: React.FC = () => {
   );
 
   const handleSave = async () => {
+    if (!caseId) return;
     setIsSaving(true);
     try {
       const saved = await detectiveBoardService.saveDetectiveBoard({
@@ -398,13 +398,15 @@ export const DetectiveBoardPage: React.FC = () => {
     setEdges((eds) => eds.filter(e => !e.selected));
   };
 
+  // ✅ Conditional render AFTER all hooks
+  if (!caseId) return <CaseSelector />;
+  if (isLoading) return <Loading fullScreen />;
+
   const evidenceOnBoard = new Set(nodes.map(n => n.id));
   const filteredEvidence = filterType
     ? evidenceList.filter(e => e.evidence_type === filterType)
     : evidenceList;
   const evidenceTypes = [...new Set(evidenceList.map(e => e.evidence_type))];
-
-  if (isLoading) return <Loading fullScreen />;
 
   return (
     <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', bgcolor: '#050510' }}>
