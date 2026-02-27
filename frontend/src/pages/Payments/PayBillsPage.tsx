@@ -61,46 +61,7 @@ export const PayBillsPage: React.FC = () => {
 
     return (
         <Container maxWidth="lg" sx={{ py: 4, position: 'relative' }}>
-            {/* Animated Chavoshi Splash Effect */}
-            <Box
-                component="img"
-                src={chavoshiImg}
-                alt="Chavoshi Splash"
-                sx={{
-                    position: 'fixed',
-                    zIndex: 9999,
-                    pointerEvents: 'none',
-                    width: 'auto',
-                    maxHeight: '400px',
-                    animation: 'chavoshiSplash 3s forwards cubic-bezier(0.4, 0, 0.2, 1)',
-                    '@keyframes chavoshiSplash': {
-                        '0%': {
-                            opacity: 0,
-                            transform: 'translate(-50%, -50%) scale(0.3) rotate(-10deg)',
-                            left: '50%',
-                            top: '50%',
-                        },
-                        '20%': {
-                            opacity: 1,
-                            transform: 'translate(-50%, -50%) scale(1.1) rotate(0deg)',
-                            left: '50%',
-                            top: '50%',
-                        },
-                        '40%': {
-                            opacity: 1,
-                            transform: 'translate(-50%, -50%) scale(1) rotate(0deg)',
-                            left: '50%',
-                            top: '50%',
-                        },
-                        '100%': {
-                            opacity: 0,
-                            transform: 'translate(-50%, -50%) scale(0.5) rotate(0deg)',
-                            left: '50%',
-                            top: '50%',
-                        }
-                    }
-                }}
-            />
+
 
             <Grid container spacing={4}>
                 {/* ── LEFT COLUMN: TITLE, FILTERS, BILLS ── */}
@@ -224,23 +185,10 @@ export const PayBillsPage: React.FC = () => {
                                     width: '100%',
                                     maxWidth: '280px',
                                     height: 'auto',
-                                    opacity: 0,
-                                    animation: 'chavoshiSettle 1.5s forwards ease-out',
-                                    animationDelay: '2.5s', // Starts as splash ends
-                                    '@keyframes chavoshiSettle': {
-                                        '0%': {
-                                            opacity: 0,
-                                            transform: 'translateY(20px) scale(0.9)',
-                                        },
-                                        '100%': {
-                                            opacity: 1,
-                                            transform: 'translateY(0) scale(1)',
-                                        }
-                                    }
                                 }}
                             />
 
-                            <Box mt={3} sx={{ opacity: 0, animation: 'fadeIn 1s forwards ease-out', animationDelay: '3.5s' }}>
+                            <Box mt={3}>
                                 <Typography variant="h6" color="primary" gutterBottom fontWeight="bold">
                                     Judicial Support
                                 </Typography>
@@ -259,14 +207,7 @@ export const PayBillsPage: React.FC = () => {
                 </Grid>
             </Grid>
 
-            <style>
-                {`
-                @keyframes fadeIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
-                }
-                `}
-            </style>
+
         </Container>
     );
 };
