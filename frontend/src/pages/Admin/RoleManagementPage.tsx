@@ -76,89 +76,323 @@ export const RoleManagementPage = () => {
         }
     };
 
-    if (isLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
+    if (isLoading) return (
+        <Box
+            sx={{
+                minHeight: '100vh',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                background: 'var(--gradient-page-bg)',
+            }}
+        >
+            <CircularProgress sx={{ color: 'var(--accent-primary)' }} />
+        </Box>
+    );
 
     return (
-        <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                <Typography variant="h4">
-                    Manage Roles
-                </Typography>
-                <Button variant="contained" color="primary" onClick={() => setOpenModal(true)}>
-                    Create New Role
-                </Button>
-            </Box>
-
-            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-
-            <TableContainer component={Paper}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Role Name</TableCell>
-                            <TableCell>Description</TableCell>
-                            <TableCell align="right">Actions</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {roles.map((role) => (
-                            <TableRow key={role.id}>
-                                <TableCell><b>{role.name}</b></TableCell>
-                                <TableCell>{role.description || 'No description'}</TableCell>
-                                <TableCell align="right">
-                                    <Button variant="outlined" color="error" size="small" onClick={() => handleDeleteRole(role.id)}>
-                                        Delete Role
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                        {roles.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={3} align="center">No roles found.</TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-
-            {/* Create Role Modal */}
-            <Dialog open={openModal} onClose={() => setOpenModal(false)} maxWidth="sm" fullWidth>
-                <DialogTitle>Create New Role</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        label="Role Name"
-                        type="text"
-                        fullWidth
-                        variant="outlined"
-                        value={newRoleName}
-                        onChange={(e) => setNewRoleName(e.target.value)}
-                        sx={{ mb: 2, mt: 1 }}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Description"
-                        type="text"
-                        fullWidth
-                        multiline
-                        rows={3}
-                        variant="outlined"
-                        value={newRoleDesc}
-                        onChange={(e) => setNewRoleDesc(e.target.value)}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenModal(false)}>Cancel</Button>
-                    <Button
-                        onClick={handleCreateRole}
-                        variant="contained"
-                        disabled={!newRoleName.trim() || isSubmitting}
+        <Box
+            sx={{
+                minHeight: '100vh',
+                background: 'var(--gradient-page-bg)',
+                position: 'relative',
+                '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'var(--radial-glow-combined)',
+                    pointerEvents: 'none',
+                    zIndex: 0,
+                },
+            }}
+        >
+            <Container maxWidth="md" sx={{ py: 6, position: 'relative', zIndex: 1 }}>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+                    <Typography
+                        variant="h1"
+                        component="h1"
+                        sx={{
+                            fontSize: 'var(--heading-h1-size)',
+                            fontWeight: 'var(--heading-h1-weight)',
+                            lineHeight: 'var(--heading-h1-line-height)',
+                            letterSpacing: 'var(--heading-h1-letter-spacing)',
+                            background: 'var(--gradient-accent)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                        }}
                     >
-                        {isSubmitting ? 'Creating...' : 'Create Role'}
+                        Manage Roles
+                    </Typography>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => setOpenModal(true)}
+                        sx={{
+                            background: 'var(--gradient-accent)',
+                            color: 'var(--text-primary)',
+                            boxShadow: 'var(--button-shadow)',
+                            borderRadius: 'var(--radius-md)',
+                            px: 3,
+                            py: 1.5,
+                            fontWeight: 'var(--font-weight-semibold)',
+                            textTransform: 'none',
+                            fontSize: 'var(--button-base-size)',
+                            '&:hover': {
+                                background: 'var(--gradient-accent-hover)',
+                                boxShadow: 'var(--button-shadow-hover)',
+                                transform: 'translateY(-2px)',
+                            },
+                            transition: 'var(--transition-base)',
+                        }}
+                    >
+                        Create New Role
                     </Button>
-                </DialogActions>
-            </Dialog>
-        </Container>
+                </Box>
+
+                {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+                <TableContainer
+                    component={Paper}
+                    className="glass-effect"
+                    sx={{
+                        background: 'var(--glass-bg)',
+                        border: '1px solid var(--glass-border)',
+                        borderRadius: 'var(--radius-lg)',
+                        boxShadow: 'var(--shadow-lg)',
+                        overflow: 'hidden',
+                    }}
+                >
+                    <Table>
+                        <TableHead>
+                            <TableRow
+                                sx={{
+                                    background: 'var(--bg-elevated)',
+                                    '& th': {
+                                        color: 'var(--text-primary)',
+                                        fontWeight: 'var(--font-weight-semibold)',
+                                        fontSize: 'var(--label-base-size)',
+                                        borderBottom: '1px solid var(--glass-border)',
+                                    },
+                                }}
+                            >
+                                <TableCell>Role Name</TableCell>
+                                <TableCell>Description</TableCell>
+                                <TableCell align="right">Actions</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {roles.map((role) => (
+                                <TableRow
+                                    key={role.id}
+                                    hover
+                                    sx={{
+                                        '&:hover': {
+                                            background: 'var(--bg-hover)',
+                                        },
+                                        '& td': {
+                                            color: 'var(--text-primary)',
+                                            borderBottom: '1px solid var(--glass-border)',
+                                            fontSize: 'var(--body-base-size)',
+                                        },
+                                    }}
+                                >
+                                    <TableCell>
+                                        <Typography
+                                            sx={{
+                                                fontWeight: 'var(--font-weight-semibold)',
+                                                fontSize: 'var(--body-base-size)',
+                                                color: 'var(--text-primary)',
+                                            }}
+                                        >
+                                            {role.name}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        {role.description || (
+                                            <Typography
+                                                sx={{
+                                                    color: 'var(--text-secondary)',
+                                                    fontSize: 'var(--body-base-size)',
+                                                }}
+                                            >
+                                                No description
+                                            </Typography>
+                                        )}
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        <Button
+                                            variant="outlined"
+                                            color="error"
+                                            size="small"
+                                            onClick={() => handleDeleteRole(role.id)}
+                                            sx={{
+                                                borderColor: 'var(--accent-error)',
+                                                color: 'var(--accent-error)',
+                                                '&:hover': {
+                                                    borderColor: 'var(--accent-error)',
+                                                    background: 'var(--error-bg)',
+                                                },
+                                            }}
+                                        >
+                                            Delete Role
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                            {roles.length === 0 && (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={3}
+                                        align="center"
+                                        sx={{
+                                            py: 4,
+                                            color: 'var(--text-secondary)',
+                                            fontSize: 'var(--body-base-size)',
+                                        }}
+                                    >
+                                        No roles found.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+
+                {/* Create Role Modal */}
+                <Dialog
+                    open={openModal}
+                    onClose={() => setOpenModal(false)}
+                    maxWidth="sm"
+                    fullWidth
+                    PaperProps={{
+                        sx: {
+                            background: 'var(--glass-bg)',
+                            border: '1px solid var(--glass-border)',
+                            borderRadius: 'var(--radius-lg)',
+                            boxShadow: 'var(--shadow-xl)',
+                        },
+                    }}
+                >
+                    <DialogTitle
+                        sx={{
+                            fontSize: 'var(--heading-h3-size)',
+                            fontWeight: 'var(--heading-h3-weight)',
+                            color: 'var(--text-primary)',
+                            borderBottom: '1px solid var(--glass-border)',
+                        }}
+                    >
+                        Create New Role
+                    </DialogTitle>
+                    <DialogContent sx={{ mt: 2 }}>
+                        <TextField
+                            autoFocus
+                            margin="dense"
+                            label="Role Name"
+                            type="text"
+                            fullWidth
+                            variant="outlined"
+                            value={newRoleName}
+                            onChange={(e) => setNewRoleName(e.target.value)}
+                            sx={{
+                                mb: 2,
+                                mt: 1,
+                                '& .MuiOutlinedInput-root': {
+                                    background: 'var(--input-bg)',
+                                    borderRadius: 'var(--radius-md)',
+                                    color: 'var(--text-primary)',
+                                    '& fieldset': {
+                                        borderColor: 'var(--glass-border)',
+                                    },
+                                    '&:hover fieldset': {
+                                        borderColor: 'var(--accent-primary)',
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: 'var(--accent-primary)',
+                                        boxShadow: 'var(--shadow-glow)',
+                                    },
+                                },
+                                '& .MuiInputLabel-root': {
+                                    color: 'var(--text-secondary)',
+                                    '&.Mui-focused': {
+                                        color: 'var(--accent-primary)',
+                                    },
+                                },
+                            }}
+                        />
+                        <TextField
+                            margin="dense"
+                            label="Description"
+                            type="text"
+                            fullWidth
+                            multiline
+                            rows={3}
+                            variant="outlined"
+                            value={newRoleDesc}
+                            onChange={(e) => setNewRoleDesc(e.target.value)}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    background: 'var(--input-bg)',
+                                    borderRadius: 'var(--radius-md)',
+                                    color: 'var(--text-primary)',
+                                    '& fieldset': {
+                                        borderColor: 'var(--glass-border)',
+                                    },
+                                    '&:hover fieldset': {
+                                        borderColor: 'var(--accent-primary)',
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: 'var(--accent-primary)',
+                                        boxShadow: 'var(--shadow-glow)',
+                                    },
+                                },
+                                '& .MuiInputLabel-root': {
+                                    color: 'var(--text-secondary)',
+                                    '&.Mui-focused': {
+                                        color: 'var(--accent-primary)',
+                                    },
+                                },
+                            }}
+                        />
+                    </DialogContent>
+                    <DialogActions sx={{ p: 2, borderTop: '1px solid var(--glass-border)' }}>
+                        <Button
+                            onClick={() => setOpenModal(false)}
+                            sx={{
+                                color: 'var(--text-secondary)',
+                                '&:hover': {
+                                    color: 'var(--accent-primary)',
+                                    background: 'var(--accent-primary-light)',
+                                },
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleCreateRole}
+                            variant="contained"
+                            disabled={!newRoleName.trim() || isSubmitting}
+                            sx={{
+                                background: 'var(--gradient-accent)',
+                                color: 'var(--text-primary)',
+                                boxShadow: 'var(--button-shadow)',
+                                '&:hover': {
+                                    background: 'var(--gradient-accent-hover)',
+                                    boxShadow: 'var(--button-shadow-hover)',
+                                },
+                                '&:disabled': {
+                                    opacity: 0.6,
+                                },
+                            }}
+                        >
+                            {isSubmitting ? 'Creating...' : 'Create Role'}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </Container>
+        </Box>
     );
 };
