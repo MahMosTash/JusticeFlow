@@ -101,6 +101,15 @@ class GuiltScoreSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Guilt score must be between 1 and 10.')
         return value
 
+    def validate(self, attrs):
+        """Validate that the current user hasn't already scored this suspect."""
+        request = self.context.get('request')
+        if request and request.user:
+            suspect = attrs.get('suspect')
+            if suspect and GuiltScore.objects.filter(suspect=suspect, assigned_by=request.user).exists():
+                raise serializers.ValidationError('You have already submitted a guilt score for this suspect.')
+        return attrs
+
 
 class CaptainDecisionSerializer(serializers.ModelSerializer):
     """Serializer for CaptainDecision model."""
@@ -124,7 +133,15 @@ class CaptainDecisionCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = CaptainDecision
-        fields = ['case', 'suspect', 'decision', 'comments']
+        fields = [
+            'case', 'suspect', 'decision', 'comments', 
+            'requires_chief_approval', 'chief_approval', 
+            'chief_approved_by', 'chief_approval_date'
+        ]
+        read_only_fields = [
+            'requires_chief_approval', 'chief_approval', 
+            'chief_approved_by', 'chief_approval_date'
+        ]
     
     def validate(self, attrs):
         """Validate decision requirements."""

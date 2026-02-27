@@ -27,6 +27,7 @@ import { ReportsPage } from './pages/Reports/ReportsPage';
 import { UserManagementPage } from './pages/Admin/UserManagementPage';
 import { RoleManagementPage } from './pages/Admin/RoleManagementPage';
 import { TrialPage } from './pages/Trials/TrialPage';
+import { TrialsListPage } from './pages/Trials/TrialsListPage';
 import { RewardSubmitPage } from './pages/Rewards/RewardSubmitPage';
 import { MyRewardsPage } from './pages/Rewards/MyRewardsPage';
 import { RewardReviewPage } from './pages/Rewards/RewardReviewPage';
@@ -79,6 +80,7 @@ const AppRoutes: React.FC = () => {
         <Route path={ROUTES.REWARDS_MY} element={<MyRewardsPage />} />
         <Route path={ROUTES.REWARDS_REVIEW} element={<RewardReviewPage />} />
         <Route path={ROUTES.REWARD_VERIFY} element={<RewardVerificationPage />} />
+        <Route path={ROUTES.TRIALS} element={<TrialsListPage />} />
         <Route path={ROUTES.TRIAL_DETAIL(':id')} element={<TrialPage />} />
         <Route path={ROUTES.ADMIN_USERS} element={<UserManagementPage />} />
         <Route path={ROUTES.ADMIN_ROLES} element={<RoleManagementPage />} />
