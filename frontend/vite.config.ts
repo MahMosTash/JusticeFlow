@@ -11,10 +11,14 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    host: '0.0.0.0', // Allow external connections (needed for Docker)
+    port: 5173,
+    watch: {
+      usePolling: true, // Needed for Docker volume mounting
+    },
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://backend:8000', // Use service name in Docker
         changeOrigin: true,
       },
       '/media': {
