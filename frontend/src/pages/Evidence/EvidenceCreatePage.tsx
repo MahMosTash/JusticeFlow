@@ -189,80 +189,170 @@ export const EvidenceCreatePage: React.FC = () => {
     }
   };
 
+  const commonTextFieldSx = {
+    '& .MuiOutlinedInput-root': {
+      background: 'var(--input-bg)',
+      borderRadius: 'var(--radius-md)',
+      color: 'var(--text-primary)',
+      '& fieldset': {
+        borderColor: 'var(--glass-border)',
+      },
+      '&:hover fieldset': {
+        borderColor: 'var(--accent-primary)',
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: 'var(--accent-primary)',
+        boxShadow: 'var(--shadow-glow)',
+      },
+    },
+    '& .MuiInputLabel-root': {
+      color: 'var(--text-secondary)',
+      '&.Mui-focused': {
+        color: 'var(--accent-primary)',
+      },
+    },
+  };
+
+  const commonSelectSx = {
+    '& .MuiOutlinedInput-root': {
+      background: 'var(--input-bg)',
+      borderRadius: 'var(--radius-md)',
+      color: 'var(--text-primary)',
+      '& fieldset': {
+        borderColor: 'var(--glass-border)',
+      },
+      '&:hover fieldset': {
+        borderColor: 'var(--accent-primary)',
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: 'var(--accent-primary)',
+        boxShadow: 'var(--shadow-glow)',
+      },
+    },
+    '& .MuiInputLabel-root': {
+      color: 'var(--text-secondary)',
+      '&.Mui-focused': {
+        color: 'var(--accent-primary)',
+      },
+    },
+  };
+
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Create Evidence
-      </Typography>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: 'var(--gradient-page-bg)',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'var(--radial-glow-combined)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        },
+      }}
+    >
+      <Container maxWidth="md" sx={{ py: 6, position: 'relative', zIndex: 1 }}>
+        <Typography
+          variant="h1"
+          component="h1"
+          sx={{
+            fontSize: 'var(--heading-h1-size)',
+            fontWeight: 'var(--heading-h1-weight)',
+            lineHeight: 'var(--heading-h1-line-height)',
+            letterSpacing: 'var(--heading-h1-letter-spacing)',
+            background: 'var(--gradient-accent)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            mb: 4,
+          }}
+        >
+          Create Evidence
+        </Typography>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
 
-      <Card>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel>Case</InputLabel>
-                  <Select
-                    value={watch('case_id') || ''}
-                    onChange={(e) => setValue('case_id', e.target.value as number)}
-                    error={!!errors.case_id}
-                    label="Case"
-                  >
-                    {cases.map((caseItem) => (
-                      <MenuItem key={caseItem.id} value={caseItem.id}>
-                        Case #{caseItem.id}: {caseItem.title}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Title"
-                  {...register('title')}
-                  error={!!errors.title}
-                  helperText={errors.title?.message}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Description"
-                  multiline
-                  rows={4}
-                  {...register('description')}
-                  error={!!errors.description}
-                  helperText={errors.description?.message}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel>Evidence Type</InputLabel>
-                  <Select
-                    value={selectedType}
-                    onChange={(e) => {
-                      const val = e.target.value as string;
-                      setSelectedType(val);
-                      setValue('evidence_type', val);
-                    }}
-                    error={!!errors.evidence_type}
-                    label="Evidence Type"
-                  >
-                    <MenuItem value="witness_statement">Witness Statement</MenuItem>
-                    <MenuItem value="biological">Biological Evidence</MenuItem>
-                    <MenuItem value="vehicle">Vehicle Evidence</MenuItem>
-                    <MenuItem value="identification">Identification Document</MenuItem>
-                    <MenuItem value="other">Other</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
+        <Card
+          className="glass-effect"
+          sx={{
+            background: 'var(--glass-bg)',
+            border: '1px solid var(--glass-border)',
+            borderRadius: 'var(--radius-lg)',
+            boxShadow: 'var(--shadow-lg)',
+          }}
+        >
+          <CardContent sx={{ p: 3 }}>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <FormControl fullWidth sx={commonSelectSx}>
+                    <InputLabel>Case</InputLabel>
+                    <Select
+                      value={watch('case_id') || ''}
+                      onChange={(e) => setValue('case_id', e.target.value as number)}
+                      error={!!errors.case_id}
+                      label="Case"
+                    >
+                      {cases.map((caseItem) => (
+                        <MenuItem key={caseItem.id} value={caseItem.id}>
+                          Case #{caseItem.id}: {caseItem.title}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Title"
+                    {...register('title')}
+                    error={!!errors.title}
+                    helperText={errors.title?.message}
+                    sx={commonTextFieldSx}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Description"
+                    multiline
+                    rows={4}
+                    {...register('description')}
+                    error={!!errors.description}
+                    helperText={errors.description?.message}
+                    sx={commonTextFieldSx}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControl fullWidth sx={commonSelectSx}>
+                    <InputLabel>Evidence Type</InputLabel>
+                    <Select
+                      value={selectedType}
+                      onChange={(e) => {
+                        const val = e.target.value as string;
+                        setSelectedType(val);
+                        setValue('evidence_type', val);
+                      }}
+                      error={!!errors.evidence_type}
+                      label="Evidence Type"
+                    >
+                      <MenuItem value="witness_statement">Witness Statement</MenuItem>
+                      <MenuItem value="biological">Biological Evidence</MenuItem>
+                      <MenuItem value="vehicle">Vehicle Evidence</MenuItem>
+                      <MenuItem value="identification">Identification Document</MenuItem>
+                      <MenuItem value="other">Other</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
 
               {/* ═══ Witness Statement Fields ═══ */}
               {selectedType === 'witness_statement' && (
@@ -275,16 +365,32 @@ export const EvidenceCreatePage: React.FC = () => {
                       rows={4}
                       {...register('transcript')}
                       helperText="Required — the transcribed witness testimony"
+                      sx={commonTextFieldSx}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label="Witness Name" {...register('witness_name')} />
+                    <TextField
+                      fullWidth
+                      label="Witness Name"
+                      {...register('witness_name')}
+                      sx={commonTextFieldSx}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label="Witness National ID" {...register('witness_national_id')} />
+                    <TextField
+                      fullWidth
+                      label="Witness National ID"
+                      {...register('witness_national_id')}
+                      sx={commonTextFieldSx}
+                    />
                   </Grid>
                   <Grid item xs={12}>
-                    <TextField fullWidth label="Witness Phone" {...register('witness_phone')} />
+                    <TextField
+                      fullWidth
+                      label="Witness Phone"
+                      {...register('witness_phone')}
+                      sx={commonTextFieldSx}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={4}>
                     <Typography variant="body2" color="text.secondary" gutterBottom>Image (optional)</Typography>
@@ -305,7 +411,7 @@ export const EvidenceCreatePage: React.FC = () => {
               {selectedType === 'biological' && (
                 <>
                   <Grid item xs={12}>
-                    <FormControl fullWidth>
+                    <FormControl fullWidth sx={commonSelectSx}>
                       <InputLabel>Evidence Category</InputLabel>
                       <Select
                         value={selectedCategory}
@@ -339,16 +445,40 @@ export const EvidenceCreatePage: React.FC = () => {
               {selectedType === 'vehicle' && (
                 <>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label="Model *" {...register('model')} helperText="Required — e.g. Peugeot 206" />
+                    <TextField
+                      fullWidth
+                      label="Model *"
+                      {...register('model')}
+                      helperText="Required — e.g. Peugeot 206"
+                      sx={commonTextFieldSx}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label="Color *" {...register('color')} helperText="Required" />
+                    <TextField
+                      fullWidth
+                      label="Color *"
+                      {...register('color')}
+                      helperText="Required"
+                      sx={commonTextFieldSx}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label="License Plate" {...register('license_plate')} helperText="Provide either License Plate OR Serial Number" />
+                    <TextField
+                      fullWidth
+                      label="License Plate"
+                      {...register('license_plate')}
+                      helperText="Provide either License Plate OR Serial Number"
+                      sx={commonTextFieldSx}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField fullWidth label="Serial Number" {...register('serial_number')} helperText="Use when vehicle has no license plate" />
+                    <TextField
+                      fullWidth
+                      label="Serial Number"
+                      {...register('serial_number')}
+                      helperText="Use when vehicle has no license plate"
+                      sx={commonTextFieldSx}
+                    />
                   </Grid>
                 </>
               )}
@@ -357,7 +487,13 @@ export const EvidenceCreatePage: React.FC = () => {
               {selectedType === 'identification' && (
                 <>
                   <Grid item xs={12}>
-                    <TextField fullWidth label="Full Name *" {...register('full_name')} helperText="Required — name on the identification document" />
+                    <TextField
+                      fullWidth
+                      label="Full Name *"
+                      {...register('full_name')}
+                      helperText="Required — name on the identification document"
+                      sx={commonTextFieldSx}
+                    />
                   </Grid>
                   <Grid item xs={12}>
                     <TextField
@@ -367,23 +503,68 @@ export const EvidenceCreatePage: React.FC = () => {
                       rows={3}
                       {...register('metadata_json')}
                       helperText='Optional key-value pairs, e.g. {"card_type": "Passport", "issue_date": "2020-01-01"}'
+                      sx={commonTextFieldSx}
                     />
                   </Grid>
                 </>
               )}
             </Grid>
 
-            <Box mt={3} display="flex" gap={2}>
-              <Button type="submit" variant="contained" disabled={isSubmitting}>
-                {isSubmitting ? 'Creating...' : 'Create Evidence'}
-              </Button>
-              <Button variant="outlined" onClick={() => navigate(ROUTES.EVIDENCE)}>
-                Cancel
-              </Button>
-            </Box>
-          </form>
-        </CardContent>
-      </Card>
-    </Container>
+              <Box mt={4} display="flex" gap={2}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={isSubmitting}
+                  sx={{
+                    background: 'var(--gradient-accent)',
+                    color: 'var(--text-primary)',
+                    boxShadow: 'var(--button-shadow)',
+                    borderRadius: 'var(--radius-md)',
+                    px: 3,
+                    py: 1.5,
+                    fontWeight: 'var(--font-weight-semibold)',
+                    textTransform: 'none',
+                    fontSize: 'var(--button-base-size)',
+                    '&:hover': {
+                      background: 'var(--gradient-accent-hover)',
+                      boxShadow: 'var(--button-shadow-hover)',
+                      transform: 'translateY(-2px)',
+                    },
+                    '&:disabled': {
+                      opacity: 0.6,
+                    },
+                    transition: 'var(--transition-base)',
+                  }}
+                >
+                  {isSubmitting ? 'Creating...' : 'Create Evidence'}
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => navigate(ROUTES.EVIDENCE)}
+                  sx={{
+                    borderColor: 'var(--glass-border)',
+                    color: 'var(--text-secondary)',
+                    borderRadius: 'var(--radius-md)',
+                    px: 3,
+                    py: 1.5,
+                    fontWeight: 'var(--font-weight-medium)',
+                    textTransform: 'none',
+                    fontSize: 'var(--button-base-size)',
+                    '&:hover': {
+                      borderColor: 'var(--accent-primary)',
+                      color: 'var(--accent-primary)',
+                      background: 'var(--accent-primary-light)',
+                    },
+                    transition: 'var(--transition-base)',
+                  }}
+                >
+                  Cancel
+                </Button>
+              </Box>
+            </form>
+          </CardContent>
+        </Card>
+      </Container>
+    </Box>
   );
 };
