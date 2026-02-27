@@ -204,6 +204,8 @@ class TrialVerdictSerializer(serializers.ModelSerializer):
         model = Trial
         fields = ['verdict', 'punishment_title', 'punishment_description', 'notes']
 
+    fine_amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
+
     def validate(self, attrs):
         verdict = attrs.get('verdict')
         punishment_title = attrs.get('punishment_title', '')

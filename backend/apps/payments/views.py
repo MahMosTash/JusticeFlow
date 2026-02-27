@@ -125,7 +125,7 @@ class BailFineViewSet(viewsets.ModelViewSet):
         return queryset
 
     def get_permissions(self):
-        """Only sergeants can create bail/fines; others just need to be authenticated."""
+        """Only sergeants can create bails; others just need authentication."""
         if self.action == 'create':
             return [IsSergeant()]
         return [IsAuthenticated()]

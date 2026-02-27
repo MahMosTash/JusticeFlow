@@ -60,11 +60,17 @@ class TrialViewSet(viewsets.ModelViewSet):
         """Judge records verdict and punishment."""
         trial = self.get_object()
 
-        if trial.judge != request.user:
+        # Allow if the judge owns the trial OR if the trial is completely unassigned
+        if trial.judge and trial.judge != request.user:
             return Response(
                 {'error': 'You can only record verdict for your own trials'},
                 status=status.HTTP_403_FORBIDDEN
             )
+            
+        # If unassigned, claim it for this judge
+        if not trial.judge:
+            trial.judge = request.user
+            trial.save()
             
         if trial.is_complete():
             return Response(
@@ -74,6 +80,10 @@ class TrialViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(trial, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
+        
+        # Pop the explicit fine_amount which isn't part of the Trial model
+        fine_amount = serializer.validated_data.pop('fine_amount', None)
+        
         serializer.save()
 
         # Mark case as Resolved
@@ -81,5 +91,29 @@ class TrialViewSet(viewsets.ModelViewSet):
             trial.case.status = 'Resolved'
             trial.case.resolution_date = trial.verdict_date
             trial.case.save()
+            
+            # If Guilty, see if a fine was requested and create a Fine payment ticket
+            if trial.verdict == 'Guilty' and fine_amount and fine_amount > 0:
+                from apps.payments.models import BailFine
+                from apps.investigations.models import Suspect
+                
+                # We need a suspect to attach the fine to. 
+                # Grab the first active suspect of the case for simplicity.
+                # If there are multiple, in a more complex setup you'd have a suspect-specific verdict form.
+                suspect = Suspect.objects.filter(case=trial.case).first()
+                if suspect:
+                    # Update suspect status
+                    suspect.status = 'Convicted'
+                    suspect.save()
+                    
+                    # Create the Fine Ticket
+                    BailFine.objects.create(
+                        case=trial.case,
+                        suspect=suspect,
+                        amount=fine_amount,
+                        type='Fine',
+                        status='Pending',
+                        set_by=request.user
+                    )
 
         return Response(TrialSerializer(trial, context={'request': request}).data)
