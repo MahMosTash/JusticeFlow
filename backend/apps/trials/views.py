@@ -61,51 +61,46 @@ class TrialViewSet(viewsets.ModelViewSet):
         trial = self.get_object()
 
         # Allow if the judge owns the trial OR if the trial is completely unassigned
-        try:
-            trial = self.get_object()
-            
-            # The trial must not already have a verdict.
-            if trial.verdict:
-                return Response(
-                    {'detail': 'Verdict has already been recorded for this trial.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+        trial = self.get_object()
+        
+        # The trial must not already have a verdict.
+        if trial.verdict:
+            return Response(
+                {'detail': 'Verdict has already been recorded for this trial.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-            serializer = self.get_serializer(trial, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            
-            # Pop the explicit fine_amount which isn't part of the Trial model
-            fine_amount = serializer.validated_data.pop('fine_amount', None)
-            
-            serializer.save()
+        serializer = self.get_serializer(trial, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        
+        # Pop the explicit fine_amount which isn't part of the Trial model
+        fine_amount = serializer.validated_data.pop('fine_amount', None)
+        
+        serializer.save()
 
-            # Mark case as Resolved
-            if trial.verdict:
-                trial.case.status = 'Resolved'
-                trial.case.resolution_date = trial.verdict_date
-                trial.case.save()
+        # Mark case as Resolved
+        if trial.verdict:
+            trial.case.status = 'Resolved'
+            trial.case.resolution_date = trial.verdict_date
+            trial.case.save()
+            
+            # If Guilty, see if a fine was requested and create a Fine payment ticket
+            if trial.verdict == 'Guilty' and fine_amount and fine_amount > 0:
+                from apps.payments.models import BailFine
+                from apps.investigations.models import Suspect
                 
-                # If Guilty, see if a fine was requested and create a Fine payment ticket
-                if trial.verdict == 'Guilty' and fine_amount and fine_amount > 0:
-                    from apps.payments.models import BailFine
-                    from apps.investigations.models import Suspect
+                suspect = Suspect.objects.filter(case=trial.case).first()
+                if suspect:
+                    suspect.status = 'Convicted'
+                    suspect.save()
                     
-                    suspect = Suspect.objects.filter(case=trial.case).first()
-                    if suspect:
-                        suspect.status = 'Convicted'
-                        suspect.save()
-                        
-                        BailFine.objects.create(
-                            case=trial.case,
-                            suspect=suspect,
-                            amount=fine_amount,
-                            type='Fine',
-                            status='Pending',
-                            set_by=request.user
-                        )
+                    BailFine.objects.create(
+                        case=trial.case,
+                        suspect=suspect,
+                        amount=fine_amount,
+                        type='Fine',
+                        status='Pending',
+                        set_by=request.user
+                    )
 
-            return Response(TrialSerializer(trial, context={'request': request}).data)
-        except Exception as e:
-            import traceback
-            trace_string = traceback.format_exc()
-            return Response({'error': str(e), 'trace': trace_string}, status=500)
+        return Response(TrialSerializer(trial, context={'request': request}).data)

@@ -124,7 +124,8 @@ class CaseWitness(models.Model):
     Many-to-Many relationship between Case and User (witnesses).
     """
     case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='case_witnesses')
-    witness = models.ForeignKey(User, on_delete=models.CASCADE, related_name='witness_cases')
+    witness = models.ForeignKey(User, on_delete=models.CASCADE, related_name='witness_cases', null=True, blank=True)
+    witness_name = models.CharField(max_length=200, null=True, blank=True)
     witness_national_id = models.CharField(max_length=50, null=True, blank=True)
     witness_phone = models.CharField(max_length=20, null=True, blank=True)
     added_date = models.DateTimeField(auto_now_add=True)
@@ -132,10 +133,15 @@ class CaseWitness(models.Model):
     
     class Meta:
         db_table = 'case_witnesses'
-        unique_together = ['case', 'witness']
         verbose_name = 'Case Witness'
         verbose_name_plural = 'Case Witnesses'
+        indexes = [
+            models.Index(fields=['case', 'witness_national_id']),
+        ]
     
     def __str__(self):
-        return f'{self.case.title} - {self.witness.get_full_name() if self.witness else "External Witness"}'
+        name = self.witness_name
+        if not name and self.witness:
+            name = self.witness.get_full_name()
+        return f'{self.case.title} - {name or "External Witness"}'
 

@@ -24,8 +24,9 @@ import {
   MenuItem,
   Divider,
   LinearProgress,
+  Avatar,
 } from '@mui/material';
-import { ArrowBack, CheckCircle, Gavel, HowToVote, PersonSearch } from '@mui/icons-material';
+import { ArrowBack, CheckCircle, Gavel, HowToVote, PersonSearch, RecordVoiceOver } from '@mui/icons-material';
 import { caseService } from '@/services/caseService';
 import { evidenceService } from '@/services/evidenceService';
 import { suspectService } from '@/services/suspectService';
@@ -441,140 +442,46 @@ export const CaseDetailPage: React.FC = () => {
                   {formatDateTime(caseData.created_date)}
                 </Typography>
               </Grid>
-              {caseData.assigned_detective && (
-                <Grid item xs={12} sm={6}>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontSize: 'var(--label-base-size)',
-                      color: 'var(--text-secondary)',
-                      mb: 0.5,
-                    }}
-                  >
-                    Assigned Detective
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontSize: 'var(--body-base-size)',
-                      color: 'var(--text-primary)',
-                    }}
-                  >
-                    {caseData.assigned_detective.full_name || caseData.assigned_detective.username}
-                  </Typography>
-                </Grid>
-              )}
-              {caseData.assigned_sergeant && (
-                <Grid item xs={12} sm={6}>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontSize: 'var(--label-base-size)',
-                      color: 'var(--text-secondary)',
-                      mb: 0.5,
-                    }}
-                  >
-                    Assigned Sergeant
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontSize: 'var(--body-base-size)',
-                      color: 'var(--text-primary)',
-                    }}
-                  >
-                    {caseData.assigned_sergeant.full_name || caseData.assigned_sergeant.username}
-                  </Typography>
-                </Grid>
-              )}
-              {caseData.incident_date && (
-                <Grid item xs={12} sm={6}>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontSize: 'var(--label-base-size)',
-                      color: 'var(--text-secondary)',
-                      mb: 0.5,
-                    }}
-                  >
-                    Incident Date
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontSize: 'var(--body-base-size)',
-                      color: 'var(--text-primary)',
-                    }}
-                  >
-                    {formatDate(caseData.incident_date)}
-                    {caseData.incident_time && ` at ${caseData.incident_time}`}
-                  </Typography>
-                </Grid>
-              )}
-              {caseData.incident_location && (
-                <Grid item xs={12} sm={6}>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontSize: 'var(--label-base-size)',
-                      color: 'var(--text-secondary)',
-                      mb: 0.5,
-                    }}
-                  >
-                    Incident Location
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontSize: 'var(--body-base-size)',
-                      color: 'var(--text-primary)',
-                    }}
-                  >
-                    {caseData.incident_location}
-                  </Typography>
-                </Grid>
-              )}
+            )}
+            {caseData.incident_date && (
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body2" color="text.secondary">
+                  Incident Date
+                </Typography>
+                <Typography variant="body1">
+                  {formatDate(caseData.incident_date)}
+                  {caseData.incident_time && ` at ${caseData.incident_time}`}
+                </Typography>
+              </Grid>
+            )}
+            {caseData.incident_location && (
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body2" color="text.secondary">
+                  Incident Location
+                </Typography>
+                <Typography variant="body1">{caseData.incident_location}</Typography>
+              </Grid>
+            )}
+            <Grid item xs={12} sm={6}>
+              <Typography variant="body2" color="text.secondary">
+                Registered Participants
+              </Typography>
+              <Typography variant="body1">
+                {caseData.complainants?.length || 0} Complainants · {caseData.witnesses?.length || 0} Witnesses
+              </Typography>
             </Grid>
-          </CardContent>
-        </Card>
+          </Grid>
+        </CardContent>
+      </Card>
 
-        <Paper
-          className="glass-effect"
-          sx={{
-            background: 'var(--glass-bg)',
-            border: '1px solid var(--glass-border)',
-            borderRadius: 'var(--radius-lg)',
-            boxShadow: 'var(--shadow-lg)',
-            overflow: 'hidden',
-          }}
-        >
-          <Tabs
-            value={activeTab}
-            onChange={(_, newValue) => setActiveTab(newValue)}
-            variant="scrollable"
-            scrollButtons="auto"
-            sx={{
-              background: 'var(--bg-elevated)',
-              borderBottom: '1px solid var(--glass-border)',
-              '& .MuiTab-root': {
-                color: 'var(--text-secondary)',
-                fontSize: 'var(--label-base-size)',
-                fontWeight: 'var(--font-weight-medium)',
-                '&.Mui-selected': {
-                  color: 'var(--accent-primary)',
-                },
-              },
-              '& .MuiTabs-indicator': {
-                background: 'var(--gradient-accent)',
-              },
-            }}
-          >
-            <Tab label="Evidence" />
-            <Tab label="Suspects" />
-            <Tab label="Complainants" />
-            <Tab label="Witnesses" />
-            <Tab label="Interrogation" icon={<PersonSearch fontSize="small" />} iconPosition="start" />
-          </Tabs>
+      <Paper>
+        <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)} variant="scrollable" scrollButtons="auto">
+          <Tab label={`Evidence (${caseData.evidence_count || evidenceList.length || 0})`} />
+          <Tab label={`Suspects (${caseData.suspects_count || suspectsList.length || 0})`} />
+          <Tab label={`Complainants (${caseData.complainants?.length || 0})`} />
+          <Tab label={`Witnesses (${caseData.witnesses?.length || 0})`} />
+          <Tab label="Interrogation" icon={<PersonSearch fontSize="small" />} iconPosition="start" />
+        </Tabs>
 
         <Box p={3}>
           {activeTab === 0 && (
@@ -873,6 +780,54 @@ export const CaseDetailPage: React.FC = () => {
               <Typography variant="h6" gutterBottom>
                 Witnesses ({caseData.witnesses?.length || 0})
               </Typography>
+
+              {!caseData.witnesses || caseData.witnesses.length === 0 ? (
+                <Alert severity="info">No witnesses registered for this case yet. Submit a 'Witness Statement' evidence to add a witness.</Alert>
+              ) : (
+                <Grid container spacing={2} sx={{ mt: 1 }}>
+                  {caseData.witnesses.map((w) => (
+                    <Grid item xs={12} sm={6} md={4} key={w.id}>
+                      <Card variant="outlined" sx={{ height: '100%', position: 'relative' }}>
+                        <CardContent>
+                          <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
+                            <Box display="flex" alignItems="center" gap={1}>
+                              <Avatar sx={{ bgcolor: 'secondary.main', width: 32, height: 32 }}>
+                                <RecordVoiceOver fontSize="small" />
+                              </Avatar>
+                              <Typography variant="subtitle1" fontWeight="bold">
+                                {w.witness_name || w.witness?.full_name || 'Anonymous Witness'}
+                              </Typography>
+                            </Box>
+                            {w.witness && (
+                              <Chip label="User" size="small" color="primary" variant="outlined" />
+                            )}
+                          </Box>
+
+                          <Typography variant="body2" color="text.secondary">
+                            National ID: {w.witness_national_id || w.witness?.national_id || 'N/A'}
+                          </Typography>
+
+                          {(w.witness_phone || w.witness?.phone_number) && (
+                            <Typography variant="body2" color="text.secondary">
+                              Phone: {w.witness_phone || w.witness?.phone_number}
+                            </Typography>
+                          )}
+
+                          {w.notes && (
+                            <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic' }}>
+                              {w.notes}
+                            </Typography>
+                          )}
+
+                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                            Added: {formatDate(w.added_date)}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
             </Box>
           )}
 

@@ -60,6 +60,7 @@ export interface CaseWitness {
   id: number;
   case: number;
   witness: User | null;
+  witness_name: string | null;
   witness_national_id: string | null;
   witness_phone: string | null;
   added_date: string;

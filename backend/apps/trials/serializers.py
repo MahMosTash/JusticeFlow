@@ -123,7 +123,7 @@ class CaseDossierSerializer(serializers.ModelSerializer):
         return [
             {
                 'id': cc.complainant.id,
-                'full_name': cc.complainant.full_name,
+                'full_name': cc.complainant.get_full_name(),
                 'username': cc.complainant.username,
                 'national_id': getattr(cc.complainant, 'national_id', ''),
                 'phone_number': getattr(cc.complainant, 'phone_number', ''),
@@ -136,9 +136,9 @@ class CaseDossierSerializer(serializers.ModelSerializer):
         return [
             {
                 'id': cw.id,
-                'witness_name': cw.witness.full_name if cw.witness else None,
-                'witness_national_id': cw.witness_national_id,
-                'witness_phone': cw.witness_phone,
+                'witness_name': cw.witness_name or (cw.witness.get_full_name() if cw.witness else 'Anonymous'),
+                'witness_national_id': cw.witness_national_id or (cw.witness.national_id if cw.witness else 'N/A'),
+                'witness_phone': cw.witness_phone or (cw.witness.phone_number if cw.witness else ''),
                 'notes': cw.notes,
             }
             for cw in obj.case_witnesses.select_related('witness').all()

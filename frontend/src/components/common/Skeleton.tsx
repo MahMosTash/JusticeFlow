@@ -1,7 +1,7 @@
 /**
  * Skeleton loader components
  */
-import { Skeleton as MuiSkeleton, Box, Card, CardContent } from '@mui/material';
+import { Skeleton as MuiSkeleton, Box, Card, CardContent, Grid } from '@mui/material';
 
 export const Skeleton: React.FC<{ variant?: 'text' | 'circular' | 'rectangular'; width?: number | string; height?: number }> = ({
   variant = 'text',
@@ -11,17 +11,23 @@ export const Skeleton: React.FC<{ variant?: 'text' | 'circular' | 'rectangular';
   return <MuiSkeleton variant={variant} width={width} height={height} />;
 };
 
-export const CardSkeleton: React.FC = () => {
+export const CardSkeleton: React.FC<{ count?: number }> = ({ count = 1 }) => {
   return (
-    <Card>
-      <CardContent>
-        <MuiSkeleton variant="text" width="60%" height={32} />
-        <MuiSkeleton variant="text" width="40%" height={24} />
-        <Box mt={2}>
-          <MuiSkeleton variant="rectangular" width="100%" height={100} />
-        </Box>
-      </CardContent>
-    </Card>
+    <Grid container spacing={3}>
+      {Array.from({ length: count }).map((_, i) => (
+        <Grid item xs={12} md={6} key={i}>
+          <Card variant="outlined">
+            <CardContent>
+              <MuiSkeleton variant="text" width="60%" height={32} />
+              <MuiSkeleton variant="text" width="40%" height={24} />
+              <Box mt={2}>
+                <MuiSkeleton variant="rectangular" width="100%" height={100} />
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
   );
 };
 
