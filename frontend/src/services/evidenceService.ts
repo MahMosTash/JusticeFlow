@@ -12,6 +12,7 @@ export const evidenceService = {
     case?: number;
     evidence_type?: string;
     verified?: boolean;
+    detailed?: boolean;
     page?: number;
     page_size?: number;
   }): Promise<PaginatedResponse<Evidence>> => {
@@ -59,6 +60,7 @@ export const evidenceService = {
     data: {
       verified_by_national_id?: string;
       verification_notes?: string;
+      is_valid: boolean;
     }
   ): Promise<Evidence> => {
     const response = await api.post<Evidence>(`/evidence/${id}/verify/`, data);

@@ -117,6 +117,8 @@ export interface Evidence {
   verified_by_national_id?: string;
   verification_date?: string | null;
   verification_notes?: string;
+  is_verified?: boolean;
+  is_valid?: boolean;
   // Vehicle Evidence fields
   model?: string;
   color?: string;

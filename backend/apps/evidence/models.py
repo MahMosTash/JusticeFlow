@@ -79,6 +79,7 @@ class Evidence(models.Model):
     verified_by_national_id = models.CharField(max_length=50, blank=True)
     verification_date = models.DateTimeField(null=True, blank=True)
     verification_notes = models.TextField(blank=True)
+    is_valid = models.BooleanField(null=True, blank=True, help_text="True if deemed genuine by Forensic Doctor.")
     
     # Vehicle Evidence fields
     model = models.CharField(max_length=100, blank=True)

@@ -104,7 +104,7 @@ class EvidenceVerificationSerializer(serializers.ModelSerializer):
         model = Evidence
         fields = [
             'id', 'verified_by_forensic_doctor', 'verified_by_national_id',
-            'verification_date', 'verification_notes', 'is_verified'
+            'verification_date', 'verification_notes', 'is_verified', 'is_valid'
         ]
         read_only_fields = ['id', 'verification_date']
     

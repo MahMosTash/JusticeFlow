@@ -576,20 +576,33 @@ export const CaseDetailPage: React.FC = () => {
                               >
                                 {item.title}
                               </Typography>
-                              <Chip
-                                label={item.evidence_type.replace('_', ' ')}
-                                size="small"
-                                color={
-                                  item.evidence_type === 'witness_statement' ? 'info' :
-                                    item.evidence_type === 'biological' ? 'error' :
-                                      item.evidence_type === 'vehicle' ? 'warning' :
-                                        item.evidence_type === 'identification' ? 'primary' : 'default'
-                                }
-                                sx={{
-                                  fontWeight: 'var(--font-weight-medium)',
-                                  fontSize: 'var(--label-small-size)',
-                                }}
-                              />
+                              <Box display="flex" gap={1}>
+                                <Chip
+                                  label={item.evidence_type.replace('_', ' ')}
+                                  size="small"
+                                  color={
+                                    item.evidence_type === 'witness_statement' ? 'info' :
+                                      item.evidence_type === 'biological' ? 'default' :
+                                        item.evidence_type === 'vehicle' ? 'warning' :
+                                          item.evidence_type === 'identification' ? 'primary' : 'default'
+                                  }
+                                  sx={{
+                                    fontWeight: 'var(--font-weight-medium)',
+                                    fontSize: 'var(--label-small-size)',
+                                  }}
+                                />
+                                {item.evidence_type === 'biological' && (
+                                  <Chip
+                                    label={item.verified_by_forensic_doctor ? (item.is_valid ? 'Valid' : 'Invalid') : 'Pending Verification'}
+                                    size="small"
+                                    color={item.verified_by_forensic_doctor ? (item.is_valid ? 'success' : 'error') : 'warning'}
+                                    sx={{
+                                      fontWeight: 'var(--font-weight-medium)',
+                                      fontSize: 'var(--label-small-size)',
+                                    }}
+                                  />
+                                )}
+                              </Box>
                             </Box>
                             {item.description && (
                               <Typography
