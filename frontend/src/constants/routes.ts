@@ -21,6 +21,8 @@ export const ROUTES = {
   REPORTS: '/reports',
   REWARDS: '/rewards',
   REWARD_SUBMIT: '/rewards/submit',
+  TRIALS: '/trials',
+  TRIAL_DETAIL: (id: number | string) => `/trials/${id}`,
   ADMIN_USERS: '/admin/users',
   ADMIN_ROLES: '/admin/roles',
 } as const;

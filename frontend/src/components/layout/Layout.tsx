@@ -29,6 +29,7 @@ import {
   AccountTree,
   Logout,
   Home,
+  Gavel,
 } from '@mui/icons-material';
 import { useAuth } from '@/hooks/useAuth';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -88,6 +89,12 @@ export const Layout: React.FC = () => {
       icon: <Report />,
       path: ROUTES.REPORTS,
       show: permissions.isOfficer() || permissions.isInvestigator(),
+    },
+    {
+      text: 'Trials',
+      icon: <Gavel />,
+      path: ROUTES.TRIALS,
+      show: permissions.isJudge(),
     },
   ].filter((item) => item.show);
 

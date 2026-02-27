@@ -26,6 +26,7 @@ import { EvidenceDetailPage } from './pages/Evidence/EvidenceDetailPage';
 import { ReportsPage } from './pages/Reports/ReportsPage';
 import { UserManagementPage } from './pages/Admin/UserManagementPage';
 import { RoleManagementPage } from './pages/Admin/RoleManagementPage';
+import { TrialPage } from './pages/Trials/TrialPage';
 import { ROUTES } from './constants/routes';
 
 const theme = createTheme({
@@ -70,6 +71,7 @@ const AppRoutes: React.FC = () => {
         <Route path={ROUTES.EVIDENCE_CREATE} element={<EvidenceCreatePage />} />
         <Route path={ROUTES.EVIDENCE_DETAIL(':id')} element={<EvidenceDetailPage />} />
         <Route path={ROUTES.REPORTS} element={<ReportsPage />} />
+        <Route path={ROUTES.TRIAL_DETAIL(':id')} element={<TrialPage />} />
         <Route path={ROUTES.ADMIN_USERS} element={<UserManagementPage />} />
         <Route path={ROUTES.ADMIN_ROLES} element={<RoleManagementPage />} />
       </Route>
