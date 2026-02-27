@@ -51,7 +51,7 @@ export const SuspectFormDialog: React.FC<SuspectFormDialogProps> = ({
             setError(null);
             const newSuspect = await suspectService.createSuspect({
                 ...formData,
-                case: caseId,
+                case_id: caseId,
                 status: 'Under Investigation',
             });
             onSuspectAdded(newSuspect);

@@ -128,6 +128,7 @@ export interface Evidence {
 
 export interface Suspect {
   id: number;
+  case_id?: number;   // write-only field accepted by backend serializer on create
   case: number;
   user: User | null;
   name: string;
