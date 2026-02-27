@@ -32,6 +32,7 @@ export const TrialPage: React.FC = () => {
     const [verdict, setVerdict] = useState<'Guilty' | 'Not Guilty'>('Guilty');
     const [punishmentTitle, setPunishmentTitle] = useState('');
     const [punishmentDesc, setPunishmentDesc] = useState('');
+    const [fineAmount, setFineAmount] = useState<number | ''>('');
     const [notes, setNotes] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
@@ -61,6 +62,9 @@ export const TrialPage: React.FC = () => {
             if (verdict === 'Guilty') {
                 payload.punishment_title = punishmentTitle;
                 payload.punishment_description = punishmentDesc;
+                if (fineAmount !== '' && fineAmount > 0) {
+                    payload.fine_amount = fineAmount;
+                }
             }
             const updated = await trialService.recordVerdict(trial.id, payload);
             setTrial(updated);
@@ -431,6 +435,17 @@ export const TrialPage: React.FC = () => {
                                                     value={punishmentDesc}
                                                     onChange={(e) => setPunishmentDesc(e.target.value)}
                                                     placeholder="Detailed sentence and reasoning..."
+                                                />
+                                                <TextField
+                                                    id="fine-amount"
+                                                    label="Fine Amount (IRR)"
+                                                    size="small"
+                                                    fullWidth
+                                                    type="number"
+                                                    value={fineAmount}
+                                                    onChange={(e) => setFineAmount(e.target.value === '' ? '' : Number(e.target.value))}
+                                                    placeholder="e.g. 5000000"
+                                                    helperText="Optional. Amount in Rials. Only applicable to Level 2 and 3 crimes."
                                                 />
                                             </>
                                         )}

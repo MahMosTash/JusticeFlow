@@ -25,6 +25,8 @@ export const ROUTES = {
   REWARD_VERIFY: '/rewards/verify',
   TRIALS: '/trials',
   TRIAL_DETAIL: (id: number | string) => `/trials/${id}`,
+  PAY_BILLS: '/pay-bills',
+  PAY_CALLBACK: '/payment-callback',
   ADMIN_USERS: '/admin/users',
   ADMIN_ROLES: '/admin/roles',
 } as const;

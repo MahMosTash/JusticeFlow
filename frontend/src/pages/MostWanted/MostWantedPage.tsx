@@ -19,7 +19,7 @@ import { Suspect } from '@/types/api';
 import { TableSkeleton } from '@/components/common/Skeleton';
 
 export const MostWantedPage: React.FC = () => {
-  const [mostWanted, setMostWanted] = useState<Array<{ suspect: Suspect; ranking: number }>>([]);
+  const [mostWanted, setMostWanted] = useState<Array<{ suspect: Suspect; ranking: number; reward_amount: number }>>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export const MostWantedPage: React.FC = () => {
               <TableCell>Name</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Days Under Investigation</TableCell>
-              <TableCell>Ranking Score</TableCell>
+              <TableCell>Reward Prize</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -96,7 +96,7 @@ export const MostWantedPage: React.FC = () => {
                   <TableCell>{item.suspect.days_under_investigation || 0} days</TableCell>
                   <TableCell>
                     <Typography variant="body2" fontWeight="bold">
-                      {item.ranking}
+                      {item.reward_amount.toLocaleString()} Rials
                     </Typography>
                   </TableCell>
                 </TableRow>

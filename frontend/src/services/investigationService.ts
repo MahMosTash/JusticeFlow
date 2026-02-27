@@ -42,8 +42,8 @@ export const investigationService = {
     return response.data;
   },
 
-  getMostWanted: async (): Promise<Array<{ suspect: Suspect; ranking: number }>> => {
-    const response = await api.get<Array<{ suspect: Suspect; ranking: number }>>(
+  getMostWanted: async (): Promise<Array<{ suspect: Suspect; ranking: number; reward_amount: number }>> => {
+    const response = await api.get<Array<{ suspect: Suspect; ranking: number; reward_amount: number }>>(
       '/investigations/suspects/most_wanted/'
     );
     return response.data;

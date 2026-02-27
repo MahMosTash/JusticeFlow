@@ -37,6 +37,7 @@ export const trialService = {
             verdict: 'Guilty' | 'Not Guilty';
             punishment_title?: string;
             punishment_description?: string;
+            fine_amount?: number | null;
             notes?: string;
         }
     ): Promise<Trial> => {

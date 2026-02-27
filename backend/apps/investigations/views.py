@@ -107,9 +107,11 @@ class SuspectViewSet(viewsets.ModelViewSet):
         ranked_suspects = []
         for suspect in suspects:
             ranking = suspect.get_most_wanted_ranking()
+            reward_amount = suspect.get_reward_amount()
             ranked_suspects.append({
                 'suspect': SuspectSerializer(suspect).data,
-                'ranking': ranking
+                'ranking': ranking,
+                'reward_amount': reward_amount
             })
         
         # Sort by ranking (descending)

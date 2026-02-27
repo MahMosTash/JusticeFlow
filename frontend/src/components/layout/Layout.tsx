@@ -33,6 +33,7 @@ import {
   LocalAtm,
   Person,
   VerifiedUser,
+  Payment,
 } from '@mui/icons-material';
 import { useAuth } from '@/hooks/useAuth';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -103,6 +104,12 @@ export const Layout: React.FC = () => {
       text: 'My Rewards',
       icon: <LocalAtm />,
       path: ROUTES.REWARDS_MY,
+      show: permissions.isBasicUser(),
+    },
+    {
+      text: 'Pay Bills & Fines',
+      icon: <Payment />,
+      path: ROUTES.PAY_BILLS,
       show: permissions.isBasicUser(),
     },
     {
