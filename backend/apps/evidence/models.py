@@ -135,3 +135,26 @@ class Evidence(models.Model):
             return self.verified_by_forensic_doctor is not None and self.verification_date is not None
         return False
 
+class EvidenceComment(models.Model):
+    """Forensic Doctor's analysis/comment on biological evidence."""
+    evidence = models.ForeignKey(
+        Evidence,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='evidence_comments'
+    )
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'evidence_comments'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Comment by {self.author} on {self.evidence}'

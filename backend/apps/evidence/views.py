@@ -11,6 +11,12 @@ from .models import Evidence
 from .serializers import (
     EvidenceSerializer, EvidenceListSerializer, EvidenceVerificationSerializer
 )
+from .models import Evidence, EvidenceComment
+from .serializers import (
+    EvidenceSerializer, EvidenceListSerializer,
+    EvidenceVerificationSerializer, EvidenceCommentSerializer
+)
+
 
 
 class EvidenceViewSet(viewsets.ModelViewSet):
@@ -140,4 +146,29 @@ class EvidenceViewSet(viewsets.ModelViewSet):
             }
         
         return Response(result)
+    
+    
+class EvidenceCommentViewSet(viewsets.ModelViewSet):
+    """
+    Forensic Doctor posts comments on biological evidence.
+    Detectives can read them (read-only for non-forensic users).
+    """
+    serializer_class = EvidenceCommentSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
+    def get_queryset(self):
+        return EvidenceComment.objects.select_related('author', 'evidence').filter(
+            evidence__evidence_type='biological'
+        )
+
+    def get_permissions(self):
+        if self.action in ['create', 'partial_update', 'destroy']:
+            return [IsForensicDoctor()]
+        return [IsAuthenticated()]
+
+    def perform_create(self, serializer):
+        evidence = Evidence.objects.get(pk=self.request.data.get('evidence'))
+        if evidence.evidence_type != 'biological':
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError('Comments are only allowed on biological evidence.')
+        serializer.save()

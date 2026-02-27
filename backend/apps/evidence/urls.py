@@ -1,14 +1,8 @@
-"""
-URL configuration for evidence app.
-"""
-from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import EvidenceViewSet
+from .views import EvidenceViewSet, EvidenceCommentViewSet
 
 router = DefaultRouter()
-router.register(r'', EvidenceViewSet, basename='evidence')
+router.register(r'evidence', EvidenceViewSet, basename='evidence')
+router.register(r'evidence-comments', EvidenceCommentViewSet, basename='evidence-comments')
 
-urlpatterns = [
-    path('', include(router.urls)),
-]
-
+urlpatterns = router.urls

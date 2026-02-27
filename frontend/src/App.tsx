@@ -27,6 +27,7 @@ import { ReportsPage } from './pages/Reports/ReportsPage';
 import { UserManagementPage } from './pages/Admin/UserManagementPage';
 import { RoleManagementPage } from './pages/Admin/RoleManagementPage';
 import { ROUTES } from './constants/routes';
+import ForensicDoctorPage from '@/pages/ForensicDoctor/ForensicDoctorPage';
 
 const theme = createTheme({
   palette: {
@@ -48,14 +49,13 @@ const AppRoutes: React.FC = () => {
       <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
 
       {/* Protected routes */}
-      <Route
+      <Route>
         path="/"
         element={
           <ProtectedRoute>
             <Layout />
           </ProtectedRoute>
-        }
-      >
+        } /</Route>
         <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
         <Route path={ROUTES.CASES} element={<CaseListPage />} />
         <Route path={ROUTES.CASE_DETAIL(':id')} element={<CaseDetailPage />} />
@@ -72,7 +72,10 @@ const AppRoutes: React.FC = () => {
         <Route path={ROUTES.REPORTS} element={<ReportsPage />} />
         <Route path={ROUTES.ADMIN_USERS} element={<UserManagementPage />} />
         <Route path={ROUTES.ADMIN_ROLES} element={<RoleManagementPage />} />
-      </Route>
+        
+        <Route path="/forensic-doctor" element={( 
+          <ProtectedRoute allowedRoles={['Forensic Doctor']}> <ForensicDoctorPage /> 
+          </ProtectedRoute> )} ></Route>
 
       {/* Default redirect */}
       <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />

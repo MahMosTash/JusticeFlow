@@ -282,6 +282,16 @@ export interface Notification {
   created_at: string;
 }
 
+export interface EvidenceComment {
+  id: number;
+  evidence: number;
+  author: UserDetail;
+  comment: string;
+  created_at: string;
+  updated_at: string;
+}
+
+
 // Enums and Types
 export type CrimeSeverity = 'Level 3' | 'Level 2' | 'Level 1' | 'Critical';
 export type CaseStatus = 'Pending' | 'Open' | 'Under Investigation' | 'Resolved' | 'Closed';

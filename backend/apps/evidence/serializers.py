@@ -2,7 +2,7 @@
 Serializers for evidence app.
 """
 from rest_framework import serializers
-from apps.evidence.models import Evidence
+from apps.evidence.models import Evidence, EvidenceComment
 from apps.accounts.serializers import UserDetailSerializer
 from apps.cases.serializers import CaseListSerializer
 from apps.cases.models import Case
@@ -14,6 +14,7 @@ class EvidenceSerializer(serializers.ModelSerializer):
     case_id = serializers.IntegerField(write_only=True, required=False)
     recorded_by = UserDetailSerializer(read_only=True)
     verified_by_forensic_doctor = UserDetailSerializer(read_only=True)
+    comments = EvidenceCommentSerializer(many=True, read_only=True)
     
     class Meta:
         model = Evidence
@@ -30,7 +31,8 @@ class EvidenceSerializer(serializers.ModelSerializer):
             # Vehicle Evidence fields
             'model', 'color', 'license_plate', 'serial_number',
             # Identification Document fields
-            'full_name', 'metadata'
+            'full_name', 'metadata',
+            'comments',
         ]
         read_only_fields = ['id', 'recorded_by', 'created_date', 'verification_date']
 
@@ -103,3 +105,15 @@ class EvidenceVerificationSerializer(serializers.ModelSerializer):
         validated_data['verified_by_forensic_doctor'] = self.context['request'].user
         validated_data['verification_date'] = timezone.now()
         return super().update(instance, validated_data)
+
+class EvidenceCommentSerializer(serializers.ModelSerializer):
+    author = UserDetailSerializer(read_only=True)
+
+    class Meta:
+        model = EvidenceComment
+        fields = ['id', 'evidence', 'author', 'comment', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'author', 'created_at', 'updated_at']
+
+    def create(self, validated_data):
+        validated_data['author'] = self.context['request'].user
+        return super().create(validated_data)
