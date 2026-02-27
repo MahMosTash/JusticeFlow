@@ -22,8 +22,6 @@ import { Science, CheckCircle, Cancel } from '@mui/icons-material';
 import { evidenceService } from '@/services/evidenceService';
 import { Evidence } from '@/types/api';
 import { formatDateTime } from '@/utils/dateUtils';
-import { useNavigate } from 'react-router-dom';
-import { ROUTES } from '@/constants/routes';
 
 export const ForensicDashboardPage: React.FC = () => {
     const [evidenceList, setEvidenceList] = useState<Evidence[]>([]);
@@ -36,8 +34,6 @@ export const ForensicDashboardPage: React.FC = () => {
     const [actionType, setActionType] = useState<'valid' | 'invalid' | null>(null);
     const [submitting, setSubmitting] = useState(false);
 
-    const navigate = useNavigate();
-
     const fetchPendingEvidence = async () => {
         try {
             setLoading(true);
@@ -46,6 +42,7 @@ export const ForensicDashboardPage: React.FC = () => {
             const response = await evidenceService.getEvidence({
                 evidence_type: 'biological',
                 verified: false,
+                detailed: true,
             });
             setEvidenceList(response.results);
         } catch (err: any) {
@@ -173,7 +170,7 @@ export const ForensicDashboardPage: React.FC = () => {
 
                                             <Box sx={{ mb: 2 }}>
                                                 <Typography variant="caption" display="block" color="text.secondary">
-                                                    <strong>Case:</strong> #{evidence.case?.id} - {evidence.case?.title}
+                                                    <strong>Case:</strong> #{(evidence.case as any)?.id || evidence.case} - {(evidence.case as any)?.title || ''}
                                                 </Typography>
                                                 <Typography variant="caption" display="block" color="text.secondary">
                                                     <strong>Recorded by:</strong> {evidence.recorded_by?.full_name} on {formatDateTime(evidence.created_date)}
@@ -216,7 +213,7 @@ export const ForensicDashboardPage: React.FC = () => {
                 </DialogTitle>
                 <DialogContent>
                     <Typography variant="body2" paragraph>
-                        You are about to mark "{selectedEvidence?.title}" for Case #{selectedEvidence?.case?.id} as <strong>{actionType === 'valid' ? 'Valid (Genuine)' : 'Invalid (Fake)'}</strong>.
+                        You are about to mark "{selectedEvidence?.title}" for Case #{(selectedEvidence?.case as any)?.id || selectedEvidence?.case} as <strong>{actionType === 'valid' ? 'Valid (Genuine)' : 'Invalid (Fake)'}</strong>.
                         This action will automatically notify the assigned detective.
                     </Typography>
                     <TextField
