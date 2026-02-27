@@ -66,29 +66,65 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: "'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif",
+    // Headings - Match CSS variables
     h1: {
-      fontWeight: 800,
-      letterSpacing: '-0.02em',
+      fontSize: '3rem', // --heading-h1-size
+      fontWeight: 800, // --heading-h1-weight
+      lineHeight: 1.2, // --heading-h1-line-height
+      letterSpacing: '-0.025em', // --heading-h1-spacing
     },
     h2: {
-      fontWeight: 700,
-      letterSpacing: '-0.01em',
+      fontSize: '2.25rem', // --heading-h2-size
+      fontWeight: 700, // --heading-h2-weight
+      lineHeight: 1.2, // --heading-h2-line-height
+      letterSpacing: '-0.025em', // --heading-h2-spacing
     },
     h3: {
-      fontWeight: 700,
+      fontSize: '1.875rem', // --heading-h3-size
+      fontWeight: 700, // --heading-h3-weight
+      lineHeight: 1.375, // --heading-h3-line-height
+      letterSpacing: '0', // --heading-h3-spacing
     },
     h4: {
-      fontWeight: 600,
+      fontSize: '1.5rem', // --heading-h4-size
+      fontWeight: 600, // --heading-h4-weight
+      lineHeight: 1.375, // --heading-h4-line-height
+      letterSpacing: '0', // --heading-h4-spacing
     },
     h5: {
-      fontWeight: 600,
+      fontSize: '1.25rem', // --heading-h5-size
+      fontWeight: 600, // --heading-h5-weight
+      lineHeight: 1.5, // --heading-h5-line-height
+      letterSpacing: '0', // --heading-h5-spacing
     },
     h6: {
-      fontWeight: 600,
+      fontSize: '1rem', // --heading-h6-size
+      fontWeight: 600, // --heading-h6-weight
+      lineHeight: 1.5, // --heading-h6-line-height
+      letterSpacing: '0', // --heading-h6-spacing
     },
+    // Body text
+    body1: {
+      fontSize: '1rem', // --body-base-size
+      fontWeight: 400, // --body-base-weight
+      lineHeight: 1.5, // --body-base-line-height
+    },
+    body2: {
+      fontSize: '0.875rem', // --body-small-size
+      fontWeight: 400, // --body-small-weight
+      lineHeight: 1.5, // --body-small-line-height
+    },
+    // Button text
     button: {
-      fontWeight: 600,
+      fontSize: '1rem', // --button-base-size
+      fontWeight: 600, // --button-base-weight
       textTransform: 'none',
+    },
+    // Caption
+    caption: {
+      fontSize: '0.75rem', // --caption-size
+      fontWeight: 400, // --caption-weight
+      lineHeight: 1.5, // --caption-line-height
     },
   },
   shape: {
