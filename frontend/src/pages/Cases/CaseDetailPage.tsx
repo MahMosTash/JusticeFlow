@@ -16,12 +16,21 @@ import {
   Tab,
   Paper,
   Alert,
+  Slider,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Divider,
+  LinearProgress,
 } from '@mui/material';
-import { ArrowBack, CheckCircle } from '@mui/icons-material';
+import { ArrowBack, CheckCircle, Gavel, HowToVote, PersonSearch } from '@mui/icons-material';
 import { caseService } from '@/services/caseService';
 import { evidenceService } from '@/services/evidenceService';
 import { suspectService } from '@/services/suspectService';
-import { Case, Evidence, Suspect } from '@/types/api';
+import { investigationService } from '@/services/investigationService';
+import { Case, Evidence, Suspect, GuiltScore, CaptainDecision } from '@/types/api';
 import { CardSkeleton } from '@/components/common/Skeleton';
 import { SuspectFormDialog } from '@/components/suspects/SuspectFormDialog';
 import { ROUTES } from '@/constants/routes';
@@ -42,6 +51,28 @@ export const CaseDetailPage: React.FC = () => {
   const [suspectDialogOpen, setSuspectDialogOpen] = useState(false);
   const [approving, setApproving] = useState(false);
   const [approveSuccess, setApproveSuccess] = useState(false);
+
+  // ── Interrogation tab state ──────────────────────────────────────────
+  const [guiltScores, setGuiltScores] = useState<GuiltScore[]>([]);
+  const [captainDecisions, setCaptainDecisions] = useState<CaptainDecision[]>([]);
+  const [interrogationLoading, setInterrogationLoading] = useState(false);
+  // Guilt score form (sergeant / detective)
+  const [selectedSuspectId, setSelectedSuspectId] = useState<number | ''>('');
+  const [guiltScoreValue, setGuiltScoreValue] = useState<number>(5);
+  const [guiltJustification, setGuiltJustification] = useState('');
+  const [scoreSubmitting, setScoreSubmitting] = useState(false);
+  const [scoreError, setScoreError] = useState<string | null>(null);
+  const [scoreSuccess, setScoreSuccess] = useState(false);
+  // Captain decision form
+  const [captainSuspectId, setCaptainSuspectId] = useState<number | ''>('');
+  const [captainDecision, setCaptainDecision] = useState<'Approve Arrest' | 'Reject' | 'Request More Evidence'>('Approve Arrest');
+  const [captainComments, setCaptainComments] = useState('');
+  const [decisionSubmitting, setDecisionSubmitting] = useState(false);
+  const [decisionError, setDecisionError] = useState<string | null>(null);
+  const [decisionSuccess, setDecisionSuccess] = useState(false);
+  // Chief approval
+  const [chiefApproving, setChiefApproving] = useState<number | null>(null);
+  const [chiefError, setChiefError] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -85,12 +116,95 @@ export const CaseDetailPage: React.FC = () => {
     }
   };
 
+  const loadInterrogationData = async () => {
+    try {
+      setInterrogationLoading(true);
+      const caseIdNum = parseInt(id!);
+      const [scoresRes, decisionsRes, suspectsRes] = await Promise.all([
+        investigationService.getGuiltScores({ case: caseIdNum }),
+        investigationService.getCaptainDecisions({ case: caseIdNum }),
+        suspectService.getSuspects({ case: caseIdNum }),
+      ]);
+      setGuiltScores(scoresRes.results);
+      setCaptainDecisions(decisionsRes.results);
+      setSuspectsList(suspectsRes.results);
+    } catch (err: any) {
+      console.error('Failed to load interrogation data:', err);
+    } finally {
+      setInterrogationLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (id) {
       if (activeTab === 0) loadEvidence();
       if (activeTab === 1) loadSuspects();
+      if (activeTab === 4) loadInterrogationData();
     }
   }, [activeTab, id]);
+
+  const handleSubmitGuiltScore = async () => {
+    if (!selectedSuspectId) return;
+    setScoreError(null);
+    setScoreSuccess(false);
+    setScoreSubmitting(true);
+    try {
+      const newScore = await investigationService.createGuiltScore({
+        suspect: selectedSuspectId as number,
+        case: parseInt(id!),
+        score: guiltScoreValue,
+        justification: guiltJustification,
+      });
+      setGuiltScores((prev) => [newScore, ...prev]);
+      setScoreSuccess(true);
+      setGuiltJustification('');
+      setGuiltScoreValue(5);
+      setSelectedSuspectId('');
+    } catch (err: any) {
+      const msg = err?.response?.data?.non_field_errors?.[0] ||
+        err?.response?.data?.score?.[0] ||
+        'Failed to submit guilt score.';
+      setScoreError(msg);
+    } finally {
+      setScoreSubmitting(false);
+    }
+  };
+
+  const handleSubmitCaptainDecision = async () => {
+    if (!captainSuspectId) return;
+    setDecisionError(null);
+    setDecisionSuccess(false);
+    setDecisionSubmitting(true);
+    try {
+      const newDecision = await investigationService.createCaptainDecision({
+        case: parseInt(id!),
+        suspect: captainSuspectId as number,
+        decision: captainDecision,
+        comments: captainComments,
+      });
+      setCaptainDecisions((prev) => [newDecision, ...prev]);
+      setDecisionSuccess(true);
+      setCaptainComments('');
+      setCaptainSuspectId('');
+    } catch (err: any) {
+      setDecisionError('Failed to submit decision.');
+    } finally {
+      setDecisionSubmitting(false);
+    }
+  };
+
+  const handleChiefApproval = async (decisionId: number, approval: boolean) => {
+    setChiefApproving(decisionId);
+    setChiefError(null);
+    try {
+      const updated = await investigationService.approveChiefDecision(decisionId, approval);
+      setCaptainDecisions((prev) => prev.map((d) => d.id === decisionId ? updated : d));
+    } catch (err: any) {
+      setChiefError('Failed to submit approval.');
+    } finally {
+      setChiefApproving(null);
+    }
+  };
 
   const handleSuspectAdded = (suspect: Suspect) => {
     setSuspectsList((prev) => [suspect, ...prev]);
@@ -268,11 +382,12 @@ export const CaseDetailPage: React.FC = () => {
       </Card>
 
       <Paper>
-        <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
+        <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)} variant="scrollable" scrollButtons="auto">
           <Tab label="Evidence" />
           <Tab label="Suspects" />
           <Tab label="Complainants" />
           <Tab label="Witnesses" />
+          <Tab label="Interrogation" icon={<PersonSearch fontSize="small" />} iconPosition="start" />
         </Tabs>
 
         <Box p={3}>
@@ -426,6 +541,303 @@ export const CaseDetailPage: React.FC = () => {
               <Typography variant="h6" gutterBottom>
                 Witnesses ({caseData.witnesses?.length || 0})
               </Typography>
+            </Box>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════════
+              INTERROGATION TAB (tab index 4)
+              Role-based panels:
+                • Sergeant / Detective → Submit guilt score
+                • Captain             → Make a decision
+                • Police Chief        → Approve critical decisions
+                • Everyone            → Read-only scores & decisions
+          ═══════════════════════════════════════════════════════════ */}
+          {activeTab === 4 && (
+            <Box>
+              {interrogationLoading && <LinearProgress sx={{ mb: 2 }} />}
+
+              {/* ── 1. Guilt Score Form (Sergeant / Detective) ─────── */}
+              {(hasRole('Sergeant') || hasRole('Detective')) && (
+                <Card variant="outlined" sx={{ mb: 3, border: '1px solid', borderColor: 'warning.main' }}>
+                  <CardContent>
+                    <Box display="flex" alignItems="center" gap={1} mb={2}>
+                      <PersonSearch color="warning" />
+                      <Typography variant="h6">Submit Guilt Score</Typography>
+                    </Box>
+
+                    {scoreSuccess && (
+                      <Alert severity="success" sx={{ mb: 2 }} onClose={() => setScoreSuccess(false)}>
+                        Guilt score submitted successfully!
+                      </Alert>
+                    )}
+                    {scoreError && (
+                      <Alert severity="error" sx={{ mb: 2 }} onClose={() => setScoreError(null)}>
+                        {scoreError}
+                      </Alert>
+                    )}
+
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={4}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Arrested Suspect</InputLabel>
+                          <Select
+                            id="guilt-score-suspect"
+                            value={selectedSuspectId}
+                            label="Arrested Suspect"
+                            onChange={(e) => setSelectedSuspectId(e.target.value as number)}
+                          >
+                            {suspectsList
+                              .filter((s) => s.status === 'Arrested')
+                              .map((s) => (
+                                <MenuItem key={s.id} value={s.id}>{s.name || `Suspect #${s.id}`}</MenuItem>
+                              ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+
+                      <Grid item xs={12} sm={8}>
+                        <Typography variant="body2" gutterBottom>
+                          Guilt Score: <strong>{guiltScoreValue} / 10</strong>
+                        </Typography>
+                        <Slider
+                          id="guilt-score-slider"
+                          value={guiltScoreValue}
+                          min={1}
+                          max={10}
+                          step={1}
+                          marks
+                          valueLabelDisplay="auto"
+                          onChange={(_, v) => setGuiltScoreValue(v as number)}
+                          color="warning"
+                        />
+                      </Grid>
+
+                      <Grid item xs={12}>
+                        <TextField
+                          id="guilt-score-justification"
+                          label="Justification"
+                          multiline
+                          rows={3}
+                          fullWidth
+                          value={guiltJustification}
+                          onChange={(e) => setGuiltJustification(e.target.value)}
+                          placeholder="Describe the observations and evidence supporting this score..."
+                        />
+                      </Grid>
+
+                      <Grid item xs={12}>
+                        <Button
+                          variant="contained"
+                          color="warning"
+                          disabled={!selectedSuspectId || !guiltJustification.trim() || scoreSubmitting}
+                          onClick={handleSubmitGuiltScore}
+                        >
+                          {scoreSubmitting ? 'Submitting...' : 'Submit Score'}
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* ── 2. All Submitted Guilt Scores (read-only) ─────── */}
+              <Typography variant="h6" gutterBottom>
+                Guilt Scores ({guiltScores.length})
+              </Typography>
+              {guiltScores.length === 0 ? (
+                <Typography color="text.secondary" sx={{ mb: 3 }}>
+                  No guilt scores submitted yet.
+                </Typography>
+              ) : (
+                <Grid container spacing={2} sx={{ mb: 3 }}>
+                  {guiltScores.map((gs) => (
+                    <Grid item xs={12} sm={6} key={gs.id}>
+                      <Card variant="outlined">
+                        <CardContent>
+                          <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                            <Typography variant="subtitle2">
+                              {(gs.assigned_by as any)?.full_name || (gs.assigned_by as any)?.username}
+                            </Typography>
+                            <Chip
+                              label={`${gs.score} / 10`}
+                              color={gs.score >= 7 ? 'error' : gs.score >= 4 ? 'warning' : 'success'}
+                              size="small"
+                            />
+                          </Box>
+                          <Typography variant="body2" color="text.secondary">{gs.justification}</Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                            {formatDateTime(gs.assigned_date)}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
+
+              <Divider sx={{ my: 2 }} />
+
+              {/* ── 3. Captain Decision Form ───────────────────────── */}
+              {hasRole('Captain') && (
+                <Card variant="outlined" sx={{ mb: 3, border: '1px solid', borderColor: 'primary.main' }}>
+                  <CardContent>
+                    <Box display="flex" alignItems="center" gap={1} mb={2}>
+                      <Gavel color="primary" />
+                      <Typography variant="h6">Make Captain Decision</Typography>
+                    </Box>
+
+                    {decisionSuccess && (
+                      <Alert severity="success" sx={{ mb: 2 }} onClose={() => setDecisionSuccess(false)}>
+                        Decision recorded successfully!
+                      </Alert>
+                    )}
+                    {decisionError && (
+                      <Alert severity="error" sx={{ mb: 2 }} onClose={() => setDecisionError(null)}>
+                        {decisionError}
+                      </Alert>
+                    )}
+
+                    {guiltScores.length < 2 && (
+                      <Alert severity="warning" sx={{ mb: 2 }}>
+                        Waiting for scores from both Sergeant and Detective before making a decision.
+                      </Alert>
+                    )}
+
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={4}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Suspect</InputLabel>
+                          <Select
+                            id="captain-decision-suspect"
+                            value={captainSuspectId}
+                            label="Suspect"
+                            onChange={(e) => setCaptainSuspectId(e.target.value as number)}
+                          >
+                            {suspectsList
+                              .filter((s) => s.status === 'Arrested')
+                              .map((s) => (
+                                <MenuItem key={s.id} value={s.id}>{s.name || `Suspect #${s.id}`}</MenuItem>
+                              ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+
+                      <Grid item xs={12} sm={4}>
+                        <FormControl fullWidth size="small">
+                          <InputLabel>Decision</InputLabel>
+                          <Select
+                            id="captain-decision-type"
+                            value={captainDecision}
+                            label="Decision"
+                            onChange={(e) => setCaptainDecision(e.target.value as any)}
+                          >
+                            <MenuItem value="Approve Arrest">Approve Arrest</MenuItem>
+                            <MenuItem value="Reject">Reject</MenuItem>
+                            <MenuItem value="Request More Evidence">Request More Evidence</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+
+                      <Grid item xs={12}>
+                        <TextField
+                          id="captain-decision-comments"
+                          label="Comments"
+                          multiline
+                          rows={3}
+                          fullWidth
+                          value={captainComments}
+                          onChange={(e) => setCaptainComments(e.target.value)}
+                          placeholder="Summarise the evidence, statements, and guilt scores that inform this decision..."
+                        />
+                      </Grid>
+
+                      <Grid item xs={12}>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          startIcon={<Gavel />}
+                          disabled={!captainSuspectId || !captainComments.trim() || decisionSubmitting}
+                          onClick={handleSubmitCaptainDecision}
+                        >
+                          {decisionSubmitting ? 'Submitting...' : 'Record Decision'}
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* ── 4. Captain Decisions List ─────────────────────── */}
+              <Typography variant="h6" gutterBottom>
+                Captain Decisions ({captainDecisions.length})
+              </Typography>
+              {captainDecisions.length === 0 ? (
+                <Typography color="text.secondary" sx={{ mb: 3 }}>No decisions recorded yet.</Typography>
+              ) : (
+                <Grid container spacing={2} sx={{ mb: 3 }}>
+                  {captainDecisions.map((dec) => (
+                    <Grid item xs={12} key={dec.id}>
+                      <Card variant="outlined" sx={{
+                        borderColor: dec.decision === 'Approve Arrest' ? 'success.main' :
+                          dec.decision === 'Reject' ? 'error.main' : 'warning.main'
+                      }}>
+                        <CardContent>
+                          <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
+                            <Box>
+                              <Chip
+                                label={dec.decision}
+                                color={dec.decision === 'Approve Arrest' ? 'success' : dec.decision === 'Reject' ? 'error' : 'warning'}
+                                sx={{ mr: 1 }}
+                              />
+                              {dec.requires_chief_approval && (
+                                <Chip
+                                  label={dec.chief_approval === null ? '⏳ Awaiting Chief' : dec.chief_approval ? '✅ Chief Approved' : '❌ Chief Rejected'}
+                                  color={dec.chief_approval === null ? 'default' : dec.chief_approval ? 'success' : 'error'}
+                                  size="small"
+                                />
+                              )}
+                            </Box>
+                            <Typography variant="caption" color="text.secondary">
+                              {formatDateTime(dec.decided_at)}
+                            </Typography>
+                          </Box>
+                          {dec.comments && (
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{dec.comments}</Typography>
+                          )}
+
+                          {/* Police Chief approval buttons */}
+                          {hasRole('Police Chief') && dec.requires_chief_approval && dec.chief_approval === null && (
+                            <Box display="flex" gap={1} mt={1}>
+                              <Button
+                                id={`chief-approve-${dec.id}`}
+                                size="small"
+                                variant="contained"
+                                color="success"
+                                startIcon={<HowToVote />}
+                                disabled={chiefApproving === dec.id}
+                                onClick={() => handleChiefApproval(dec.id, true)}
+                              >
+                                Approve
+                              </Button>
+                              <Button
+                                id={`chief-reject-${dec.id}`}
+                                size="small"
+                                variant="outlined"
+                                color="error"
+                                disabled={chiefApproving === dec.id}
+                                onClick={() => handleChiefApproval(dec.id, false)}
+                              >
+                                Reject
+                              </Button>
+                            </Box>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
+              {chiefError && <Alert severity="error">{chiefError}</Alert>}
             </Box>
           )}
         </Box>
