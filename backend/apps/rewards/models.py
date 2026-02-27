@@ -133,8 +133,11 @@ class Reward(models.Model):
                 from django.utils import timezone
                 delta = timezone.now().date() - self.case.created_date.date()
                 max_days = max(0, delta.days)
-            
             self.amount = calculate_reward_amount(severity, max_days)
+            
+        # Fallback if no case or calculation failed
+        if self.amount is None:
+            self.amount = 5000000  # Default base reward for useful tips
         
         super().save(*args, **kwargs)
 

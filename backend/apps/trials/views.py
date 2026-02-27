@@ -65,7 +65,7 @@ class TrialViewSet(viewsets.ModelViewSet):
                 {'error': 'You can only record verdict for your own trials'},
                 status=status.HTTP_403_FORBIDDEN
             )
-
+            
         if trial.is_complete():
             return Response(
                 {'error': 'Trial verdict has already been recorded'},

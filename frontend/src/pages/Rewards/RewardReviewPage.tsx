@@ -64,8 +64,9 @@ export const RewardReviewPage: React.FC = () => {
             setDialogOpen(false);
             fetchSubmissions(); // refresh list
         } catch (err: any) {
-            console.error(err);
-            alert(err?.response?.data?.error || 'Failed to submit review');
+            console.error('Approval Error:', err?.response?.data || err);
+            const errMsg = err?.response?.data?.error || err?.response?.data?.detail || JSON.stringify(err?.response?.data) || 'Failed to submit review';
+            alert(`Error: ${errMsg}`);
         } finally {
             setSubmitting(false);
         }
