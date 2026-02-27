@@ -35,6 +35,7 @@ import { RewardVerificationPage } from './pages/Rewards/RewardVerificationPage';
 import { PayBillsPage } from './pages/Payments/PayBillsPage';
 import { PaymentCallbackPage } from './pages/Payments/PaymentCallbackPage';
 import { ROUTES } from './constants/routes';
+import { ForensicDoctorDashboardPage } from './pages/ForensicDoctor/ForensicDoctorDashboardPage';
 
 const theme = createTheme({
   palette: {
@@ -277,6 +278,7 @@ const AppRoutes: React.FC = () => {
         <Route path={ROUTES.PAY_CALLBACK} element={<PaymentCallbackPage />} />
         <Route path={ROUTES.ADMIN_USERS} element={<UserManagementPage />} />
         <Route path={ROUTES.ADMIN_ROLES} element={<RoleManagementPage />} />
+        <Route path={ROUTES.FORENSIC_DOCTOR} element={<ForensicDoctorDashboardPage />} />
       </Route>
 
       {/* Default redirect */}

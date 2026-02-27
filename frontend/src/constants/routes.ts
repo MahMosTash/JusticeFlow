@@ -10,6 +10,7 @@ export const ROUTES = {
   CASE_DETAIL: (id: number | string) => `/cases/${id}`,
   CASE_CREATE: '/cases/create',
   COMPLAINTS: '/complaints',
+  FORENSIC_DOCTOR: '/forensic-doctor',
   COMPLAINT_SUBMIT: '/complaints/submit',
   COMPLAINT_DETAIL: (id: number | string) => `/complaints/${id}`,
   EVIDENCE: '/evidence',
