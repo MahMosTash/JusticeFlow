@@ -78,20 +78,58 @@ class Suspect(models.Model):
             return True
         return False
     
-    def get_most_wanted_ranking(self):
-        """
-        Calculate Most Wanted ranking: max(Lj) × max(Di)
-        Where Lj = crime severity (1-4), Di = days under investigation
-        """
+    def get_max_days_and_severity(self):
+        """Helper to get max days (Lj) in open cases and max severity (Di) over all cases."""
+        from django.utils import timezone
+        
+        # Find all suspect records for this person across the system
+        suspects = []
+        if self.user:
+            suspects = Suspect.objects.filter(user=self.user)
+        elif self.national_id:
+            suspects = Suspect.objects.filter(national_id=self.national_id)
+        else:
+            suspects = Suspect.objects.filter(id=self.id)
+            
         severity_map = {
             'Level 3': 1,
             'Level 2': 2,
             'Level 1': 3,
             'Critical': 4,
         }
-        severity_value = severity_map.get(self.case.severity, 1)
-        days = self.get_days_under_investigation()
-        return severity_value * days
+        
+        max_days = 0
+        max_severity = 0
+        today = timezone.now().date()
+        closed_statuses = ['Resolved', 'Closed']
+        
+        for s in suspects:
+            # Check highest crime degree they have EVER done
+            sev = severity_map.get(s.case.severity, 1)
+            if sev > max_severity:
+                max_severity = sev
+                
+            # Check highest days wanted for a crime in an OPEN case
+            if s.case.status not in closed_statuses and s.surveillance_start_date:
+                delta = (today - s.surveillance_start_date).days
+                if delta > max_days:
+                    max_days = delta
+                    
+        return max(0, max_days), max_severity
+
+    def get_most_wanted_ranking(self):
+        """
+        Calculate Most Wanted Ranking scalar: max(Lj) × max(Di)
+        Where Lj = max days in open case, Di = max severity ever.
+        """
+        max_days, max_severity = self.get_max_days_and_severity()
+        return max_days * max_severity
+        
+    def get_reward_amount(self):
+        """
+        Calculate reward prize amount: max(Lj) × max(Di) × 20,000,000
+        """
+        return self.get_most_wanted_ranking() * 20000000
 
 
 class Interrogation(models.Model):

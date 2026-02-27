@@ -30,6 +30,7 @@ export const SuspectFormDialog: React.FC<SuspectFormDialogProps> = ({
         national_id: '',
         phone_number: '',
         notes: '',
+        surveillance_start_date: new Date().toISOString().split('T')[0],
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -55,7 +56,7 @@ export const SuspectFormDialog: React.FC<SuspectFormDialogProps> = ({
                 status: 'Under Investigation',
             });
             onSuspectAdded(newSuspect);
-            setFormData({ name: '', national_id: '', phone_number: '', notes: '' });
+            setFormData({ name: '', national_id: '', phone_number: '', notes: '', surveillance_start_date: new Date().toISOString().split('T')[0] });
             onClose();
         } catch (err: any) {
             console.error('Failed to create suspect:', err);
@@ -109,6 +110,19 @@ export const SuspectFormDialog: React.FC<SuspectFormDialogProps> = ({
                                 name="phone_number"
                                 value={formData.phone_number}
                                 onChange={handleChange}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                fullWidth
+                                label="Investigation Start Date"
+                                name="surveillance_start_date"
+                                type="date"
+                                value={formData.surveillance_start_date}
+                                onChange={handleChange}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
                             />
                         </Grid>
                         <Grid item xs={12}>
