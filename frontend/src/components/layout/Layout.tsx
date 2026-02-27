@@ -34,7 +34,9 @@ import {
   Person,
   VerifiedUser,
   Payment,
+  Science,           
 } from '@mui/icons-material';
+
 import { useAuth } from '@/hooks/useAuth';
 import { usePermissions } from '@/hooks/usePermissions';
 import { ROUTES } from '@/constants/routes';
@@ -123,6 +125,12 @@ export const Layout: React.FC = () => {
       icon: <VerifiedUser />,
       path: ROUTES.REWARD_VERIFY,
       show: permissions.isOfficer() || permissions.isInvestigator() || permissions.isCaptain() || permissions.isPoliceChief(),
+    },
+    {
+      text: 'Forensic Lab',
+      icon: <Science />,
+      path: ROUTES.FORENSIC_DOCTOR,
+      show: permissions.isForensicDoctor(),
     },
   ].filter((item) => item.show);
 
