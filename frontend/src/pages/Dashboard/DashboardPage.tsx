@@ -12,6 +12,7 @@ import { OfficerDashboard } from './OfficerDashboard';
 import { DetectiveDashboard } from './DetectiveDashboard';
 import { InternDashboard } from './InternDashboard';
 import { UserDashboard } from './UserDashboard';
+import { ForensicDoctorDashboard } from './ForensicDoctorDashboard';
 import { Loading } from '@/components/common/Loading';
 
 export const DashboardPage: React.FC = () => {
@@ -46,6 +47,9 @@ export const DashboardPage: React.FC = () => {
     }
     if (permissions.isIntern()) {
       return <InternDashboard />;
+    }
+    if (permissions.isForensicDoctor()) {         // ← new branch
+      return <ForensicDoctorDashboard />;
     }
     return <UserDashboard />;
   };
@@ -104,4 +108,3 @@ export const DashboardPage: React.FC = () => {
     </Box>
   );
 };
-

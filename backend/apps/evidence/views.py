@@ -3,13 +3,13 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
 from django.utils import timezone
 
 from core.permissions import IsForensicDoctor
 from .models import Evidence
 from .serializers import EvidenceSerializer, EvidenceVerificationSerializer
 from apps.accounts.models import User
+
 
 class EvidenceViewSet(viewsets.ModelViewSet):
     serializer_class = EvidenceSerializer
@@ -44,7 +44,6 @@ class EvidenceViewSet(viewsets.ModelViewSet):
     def verify(self, request, pk=None):
         """
         Forensic doctors can verify OR update their review at any time.
-        Removing the one-shot block so doctors can refine comments.
         """
         evidence = self.get_object()
 
@@ -59,7 +58,7 @@ class EvidenceViewSet(viewsets.ModelViewSet):
         )
         serializer.is_valid(raise_exception=True)
 
-        # Resolve doctor by national_id supplied, or fall back to the requesting user
+        # Resolve doctor by national_id if supplied, otherwise use requesting user
         national_id = request.data.get('verified_by_national_id', '').strip()
         doctor = request.user
         if national_id:
@@ -71,41 +70,21 @@ class EvidenceViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-        is_first_verification = evidence.verified_by_forensic_doctor is None
-
         evidence.verified_by_forensic_doctor = doctor
-        evidence.verified_by_national_id = national_id or request.user.national_id
+        evidence.verified_by_national_id = national_id or getattr(request.user, 'national_id', '')
         evidence.verification_date = timezone.now()
         evidence.verification_notes = request.data.get(
             'verification_notes', evidence.verification_notes
         )
         evidence.save()
 
-        # Notify the detective assigned to the case only on first verification
-        # (re-submissions send a lighter "updated" notification)
-        case = evidence.case
-        detective = getattr(case, 'assigned_detective', None)
-        if detective:
-            if is_first_verification:
-                title = 'Biological Evidence Verified'
-                message = (
-                    f'Dr. {doctor.full_name or doctor.username} has verified '
-                    f'biological evidence "{evidence.title}" for case "{case.title}".'
-                )
-            else:
-                title = 'Forensic Review Updated'
-                message = (
-                    f'Dr. {doctor.full_name or doctor.username} has updated their '
-                    f'review of biological evidence "{evidence.title}" for case "{case.title}".'
-                )
-
         return Response(EvidenceSerializer(evidence).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated, IsForensicDoctor])
     def unanswered_biological(self, request):
         """
-        Returns all biological evidence that has NOT yet been reviewed
-        by any forensic doctor.  This is the doctor's primary work queue.
+        Returns all biological evidence not yet reviewed by any forensic doctor.
+        This is the doctor's primary work queue.
         """
         queryset = Evidence.objects.filter(
             evidence_type='biological',

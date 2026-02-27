@@ -89,31 +89,85 @@ class CaseSerializer(serializers.ModelSerializer):
 
 
 class CaseListSerializer(serializers.ModelSerializer):
-    """Lightweight serializer for case lists."""
-    created_by = serializers.StringRelatedField()
-    assigned_detective = serializers.StringRelatedField()
-    
+    assigned_detective_name = serializers.SerializerMethodField()
+    evidence_count = serializers.SerializerMethodField()
+    status_display = serializers.SerializerMethodField()
+    created_by_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Case
         fields = [
-            'id', 'title', 'severity', 'status', 'created_by',
-            'assigned_detective', 'created_date'
+            'id',
+            'case_number',
+            'title',
+            'status',
+            'status_display',
+            'priority',
+            'created_at',
+            'updated_at',
+            'assigned_detective_name',
+            'evidence_count',
+            'created_by_name',
         ]
 
+    def get_assigned_detective_name(self, obj):
+        if obj.assigned_detective:
+            return obj.assigned_detective.get_full_name() or obj.assigned_detective.username
+        return None
 
-class CaseDetailSerializer(CaseSerializer):
-    """Detailed serializer for case with all relationships."""
-    evidence_count = serializers.SerializerMethodField()
-    suspects_count = serializers.SerializerMethodField()
-    
-    class Meta(CaseSerializer.Meta):
-        fields = CaseSerializer.Meta.fields + ['evidence_count', 'suspects_count']
-    
     def get_evidence_count(self, obj):
-        """Get count of evidence items."""
-        return obj.evidence_items.count()
-    
-    def get_suspects_count(self, obj):
-        """Get count of suspects."""
-        return obj.suspects.count()
+        return obj.evidence_set.count()
 
+    def get_status_display(self, obj):
+        return obj.get_status_display()
+
+    def get_created_by_name(self, obj):
+        if obj.created_by:
+            return obj.created_by.get_full_name() or obj.created_by.username
+        return None
+
+
+class CaseDetailSerializer(serializers.ModelSerializer):
+    assigned_detective = UserMinimalSerializer(read_only=True)
+    assigned_detective_id = serializers.PrimaryKeyRelatedField(
+        source='assigned_detective',
+        queryset=__import__('apps.accounts.models', fromlist=['User']).User.objects.all(),
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+    created_by = UserMinimalSerializer(read_only=True)
+    status_display = serializers.SerializerMethodField()
+    priority_display = serializers.SerializerMethodField()
+    evidence_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Case
+        fields = [
+            'id',
+            'case_number',
+            'title',
+            'description',
+            'status',
+            'status_display',
+            'priority',
+            'priority_display',
+            'location',
+            'incident_date',
+            'assigned_detective',
+            'assigned_detective_id',
+            'created_by',
+            'created_at',
+            'updated_at',
+            'evidence_count',
+        ]
+        read_only_fields = ['id', 'case_number', 'created_at', 'updated_at', 'created_by']
+
+    def get_status_display(self, obj):
+        return obj.get_status_display()
+
+    def get_priority_display(self, obj):
+        return obj.get_priority_display()
+
+    def get_evidence_count(self, obj):
+        return obj.evidence_set.count()

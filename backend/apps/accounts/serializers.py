@@ -32,35 +32,56 @@ class RoleAssignmentSerializer(serializers.ModelSerializer):
                   'assigned_by', 'is_active']
         read_only_fields = ['id', 'assigned_at']
 
+class UserMinimalSerializer(serializers.ModelSerializer):
+    """Lightweight serializer used as nested field in other serializers."""
+    full_name = serializers.SerializerMethodField()
+    role_display = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'full_name', 'email', 'role', 'role_display']
+
+    def get_full_name(self, obj):
+        return obj.get_full_name() or obj.username
+
+    def get_role_display(self, obj):
+        return obj.get_role_display() if hasattr(obj, 'get_role_display') else obj.role
 
 class UserSerializer(serializers.ModelSerializer):
-    """Serializer for User model."""
-    roles = serializers.SerializerMethodField()
-    role_ids = serializers.PrimaryKeyRelatedField(
-        queryset=Role.objects.filter(is_active=True),
-        many=True,
-        write_only=True,
-        required=False
-    )
-    
+    """Full user serializer for profile endpoints."""
+    full_name = serializers.SerializerMethodField()
+    role_display = serializers.SerializerMethodField()
+    permissions = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = [
-            'id', 'username', 'email', 'phone_number', 'national_id',
-            'first_name', 'last_name', 'is_active', 'date_joined',
-            'last_login', 'roles', 'role_ids'
+            'id', 'username', 'email', 'first_name', 'last_name',
+            'full_name', 'role', 'role_display', 'badge_number',
+            'phone_number', 'is_active', 'date_joined', 'permissions',
         ]
-        read_only_fields = ['id', 'date_joined', 'last_login']
-        extra_kwargs = {
-            'password': {'write_only': True, 'required': False},
-            'email': {'required': True},
-            'phone_number': {'required': True},
-            'national_id': {'required': True},
-        }
-        
-    def get_roles(self, obj):
-        return RoleSerializer(obj.get_active_roles(), many=True).data
+        read_only_fields = ['id', 'date_joined']
 
+    def get_full_name(self, obj):
+        return obj.get_full_name() or obj.username
+
+    def get_role_display(self, obj):
+        return obj.get_role_display() if hasattr(obj, 'get_role_display') else obj.role
+
+    def get_permissions(self, obj):
+        """Return permission flags for frontend role-based UI."""
+        role = getattr(obj, 'role', '')
+        return {
+            'canViewAllCases':     role in ('admin', 'detective', 'supervisor'),
+            'canCreateCase':       role in ('admin', 'detective', 'supervisor'),
+            'canAssignDetective':  role in ('admin', 'supervisor'),
+            'canManageEvidence':   role in ('admin', 'detective', 'supervisor', 'forensic_doctor'),
+            'canVerifyEvidence':   role in ('forensic_doctor',),
+            'isForensicDoctor':    role == 'forensic_doctor',
+            'isAdmin':             role == 'admin',
+            'isSupervisor':        role == 'supervisor',
+            'isDetective':         role == 'detective',
+        }
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """Serializer for user registration."""
@@ -142,3 +163,4 @@ class UserDetailSerializer(serializers.ModelSerializer):
     def get_roles(self, obj):
         return RoleSerializer(obj.get_active_roles(), many=True).data
 
+EvidenceListSerializer = EvidenceSerializer

@@ -35,7 +35,7 @@ import { RewardVerificationPage } from './pages/Rewards/RewardVerificationPage';
 import { PayBillsPage } from './pages/Payments/PayBillsPage';
 import { PaymentCallbackPage } from './pages/Payments/PaymentCallbackPage';
 import { ROUTES } from './constants/routes';
-import { ForensicDoctorDashboardPage } from './pages/ForensicDoctor/ForensicDoctorDashboardPage';
+import { ForensicDoctorDashboardPage } from './pages/Dashboard/ForensicDoctorDashboardPage';
 
 const theme = createTheme({
   palette: {

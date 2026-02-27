@@ -38,3 +38,8 @@ class EvidenceVerificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Evidence
         fields = ['verified_by_national_id', 'verification_notes']
+
+
+# ─── Backward-compatibility alias ────────────────────────────────────────────
+# detective_board/serializers.py imports this name - keep it in sync
+EvidenceListSerializer = EvidenceSerializer
