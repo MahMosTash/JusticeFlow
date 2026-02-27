@@ -586,11 +586,17 @@ export const CaseDetailPage: React.FC = () => {
                             label="Arrested Suspect"
                             onChange={(e) => setSelectedSuspectId(e.target.value as number)}
                           >
-                            {suspectsList
-                              .filter((s) => s.status === 'Arrested')
-                              .map((s) => (
-                                <MenuItem key={s.id} value={s.id}>{s.name || `Suspect #${s.id}`}</MenuItem>
-                              ))}
+                            {suspectsList.length === 0 && (
+                              <MenuItem disabled>No suspects in this case yet</MenuItem>
+                            )}
+                            {suspectsList.map((s) => (
+                              <MenuItem key={s.id} value={s.id}>
+                                {s.name || `Suspect #${s.id}`}
+                                <Chip label={s.status} size="small" sx={{ ml: 1 }}
+                                  color={s.status === 'Arrested' ? 'error' : s.status === 'Cleared' ? 'success' : 'default'}
+                                />
+                              </MenuItem>
+                            ))}
                           </Select>
                         </FormControl>
                       </Grid>
@@ -713,11 +719,17 @@ export const CaseDetailPage: React.FC = () => {
                             label="Suspect"
                             onChange={(e) => setCaptainSuspectId(e.target.value as number)}
                           >
-                            {suspectsList
-                              .filter((s) => s.status === 'Arrested')
-                              .map((s) => (
-                                <MenuItem key={s.id} value={s.id}>{s.name || `Suspect #${s.id}`}</MenuItem>
-                              ))}
+                            {suspectsList.length === 0 && (
+                              <MenuItem disabled>No suspects in this case yet</MenuItem>
+                            )}
+                            {suspectsList.map((s) => (
+                              <MenuItem key={s.id} value={s.id}>
+                                {s.name || `Suspect #${s.id}`}
+                                <Chip label={s.status} size="small" sx={{ ml: 1 }}
+                                  color={s.status === 'Arrested' ? 'error' : s.status === 'Cleared' ? 'success' : 'default'}
+                                />
+                              </MenuItem>
+                            ))}
                           </Select>
                         </FormControl>
                       </Grid>
