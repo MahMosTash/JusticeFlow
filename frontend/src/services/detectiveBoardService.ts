@@ -4,15 +4,23 @@
 import api from './api';
 import { DetectiveBoard } from '@/types/api';
 
+export interface BoardConnection {
+  source_evidence_id: number;
+  target_evidence_id: number;
+  connection_type: string;
+  notes?: string;
+}
+
 export const detectiveBoardService = {
   /**
    * Get detective board for a case
    */
-  getDetectiveBoard: async (caseId: number): Promise<DetectiveBoard> => {
+  getDetectiveBoard: async (caseId: number): Promise<DetectiveBoard | null> => {
     const response = await api.get<{ results: DetectiveBoard[] }>('/detective-board/', {
       params: { case: caseId },
     });
-    return response.data.results[0] || null;
+    const results = response.data.results ?? response.data;
+    return Array.isArray(results) && results.length > 0 ? results[0] : null;
   },
 
   /**
@@ -24,30 +32,25 @@ export const detectiveBoardService = {
   }): Promise<DetectiveBoard> => {
     const existing = await detectiveBoardService.getDetectiveBoard(data.case);
     if (existing) {
-      const response = await api.patch<DetectiveBoard>(`/detective-board/${existing.id}/`, data);
-      return response.data;
-    } else {
-      const response = await api.post<DetectiveBoard>('/detective-board/', data);
+      const response = await api.patch<DetectiveBoard>(`/detective-board/${existing.id}/`, {
+        board_data: data.board_data,
+      });
       return response.data;
     }
+    // Use case_id for creation
+    const response = await api.post<DetectiveBoard>('/detective-board/', {
+      case_id: data.case,
+      board_data: data.board_data,
+    });
+    return response.data;
   },
+
 
   /**
    * Add connection between evidence
    */
-  addConnection: async (
-    boardId: number,
-    data: {
-      source_evidence_id: number;
-      target_evidence_id: number;
-      connection_type: string;
-      notes?: string;
-    }
-  ): Promise<DetectiveBoard> => {
-    const response = await api.post<DetectiveBoard>(
-      `/detective-board/${boardId}/add_connection/`,
-      data
-    );
+  addConnection: async (boardId: number, data: BoardConnection): Promise<any> => {
+    const response = await api.post(`/detective-board/${boardId}/add_connection/`, data);
     return response.data;
   },
 
@@ -89,4 +92,3 @@ export const detectiveBoardService = {
     return response.data;
   },
 };
-

@@ -6,7 +6,7 @@ from apps.detective_board.models import DetectiveBoard, BoardEvidenceConnection
 from apps.accounts.serializers import UserDetailSerializer
 from apps.cases.serializers import CaseListSerializer
 from apps.evidence.serializers import EvidenceListSerializer
-
+from apps.cases.models import Case
 
 class BoardEvidenceConnectionSerializer(serializers.ModelSerializer):
     """Serializer for BoardEvidenceConnection."""
@@ -23,20 +23,22 @@ class BoardEvidenceConnectionSerializer(serializers.ModelSerializer):
 
 
 class DetectiveBoardSerializer(serializers.ModelSerializer):
-    """Serializer for DetectiveBoard model."""
     case = CaseListSerializer(read_only=True)
+    case_id = serializers.PrimaryKeyRelatedField(
+        queryset=Case.objects.all(), source='case', write_only=True
+    )
     detective = UserDetailSerializer(read_only=True)
     last_modified_by = UserDetailSerializer(read_only=True)
     connections = BoardEvidenceConnectionSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = DetectiveBoard
         fields = [
-            'id', 'case', 'detective', 'board_data', 'last_modified',
+            'id', 'case', 'case_id', 'detective', 'board_data', 'last_modified',
             'last_modified_by', 'connections'
         ]
         read_only_fields = ['id', 'detective', 'last_modified', 'last_modified_by']
-    
+
     def create(self, validated_data):
         """Create board and set detective."""
         validated_data['detective'] = self.context['request'].user
