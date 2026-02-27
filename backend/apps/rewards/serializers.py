@@ -32,7 +32,8 @@ class RewardSubmissionCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = RewardSubmission
-        fields = ['case', 'information']
+        fields = ['id', 'case', 'information']
+        read_only_fields = ['id']
     
     def create(self, validated_data):
         """Create submission and set submitted_by."""

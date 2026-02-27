@@ -1,85 +1,76 @@
-/**
- * Reward service
- */
 import api from './api';
-import { RewardSubmission, Reward, PaginatedResponse } from '@/types/api';
+import { User, Case } from '@/types/api';
+
+export interface RewardSubmission {
+  id: number;
+  submitted_by: User;
+  case: Case | null;
+  information: string;
+  status: 'Pending' | 'Under Review' | 'Approved' | 'Rejected';
+  reviewed_by_officer?: User | null;
+  reviewed_by_detective?: User | null;
+  review_comments?: string;
+  submitted_date: string;
+  updated_date: string;
+}
+
+export interface Reward {
+  id: number;
+  submission: RewardSubmission;
+  case: Case | null;
+  amount: number;
+  reward_code: string;
+  status: 'Pending' | 'Claimed';
+  claimed_date?: string | null;
+  claimed_at_location?: string;
+  created_date: string;
+  created_by: User;
+}
+
+export interface RewardList {
+  id: number;
+  reward_code: string;
+  amount: number;
+  status: string;
+  submitted_by: string;
+  created_date: string;
+}
 
 export const rewardService = {
-  /**
-   * Get reward submissions
-   */
-  getSubmissions: async (params?: {
-    status?: string;
-    page?: number;
-    page_size?: number;
-  }): Promise<PaginatedResponse<RewardSubmission>> => {
-    const response = await api.get<PaginatedResponse<RewardSubmission>>(
-      '/rewards/submissions/',
-      { params }
-    );
+  // Submissions
+  getSubmissions: async () => {
+    const response = await api.get('/rewards/submissions/');
     return response.data;
   },
 
-  /**
-   * Submit reward information
-   */
-  submitInformation: async (data: {
-    case?: number;
-    information: string;
-  }): Promise<RewardSubmission> => {
-    const response = await api.post<RewardSubmission>('/rewards/submissions/', data);
+  submitInformation: async (payload: { case?: number; information: string }) => {
+    const response = await api.post('/rewards/submissions/', payload);
     return response.data;
   },
 
-  /**
-   * Police Officer review submission
-   */
-  reviewAsOfficer: async (
-    id: number,
-    action: 'approve' | 'reject',
-    comments: string
-  ): Promise<RewardSubmission> => {
-    const response = await api.post<RewardSubmission>(
-      `/rewards/submissions/${id}/review_as_officer/`,
-      { action, comments }
-    );
+  reviewAsOfficer: async (id: number, payload: { action: 'approve' | 'reject'; comments?: string }) => {
+    const response = await api.post(`/rewards/submissions/${id}/review_as_officer/`, payload);
     return response.data;
   },
 
-  /**
-   * Detective review and approve submission
-   */
-  reviewAsDetective: async (
-    id: number,
-    action: 'approve' | 'reject',
-    comments: string
-  ): Promise<{ submission: RewardSubmission; reward?: Reward }> => {
-    const response = await api.post<{ submission: RewardSubmission; reward?: Reward }>(
-      `/rewards/submissions/${id}/review_as_detective/`,
-      { action, comments }
-    );
+  reviewAsDetective: async (id: number, payload: { action: 'approve' | 'reject'; comments?: string }) => {
+    const response = await api.post(`/rewards/submissions/${id}/review_as_detective/`, payload);
     return response.data;
   },
 
-  /**
-   * Get rewards
-   */
-  getRewards: async (params?: {
-    status?: string;
-    reward_code?: string;
-    page?: number;
-    page_size?: number;
-  }): Promise<PaginatedResponse<Reward>> => {
-    const response = await api.get<PaginatedResponse<Reward>>('/rewards/', { params });
+  // Rewards
+  getRewards: async (params?: { status?: string; reward_code?: string }) => {
+    const response = await api.get('/rewards/', { params });
     return response.data;
   },
 
-  /**
-   * Claim reward
-   */
-  claimReward: async (id: number, data: { reward_code: string; location: string }): Promise<Reward> => {
-    const response = await api.post<Reward>(`/rewards/${id}/claim/`, data);
+  verifyRewardCode: async (payload: { reward_code: string; national_id: string }) => {
+    const response = await api.post('/rewards/verify/', payload);
     return response.data;
   },
+
+  claimReward: async (id: number, payload: { reward_code: string; location: string }) => {
+    const response = await api.post(`/rewards/${id}/claim/`, payload);
+    return response.data;
+  }
 };
-

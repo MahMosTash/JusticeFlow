@@ -221,3 +221,33 @@ class RewardViewSet(viewsets.ReadOnlyModelViewSet):
         
         return Response(RewardSerializer(reward).data)
 
+    @action(detail=False, methods=['post'], permission_classes=[IsPoliceOfficer])
+    def verify(self, request):
+        """Verify reward code against user's national ID."""
+        reward_code = request.data.get('reward_code')
+        national_id = request.data.get('national_id')
+        
+        if not reward_code or not national_id:
+            return Response(
+                {'error': 'Both reward_code and national_id are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        try:
+            reward = Reward.objects.get(reward_code=reward_code)
+        except Reward.DoesNotExist:
+            return Response(
+                {'error': 'Invalid reward code'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+            
+        # Check if the national ID matches the submitted_by user
+        user = reward.submission.submitted_by
+        if user.national_id != national_id:
+            return Response(
+                {'error': 'National ID does not match this reward code'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        return Response(RewardSerializer(reward).data)
+
