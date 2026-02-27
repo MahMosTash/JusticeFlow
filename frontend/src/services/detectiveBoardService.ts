@@ -37,9 +37,14 @@ export const detectiveBoardService = {
       });
       return response.data;
     }
-    const response = await api.post<DetectiveBoard>('/detective-board/', data);
+    // Use case_id for creation
+    const response = await api.post<DetectiveBoard>('/detective-board/', {
+      case_id: data.case,
+      board_data: data.board_data,
+    });
     return response.data;
   },
+
 
   /**
    * Add connection between evidence
