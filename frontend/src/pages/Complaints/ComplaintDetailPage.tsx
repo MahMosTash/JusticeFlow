@@ -161,163 +161,431 @@ export const ComplaintDetailPage: React.FC = () => {
   const isAwaitingIntern = complaint.status === 'Pending' || complaint.status === 'Rejected';
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box display="flex" alignItems="center" mb={3}>
-        <Button startIcon={<ArrowBack />} onClick={() => navigate(ROUTES.COMPLAINTS)}>
-          Back to Complaints
-        </Button>
-      </Box>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: 'var(--gradient-page-bg)',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'var(--radial-glow-combined)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        },
+      }}
+    >
+      <Container maxWidth="lg" sx={{ py: 6, position: 'relative', zIndex: 1 }}>
+        <Box display="flex" alignItems="center" mb={3}>
+          <Button
+            startIcon={<ArrowBack />}
+            onClick={() => navigate(ROUTES.COMPLAINTS)}
+            sx={{
+              color: 'var(--text-secondary)',
+              '&:hover': {
+                color: 'var(--accent-primary)',
+                background: 'var(--accent-primary-light)',
+              },
+            }}
+          >
+            Back to Complaints
+          </Button>
+        </Box>
 
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          {user?.id === complaint.submitted_by?.id && isAwaitingUser && complaint.review_comments && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              <AlertTitle>Action Required: Complaint Returned</AlertTitle>
-              {complaint.review_comments}
-            </Alert>
-          )}
+        <Card
+          className="glass-effect"
+          sx={{
+            mb: 3,
+            background: 'var(--glass-bg)',
+            border: '1px solid var(--glass-border)',
+            borderRadius: 'var(--radius-lg)',
+            boxShadow: 'var(--shadow-lg)',
+          }}
+        >
+          <CardContent sx={{ p: 3 }}>
+            {user?.id === complaint.submitted_by?.id && isAwaitingUser && complaint.review_comments && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                <AlertTitle>Action Required: Complaint Returned</AlertTitle>
+                {complaint.review_comments}
+              </Alert>
+            )}
 
-          <Box display="flex" justifyContent="space-between" alignItems="start" mb={2}>
-            <Box>
-              <Typography variant="h4" component="h1" gutterBottom>
-                {complaint.title}
-              </Typography>
-              <Box display="flex" gap={1} mb={2}>
-                <Chip
-                  label={complaint.status}
-                  color={getStatusColor(complaint.status)}
-                />
-                <Chip label={`Submission #${complaint.submission_count}`} />
+            <Box display="flex" justifyContent="space-between" alignItems="start" mb={2} flexWrap="wrap" gap={2}>
+              <Box>
+                <Typography
+                  variant="h1"
+                  component="h1"
+                  sx={{
+                    fontSize: 'var(--heading-h1-size)',
+                    fontWeight: 'var(--heading-h1-weight)',
+                    color: 'var(--text-primary)',
+                    mb: 2,
+                  }}
+                >
+                  {complaint.title}
+                </Typography>
+                <Box display="flex" gap={1} mb={2}>
+                  <Chip
+                    label={complaint.status}
+                    color={getStatusColor(complaint.status)}
+                    sx={{
+                      fontWeight: 'var(--font-weight-medium)',
+                      fontSize: 'var(--label-base-size)',
+                    }}
+                  />
+                  <Chip
+                    label={`Submission #${complaint.submission_count}`}
+                    sx={{
+                      fontWeight: 'var(--font-weight-medium)',
+                      fontSize: 'var(--label-base-size)',
+                    }}
+                  />
+                </Box>
+              </Box>
+
+              {/* Workflow Action Buttons */}
+              <Box display="flex" gap={1} flexWrap="wrap">
+                {permissions.isIntern() && isAwaitingIntern && (
+                  <>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={() => openActionDialog('return')}
+                      sx={{
+                        borderColor: 'var(--accent-error)',
+                        color: 'var(--accent-error)',
+                        '&:hover': {
+                          borderColor: 'var(--accent-error)',
+                          background: 'var(--error-bg)',
+                        },
+                      }}
+                    >
+                      Return to Complainant
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => openActionDialog('forward')}
+                      sx={{
+                        background: 'var(--gradient-accent)',
+                        color: 'var(--text-primary)',
+                        boxShadow: 'var(--button-shadow)',
+                        '&:hover': {
+                          background: 'var(--gradient-accent-hover)',
+                          boxShadow: 'var(--button-shadow-hover)',
+                        },
+                      }}
+                    >
+                      Forward to Officer
+                    </Button>
+                  </>
+                )}
+                {permissions.isPoliceOfficer() && complaint.status === 'Under Review' && (
+                  <>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={() => openActionDialog('reject')}
+                      sx={{
+                        borderColor: 'var(--accent-error)',
+                        color: 'var(--accent-error)',
+                        '&:hover': {
+                          borderColor: 'var(--accent-error)',
+                          background: 'var(--error-bg)',
+                        },
+                      }}
+                    >
+                      Reject back to Intern
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="success"
+                      onClick={() => openActionDialog('approve')}
+                      sx={{
+                        background: 'var(--gradient-accent)',
+                        color: 'var(--text-primary)',
+                        boxShadow: 'var(--button-shadow)',
+                        '&:hover': {
+                          background: 'var(--gradient-accent-hover)',
+                          boxShadow: 'var(--button-shadow-hover)',
+                        },
+                      }}
+                    >
+                      Approve & Create Case
+                    </Button>
+                  </>
+                )}
+                {user?.id === complaint.submitted_by?.id && isAwaitingUser && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => openActionDialog('resubmit')}
+                    sx={{
+                      background: 'var(--gradient-accent)',
+                      color: 'var(--text-primary)',
+                      boxShadow: 'var(--button-shadow)',
+                      '&:hover': {
+                        background: 'var(--gradient-accent-hover)',
+                        boxShadow: 'var(--button-shadow-hover)',
+                      },
+                    }}
+                  >
+                    Edit & Resubmit
+                  </Button>
+                )}
               </Box>
             </Box>
 
-            {/* Workflow Action Buttons */}
-            <Box display="flex" gap={1}>
-              {permissions.isIntern() && isAwaitingIntern && (
-                <>
-                  <Button variant="outlined" color="error" onClick={() => openActionDialog('return')}>
-                    Return to Complainant
-                  </Button>
-                  <Button variant="contained" color="primary" onClick={() => openActionDialog('forward')}>
-                    Forward to Officer
-                  </Button>
-                </>
-              )}
-              {permissions.isPoliceOfficer() && complaint.status === 'Under Review' && (
-                <>
-                  <Button variant="outlined" color="error" onClick={() => openActionDialog('reject')}>
-                    Reject back to Intern
-                  </Button>
-                  <Button variant="contained" color="success" onClick={() => openActionDialog('approve')}>
-                    Approve & Create Case
-                  </Button>
-                </>
-              )}
-              {user?.id === complaint.submitted_by?.id && isAwaitingUser && (
-                <Button variant="contained" color="primary" onClick={() => openActionDialog('resubmit')}>
-                  Edit & Resubmit
-                </Button>
-              )}
-            </Box>
-          </Box>
+            <Typography
+              variant="body1"
+              paragraph
+              sx={{
+                fontSize: 'var(--body-large-size)',
+                color: 'var(--text-primary)',
+                lineHeight: 'var(--line-height-relaxed)',
+              }}
+            >
+              {complaint.description}
+            </Typography>
 
-          <Typography variant="body1" paragraph>
-            {complaint.description}
-          </Typography>
+            <Divider sx={{ my: 2, borderColor: 'var(--glass-border)' }} />
 
-          <Divider sx={{ my: 2 }} />
-
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="body2" color="text.secondary">
-                Submitted By
-              </Typography>
-              <Typography variant="body1">
-                {complaint.submitted_by?.full_name || complaint.submitted_by?.username}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="body2" color="text.secondary">
-                Created Date
-              </Typography>
-              <Typography variant="body1">{formatDateTime(complaint.created_date)}</Typography>
-            </Grid>
-            {complaint.reviewed_by_intern && (
+            <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                <Typography variant="body2" color="text.secondary">
-                  Reviewed by Intern
-                </Typography>
-                <Typography variant="body1">
-                  {complaint.reviewed_by_intern.full_name || complaint.reviewed_by_intern.username}
-                </Typography>
-              </Grid>
-            )}
-            {complaint.reviewed_by_officer && (
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body2" color="text.secondary">
-                  Reviewed by Officer
-                </Typography>
-                <Typography variant="body1">
-                  {complaint.reviewed_by_officer.full_name || complaint.reviewed_by_officer.username}
-                </Typography>
-              </Grid>
-            )}
-            {complaint.review_comments && (
-              <Grid item xs={12}>
-                <Typography variant="body2" color="text.secondary">
-                  Review Comments
-                </Typography>
-                <Typography variant="body1">{complaint.review_comments}</Typography>
-              </Grid>
-            )}
-            {complaint.case && (
-              <Grid item xs={12}>
-                <Typography variant="body2" color="text.secondary">
-                  Related Case
-                </Typography>
-                <Button
-                  variant="text"
-                  onClick={() => navigate(ROUTES.CASE_DETAIL(complaint.case!.id))}
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: 'var(--label-base-size)',
+                    color: 'var(--text-secondary)',
+                    mb: 0.5,
+                  }}
                 >
-                  Case #{complaint.case.id}: {complaint.case.title}
-                </Button>
+                  Submitted By
+                </Typography>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontSize: 'var(--body-base-size)',
+                    color: 'var(--text-primary)',
+                  }}
+                >
+                  {complaint.submitted_by?.full_name || complaint.submitted_by?.username}
+                </Typography>
               </Grid>
-            )}
-          </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: 'var(--label-base-size)',
+                    color: 'var(--text-secondary)',
+                    mb: 0.5,
+                  }}
+                >
+                  Created Date
+                </Typography>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontSize: 'var(--body-base-size)',
+                    color: 'var(--text-primary)',
+                  }}
+                >
+                  {formatDateTime(complaint.created_date)}
+                </Typography>
+              </Grid>
+              {complaint.reviewed_by_intern && (
+                <Grid item xs={12} sm={6}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontSize: 'var(--label-base-size)',
+                      color: 'var(--text-secondary)',
+                      mb: 0.5,
+                    }}
+                  >
+                    Reviewed by Intern
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontSize: 'var(--body-base-size)',
+                      color: 'var(--text-primary)',
+                    }}
+                  >
+                    {complaint.reviewed_by_intern.full_name || complaint.reviewed_by_intern.username}
+                  </Typography>
+                </Grid>
+              )}
+              {complaint.reviewed_by_officer && (
+                <Grid item xs={12} sm={6}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontSize: 'var(--label-base-size)',
+                      color: 'var(--text-secondary)',
+                      mb: 0.5,
+                    }}
+                  >
+                    Reviewed by Officer
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontSize: 'var(--body-base-size)',
+                      color: 'var(--text-primary)',
+                    }}
+                  >
+                    {complaint.reviewed_by_officer.full_name || complaint.reviewed_by_officer.username}
+                  </Typography>
+                </Grid>
+              )}
+              {complaint.review_comments && (
+                <Grid item xs={12}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontSize: 'var(--label-base-size)',
+                      color: 'var(--text-secondary)',
+                      mb: 0.5,
+                    }}
+                  >
+                    Review Comments
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontSize: 'var(--body-base-size)',
+                      color: 'var(--text-primary)',
+                    }}
+                  >
+                    {complaint.review_comments}
+                  </Typography>
+                </Grid>
+              )}
+              {complaint.case && (
+                <Grid item xs={12}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontSize: 'var(--label-base-size)',
+                      color: 'var(--text-secondary)',
+                      mb: 0.5,
+                    }}
+                  >
+                    Related Case
+                  </Typography>
+                  <Button
+                    variant="text"
+                    onClick={() => navigate(ROUTES.CASE_DETAIL(complaint.case!.id))}
+                    sx={{
+                      color: 'var(--accent-primary)',
+                      '&:hover': {
+                        background: 'var(--accent-primary-light)',
+                      },
+                    }}
+                  >
+                    Case #{complaint.case.id}: {complaint.case.title}
+                  </Button>
+                </Grid>
+              )}
+            </Grid>
 
-          {complaint.reviews && complaint.reviews.length > 0 && (
-            <Box mt={3}>
-              <Typography variant="h6" gutterBottom>
-                Review History
-              </Typography>
-              {complaint.reviews.map((review) => (
-                <Paper key={review.id} sx={{ p: 2, mb: 2 }}>
-                  <Typography variant="subtitle2">
-                    {review.reviewer.full_name || review.reviewer.username} - {review.action}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {formatDateTime(review.reviewed_at)}
-                  </Typography>
-                  {review.comments && (
-                    <Typography variant="body2" sx={{ mt: 1 }}>
-                      {review.comments}
+            {complaint.reviews && complaint.reviews.length > 0 && (
+              <Box mt={3}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontSize: 'var(--heading-h3-size)',
+                    fontWeight: 'var(--heading-h3-weight)',
+                    color: 'var(--text-primary)',
+                    mb: 2,
+                  }}
+                >
+                  Review History
+                </Typography>
+                {complaint.reviews.map((review) => (
+                  <Paper
+                    key={review.id}
+                    className="glass-effect"
+                    sx={{
+                      p: 2,
+                      mb: 2,
+                      background: 'var(--glass-bg)',
+                      border: '1px solid var(--glass-border)',
+                      borderRadius: 'var(--radius-md)',
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontSize: 'var(--heading-h5-size)',
+                        fontWeight: 'var(--font-weight-semibold)',
+                        color: 'var(--text-primary)',
+                      }}
+                    >
+                      {review.reviewer.full_name || review.reviewer.username} - {review.action}
                     </Typography>
-                  )}
-                </Paper>
-              ))}
-            </Box>
-          )}
-        </CardContent>
-      </Card>
-      <Dialog open={actionDialogOpen} onClose={() => !isSubmittingAction && setActionDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'var(--text-secondary)',
+                        fontSize: 'var(--body-base-size)',
+                        mt: 0.5,
+                      }}
+                    >
+                      {formatDateTime(review.reviewed_at)}
+                    </Typography>
+                    {review.comments && (
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: 'var(--text-primary)',
+                          fontSize: 'var(--body-base-size)',
+                          mt: 1,
+                        }}
+                      >
+                        {review.comments}
+                      </Typography>
+                    )}
+                  </Paper>
+                ))}
+              </Box>
+            )}
+          </CardContent>
+        </Card>
+      <Dialog
+        open={actionDialogOpen}
+        onClose={() => !isSubmittingAction && setActionDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            background: 'var(--glass-bg)',
+            border: '1px solid var(--glass-border)',
+            borderRadius: 'var(--radius-lg)',
+            boxShadow: 'var(--shadow-xl)',
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontSize: 'var(--heading-h3-size)',
+            fontWeight: 'var(--heading-h3-weight)',
+            color: 'var(--text-primary)',
+            borderBottom: '1px solid var(--glass-border)',
+          }}
+        >
           {actionType === 'return' ? 'Return Complaint to User' : ''}
           {actionType === 'forward' ? 'Forward Complaint to Officer' : ''}
           {actionType === 'approve' ? 'Approve & Verify Case Creation' : ''}
           {actionType === 'reject' ? 'Reject Complaint back to Intern' : ''}
           {actionType === 'resubmit' ? 'Edit & Resubmit Complaint' : ''}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ mt: 2 }}>
           {actionType === 'resubmit' ? (
             <>
               <TextField
@@ -330,7 +598,31 @@ export const ComplaintDetailPage: React.FC = () => {
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
                 required
-                sx={{ mb: 2, mt: 1 }}
+                sx={{
+                  mb: 2,
+                  mt: 1,
+                  '& .MuiOutlinedInput-root': {
+                    background: 'var(--input-bg)',
+                    borderRadius: 'var(--radius-md)',
+                    color: 'var(--text-primary)',
+                    '& fieldset': {
+                      borderColor: 'var(--glass-border)',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'var(--accent-primary)',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'var(--accent-primary)',
+                      boxShadow: 'var(--shadow-glow)',
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: 'var(--text-secondary)',
+                    '&.Mui-focused': {
+                      color: 'var(--accent-primary)',
+                    },
+                  },
+                }}
               />
               <TextField
                 margin="dense"
@@ -343,6 +635,29 @@ export const ComplaintDetailPage: React.FC = () => {
                 value={editDescription}
                 onChange={(e) => setEditDescription(e.target.value)}
                 required
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    background: 'var(--input-bg)',
+                    borderRadius: 'var(--radius-md)',
+                    color: 'var(--text-primary)',
+                    '& fieldset': {
+                      borderColor: 'var(--glass-border)',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'var(--accent-primary)',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'var(--accent-primary)',
+                      boxShadow: 'var(--shadow-glow)',
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: 'var(--text-secondary)',
+                    '&.Mui-focused': {
+                      color: 'var(--accent-primary)',
+                    },
+                  },
+                }}
               />
             </>
           ) : actionType === 'approve' ? (
@@ -357,7 +672,31 @@ export const ComplaintDetailPage: React.FC = () => {
                 value={caseTitle}
                 onChange={(e) => setCaseTitle(e.target.value)}
                 required
-                sx={{ mb: 2, mt: 1 }}
+                sx={{
+                  mb: 2,
+                  mt: 1,
+                  '& .MuiOutlinedInput-root': {
+                    background: 'var(--input-bg)',
+                    borderRadius: 'var(--radius-md)',
+                    color: 'var(--text-primary)',
+                    '& fieldset': {
+                      borderColor: 'var(--glass-border)',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'var(--accent-primary)',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'var(--accent-primary)',
+                      boxShadow: 'var(--shadow-glow)',
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: 'var(--text-secondary)',
+                    '&.Mui-focused': {
+                      color: 'var(--accent-primary)',
+                    },
+                  },
+                }}
               />
               <TextField
                 margin="dense"
@@ -370,9 +709,58 @@ export const ComplaintDetailPage: React.FC = () => {
                 value={caseDescription}
                 onChange={(e) => setCaseDescription(e.target.value)}
                 required
-                sx={{ mb: 2 }}
+                sx={{
+                  mb: 2,
+                  '& .MuiOutlinedInput-root': {
+                    background: 'var(--input-bg)',
+                    borderRadius: 'var(--radius-md)',
+                    color: 'var(--text-primary)',
+                    '& fieldset': {
+                      borderColor: 'var(--glass-border)',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'var(--accent-primary)',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'var(--accent-primary)',
+                      boxShadow: 'var(--shadow-glow)',
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: 'var(--text-secondary)',
+                    '&.Mui-focused': {
+                      color: 'var(--accent-primary)',
+                    },
+                  },
+                }}
               />
-              <FormControl fullWidth sx={{ mb: 2 }}>
+              <FormControl
+                fullWidth
+                sx={{
+                  mb: 2,
+                  '& .MuiOutlinedInput-root': {
+                    background: 'var(--input-bg)',
+                    borderRadius: 'var(--radius-md)',
+                    color: 'var(--text-primary)',
+                    '& fieldset': {
+                      borderColor: 'var(--glass-border)',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'var(--accent-primary)',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'var(--accent-primary)',
+                      boxShadow: 'var(--shadow-glow)',
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: 'var(--text-secondary)',
+                    '&.Mui-focused': {
+                      color: 'var(--accent-primary)',
+                    },
+                  },
+                }}
+              >
                 <InputLabel id="severity-label">Case Severity</InputLabel>
                 <Select
                   labelId="severity-label"
@@ -395,6 +783,29 @@ export const ComplaintDetailPage: React.FC = () => {
                     InputLabelProps={{ shrink: true }}
                     value={caseIncidentDate}
                     onChange={(e) => setCaseIncidentDate(e.target.value)}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        background: 'var(--input-bg)',
+                        borderRadius: 'var(--radius-md)',
+                        color: 'var(--text-primary)',
+                        '& fieldset': {
+                          borderColor: 'var(--glass-border)',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'var(--accent-primary)',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: 'var(--accent-primary)',
+                          boxShadow: 'var(--shadow-glow)',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: 'var(--text-secondary)',
+                        '&.Mui-focused': {
+                          color: 'var(--accent-primary)',
+                        },
+                      },
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -405,6 +816,29 @@ export const ComplaintDetailPage: React.FC = () => {
                     InputLabelProps={{ shrink: true }}
                     value={caseIncidentTime}
                     onChange={(e) => setCaseIncidentTime(e.target.value)}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        background: 'var(--input-bg)',
+                        borderRadius: 'var(--radius-md)',
+                        color: 'var(--text-primary)',
+                        '& fieldset': {
+                          borderColor: 'var(--glass-border)',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'var(--accent-primary)',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: 'var(--accent-primary)',
+                          boxShadow: 'var(--shadow-glow)',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: 'var(--text-secondary)',
+                        '&.Mui-focused': {
+                          color: 'var(--accent-primary)',
+                        },
+                      },
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -413,6 +847,29 @@ export const ComplaintDetailPage: React.FC = () => {
                     label="Incident Location"
                     value={caseIncidentLocation}
                     onChange={(e) => setCaseIncidentLocation(e.target.value)}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        background: 'var(--input-bg)',
+                        borderRadius: 'var(--radius-md)',
+                        color: 'var(--text-primary)',
+                        '& fieldset': {
+                          borderColor: 'var(--glass-border)',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'var(--accent-primary)',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: 'var(--accent-primary)',
+                          boxShadow: 'var(--shadow-glow)',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: 'var(--text-secondary)',
+                        '&.Mui-focused': {
+                          color: 'var(--accent-primary)',
+                        },
+                      },
+                    }}
                   />
                 </Grid>
               </Grid>
@@ -427,6 +884,29 @@ export const ComplaintDetailPage: React.FC = () => {
                 variant="outlined"
                 value={actionComments}
                 onChange={(e) => setActionComments(e.target.value)}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    background: 'var(--input-bg)',
+                    borderRadius: 'var(--radius-md)',
+                    color: 'var(--text-primary)',
+                    '& fieldset': {
+                      borderColor: 'var(--glass-border)',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'var(--accent-primary)',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'var(--accent-primary)',
+                      boxShadow: 'var(--shadow-glow)',
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: 'var(--text-secondary)',
+                    '&.Mui-focused': {
+                      color: 'var(--accent-primary)',
+                    },
+                  },
+                }}
               />
             </>
           ) : (
@@ -443,12 +923,45 @@ export const ComplaintDetailPage: React.FC = () => {
               value={actionComments}
               onChange={(e) => setActionComments(e.target.value)}
               required={actionType === 'return' || actionType === 'reject'}
-              sx={{ mt: 1 }}
+              sx={{
+                mt: 1,
+                '& .MuiOutlinedInput-root': {
+                  background: 'var(--input-bg)',
+                  borderRadius: 'var(--radius-md)',
+                  color: 'var(--text-primary)',
+                  '& fieldset': {
+                    borderColor: 'var(--glass-border)',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: 'var(--accent-primary)',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'var(--accent-primary)',
+                    boxShadow: 'var(--shadow-glow)',
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: 'var(--text-secondary)',
+                  '&.Mui-focused': {
+                    color: 'var(--accent-primary)',
+                  },
+                },
+              }}
             />
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setActionDialogOpen(false)} disabled={isSubmittingAction}>
+        <DialogActions sx={{ p: 2, borderTop: '1px solid var(--glass-border)' }}>
+          <Button
+            onClick={() => setActionDialogOpen(false)}
+            disabled={isSubmittingAction}
+            sx={{
+              color: 'var(--text-secondary)',
+              '&:hover': {
+                color: 'var(--accent-primary)',
+                background: 'var(--accent-primary-light)',
+              },
+            }}
+          >
             Cancel
           </Button>
           <Button
@@ -462,12 +975,25 @@ export const ComplaintDetailPage: React.FC = () => {
               (actionType === 'resubmit' && (!editTitle.trim() || !editDescription.trim())) ||
               (actionType === 'approve' && (!caseTitle.trim() || !caseDescription.trim()))
             }
+            sx={{
+              background: 'var(--gradient-accent)',
+              color: 'var(--text-primary)',
+              boxShadow: 'var(--button-shadow)',
+              '&:hover': {
+                background: 'var(--gradient-accent-hover)',
+                boxShadow: 'var(--button-shadow-hover)',
+              },
+              '&:disabled': {
+                opacity: 0.6,
+              },
+            }}
           >
             {isSubmittingAction ? 'Submitting...' : 'Confirm'}
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+      </Container>
+    </Box>
   );
 };
 

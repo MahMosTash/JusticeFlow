@@ -273,89 +273,173 @@ export const CaseDetailPage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
-        <Button startIcon={<ArrowBack />} onClick={() => navigate(ROUTES.CASES)}>
-          Back to Cases
-        </Button>
-        {caseData.status === 'Pending' && hasRole('Police Chief') && (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: 'var(--gradient-page-bg)',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'var(--radial-glow-combined)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        },
+      }}
+    >
+      <Container maxWidth="lg" sx={{ py: 6, position: 'relative', zIndex: 1 }}>
+        <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
           <Button
-            variant="contained"
-            color="success"
-            startIcon={<CheckCircle />}
-            onClick={handleApprove}
-            disabled={approving}
+            startIcon={<ArrowBack />}
+            onClick={() => navigate(ROUTES.CASES)}
+            sx={{
+              color: 'var(--text-secondary)',
+              '&:hover': {
+                color: 'var(--accent-primary)',
+                background: 'var(--accent-primary-light)',
+              },
+            }}
           >
-            {approving ? 'Approving...' : 'Approve Case'}
+            Back to Cases
           </Button>
+          {caseData.status === 'Pending' && hasRole('Police Chief') && (
+            <Button
+              variant="contained"
+              color="success"
+              startIcon={<CheckCircle />}
+              onClick={handleApprove}
+              disabled={approving}
+              sx={{
+                background: 'var(--gradient-accent)',
+                color: 'var(--text-primary)',
+                boxShadow: 'var(--button-shadow)',
+                borderRadius: 'var(--radius-md)',
+                '&:hover': {
+                  background: 'var(--gradient-accent-hover)',
+                  boxShadow: 'var(--button-shadow-hover)',
+                },
+              }}
+            >
+              {approving ? 'Approving...' : 'Approve Case'}
+            </Button>
+          )}
+        </Box>
+
+        {approveSuccess && (
+          <Alert severity="success" sx={{ mb: 2 }} onClose={() => setApproveSuccess(false)}>
+            Case approved successfully!
+          </Alert>
         )}
-      </Box>
 
-      {approveSuccess && (
-        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setApproveSuccess(false)}>
-          Case approved successfully!
-        </Alert>
-      )}
+        {caseData.status === 'Pending' && (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            This case is pending approval by the Police Chief.
+          </Alert>
+        )}
 
-      {caseData.status === 'Pending' && (
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          This case is pending approval by the Police Chief.
-        </Alert>
-      )}
-
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Box display="flex" justifyContent="space-between" alignItems="start" mb={2}>
-            <Box>
-              <Typography variant="h4" component="h1" gutterBottom>
-                {caseData.title}
-              </Typography>
-              <Box display="flex" gap={1} mb={2}>
-                <Chip
-                  label={caseData.severity}
-                  color={getSeverityColor(caseData.severity)}
-                />
-                <Chip label={caseData.status} color={getStatusColor(caseData.status)} />
+        <Card
+          className="glass-effect"
+          sx={{
+            mb: 3,
+            background: 'var(--glass-bg)',
+            border: '1px solid var(--glass-border)',
+            borderRadius: 'var(--radius-lg)',
+            boxShadow: 'var(--shadow-lg)',
+          }}
+        >
+          <CardContent sx={{ p: 3 }}>
+            <Box display="flex" justifyContent="space-between" alignItems="start" mb={2}>
+              <Box>
+                <Typography
+                  variant="h1"
+                  component="h1"
+                  sx={{
+                    fontSize: 'var(--heading-h1-size)',
+                    fontWeight: 'var(--heading-h1-weight)',
+                    color: 'var(--text-primary)',
+                    mb: 2,
+                  }}
+                >
+                  {caseData.title}
+                </Typography>
+                <Box display="flex" gap={1} mb={2}>
+                  <Chip
+                    label={caseData.severity}
+                    color={getSeverityColor(caseData.severity)}
+                    sx={{
+                      fontWeight: 'var(--font-weight-medium)',
+                      fontSize: 'var(--label-base-size)',
+                    }}
+                  />
+                  <Chip
+                    label={caseData.status}
+                    color={getStatusColor(caseData.status)}
+                    sx={{
+                      fontWeight: 'var(--font-weight-medium)',
+                      fontSize: 'var(--label-base-size)',
+                    }}
+                  />
+                </Box>
               </Box>
             </Box>
-          </Box>
 
-          <Typography variant="body1" paragraph>
-            {caseData.description}
-          </Typography>
+            <Typography
+              variant="body1"
+              paragraph
+              sx={{
+                fontSize: 'var(--body-large-size)',
+                color: 'var(--text-primary)',
+                lineHeight: 'var(--line-height-relaxed)',
+              }}
+            >
+              {caseData.description}
+            </Typography>
 
-          <Grid container spacing={2} mt={2}>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="body2" color="text.secondary">
-                Created By
-              </Typography>
-              <Typography variant="body1">
-                {caseData.created_by?.full_name || caseData.created_by?.username}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="body2" color="text.secondary">
-                Created Date
-              </Typography>
-              <Typography variant="body1">{formatDateTime(caseData.created_date)}</Typography>
-            </Grid>
-            {caseData.assigned_detective && (
+            <Grid container spacing={2} mt={2}>
               <Grid item xs={12} sm={6}>
-                <Typography variant="body2" color="text.secondary">
-                  Assigned Detective
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: 'var(--label-base-size)',
+                    color: 'var(--text-secondary)',
+                    mb: 0.5,
+                  }}
+                >
+                  Created By
                 </Typography>
-                <Typography variant="body1">
-                  {caseData.assigned_detective.full_name || caseData.assigned_detective.username}
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontSize: 'var(--body-base-size)',
+                    color: 'var(--text-primary)',
+                  }}
+                >
+                  {caseData.created_by?.full_name || caseData.created_by?.username}
                 </Typography>
               </Grid>
-            )}
-            {caseData.assigned_sergeant && (
               <Grid item xs={12} sm={6}>
-                <Typography variant="body2" color="text.secondary">
-                  Assigned Sergeant
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: 'var(--label-base-size)',
+                    color: 'var(--text-secondary)',
+                    mb: 0.5,
+                  }}
+                >
+                  Created Date
                 </Typography>
-                <Typography variant="body1">
-                  {caseData.assigned_sergeant.full_name || caseData.assigned_sergeant.username}
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontSize: 'var(--body-base-size)',
+                    color: 'var(--text-primary)',
+                  }}
+                >
+                  {formatDateTime(caseData.created_date)}
                 </Typography>
               </Grid>
             )}
@@ -403,7 +487,14 @@ export const CaseDetailPage: React.FC = () => {
           {activeTab === 0 && (
             <Box>
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h6">
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontSize: 'var(--heading-h3-size)',
+                    fontWeight: 'var(--heading-h3-weight)',
+                    color: 'var(--text-primary)',
+                  }}
+                >
                   Evidence ({caseData.evidence_count || 0})
                 </Typography>
                 <Box display="flex" gap={1}>
@@ -411,6 +502,15 @@ export const CaseDetailPage: React.FC = () => {
                     variant="outlined"
                     size="small"
                     onClick={() => navigate(`${ROUTES.EVIDENCE}?case=${caseData.id}`)}
+                    sx={{
+                      borderColor: 'var(--glass-border)',
+                      color: 'var(--text-secondary)',
+                      '&:hover': {
+                        borderColor: 'var(--accent-primary)',
+                        color: 'var(--accent-primary)',
+                        background: 'var(--accent-primary-light)',
+                      },
+                    }}
                   >
                     View All Evidence
                   </Button>
@@ -418,6 +518,15 @@ export const CaseDetailPage: React.FC = () => {
                     variant="contained"
                     size="small"
                     onClick={() => navigate(`/evidence/create?case=${caseData.id}`)}
+                    sx={{
+                      background: 'var(--gradient-accent)',
+                      color: 'var(--text-primary)',
+                      boxShadow: 'var(--button-shadow)',
+                      '&:hover': {
+                        background: 'var(--gradient-accent-hover)',
+                        boxShadow: 'var(--button-shadow-hover)',
+                      },
+                    }}
                   >
                     Add Evidence
                   </Button>
@@ -426,17 +535,45 @@ export const CaseDetailPage: React.FC = () => {
               {evidenceLoading ? (
                 <CardSkeleton />
               ) : evidenceList.length === 0 ? (
-                <Typography color="text.secondary">No evidence recorded yet.</Typography>
+                <Typography
+                  sx={{
+                    color: 'var(--text-secondary)',
+                    fontSize: 'var(--body-base-size)',
+                  }}
+                >
+                  No evidence recorded yet.
+                </Typography>
               ) : (
                 <Grid container spacing={2}>
                   {evidenceList.map((item) => (
                     <Grid item xs={12} sm={6} key={item.id}>
-                      <Card variant="outlined" sx={{ cursor: 'pointer', '&:hover': { boxShadow: 2 } }}
+                      <Card
+                        className="glass-effect"
+                        variant="outlined"
+                        sx={{
+                          cursor: 'pointer',
+                          background: 'var(--glass-bg)',
+                          border: '1px solid var(--glass-border)',
+                          borderRadius: 'var(--radius-md)',
+                          transition: 'var(--transition-base)',
+                          '&:hover': {
+                            boxShadow: 'var(--shadow-glow-lg), var(--shadow-lg)',
+                            transform: 'translateY(-2px)',
+                            borderColor: 'var(--accent-primary)',
+                          },
+                        }}
                         onClick={() => navigate(ROUTES.EVIDENCE_DETAIL(item.id))}
                       >
                         <CardContent>
                           <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                            <Typography variant="subtitle1" fontWeight="bold">
+                            <Typography
+                              variant="subtitle1"
+                              sx={{
+                                fontWeight: 'var(--font-weight-semibold)',
+                                fontSize: 'var(--heading-h4-size)',
+                                color: 'var(--text-primary)',
+                              }}
+                            >
                               {item.title}
                             </Typography>
                             <Chip
@@ -448,14 +585,33 @@ export const CaseDetailPage: React.FC = () => {
                                     item.evidence_type === 'vehicle' ? 'warning' :
                                       item.evidence_type === 'identification' ? 'primary' : 'default'
                               }
+                              sx={{
+                                fontWeight: 'var(--font-weight-medium)',
+                                fontSize: 'var(--label-small-size)',
+                              }}
                             />
                           </Box>
                           {item.description && (
-                            <Typography variant="body2" color="text.secondary" noWrap>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: 'var(--text-secondary)',
+                                fontSize: 'var(--body-base-size)',
+                              }}
+                              noWrap
+                            >
                               {item.description}
                             </Typography>
                           )}
-                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: 'var(--text-tertiary)',
+                              fontSize: 'var(--caption-size)',
+                              mt: 1,
+                              display: 'block',
+                            }}
+                          >
                             Recorded: {formatDate(item.created_date)}
                           </Typography>
                         </CardContent>
@@ -469,7 +625,14 @@ export const CaseDetailPage: React.FC = () => {
           {activeTab === 1 && (
             <Box>
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography variant="h6">
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontSize: 'var(--heading-h3-size)',
+                    fontWeight: 'var(--heading-h3-weight)',
+                    color: 'var(--text-primary)',
+                  }}
+                >
                   Suspects ({caseData.suspects_count || 0})
                 </Typography>
                 {(hasRole('Detective') || hasRole('Sergeant')) && (
@@ -477,6 +640,15 @@ export const CaseDetailPage: React.FC = () => {
                     variant="contained"
                     size="small"
                     onClick={() => setSuspectDialogOpen(true)}
+                    sx={{
+                      background: 'var(--gradient-accent)',
+                      color: 'var(--text-primary)',
+                      boxShadow: 'var(--button-shadow)',
+                      '&:hover': {
+                        background: 'var(--gradient-accent-hover)',
+                        boxShadow: 'var(--button-shadow-hover)',
+                      },
+                    }}
                   >
                     Add Suspect
                   </Button>
@@ -486,15 +658,42 @@ export const CaseDetailPage: React.FC = () => {
               {suspectsLoading ? (
                 <CardSkeleton />
               ) : suspectsList.length === 0 ? (
-                <Typography color="text.secondary">No suspects recorded yet.</Typography>
+                <Typography
+                  sx={{
+                    color: 'var(--text-secondary)',
+                    fontSize: 'var(--body-base-size)',
+                  }}
+                >
+                  No suspects recorded yet.
+                </Typography>
               ) : (
                 <Grid container spacing={2}>
                   {suspectsList.map((suspect) => (
                     <Grid item xs={12} sm={6} key={suspect.id}>
-                      <Card variant="outlined">
+                      <Card
+                        className="glass-effect"
+                        variant="outlined"
+                        sx={{
+                          background: 'var(--glass-bg)',
+                          border: '1px solid var(--glass-border)',
+                          borderRadius: 'var(--radius-md)',
+                          transition: 'var(--transition-base)',
+                          '&:hover': {
+                            boxShadow: 'var(--shadow-glow-lg), var(--shadow-lg)',
+                            transform: 'translateY(-2px)',
+                          },
+                        }}
+                      >
                         <CardContent>
                           <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                            <Typography variant="subtitle1" fontWeight="bold">
+                            <Typography
+                              variant="subtitle1"
+                              sx={{
+                                fontWeight: 'var(--font-weight-semibold)',
+                                fontSize: 'var(--heading-h4-size)',
+                                color: 'var(--text-primary)',
+                              }}
+                            >
                               {suspect.name}
                             </Typography>
                             <Chip
@@ -505,22 +704,53 @@ export const CaseDetailPage: React.FC = () => {
                                   suspect.status === 'Cleared' ? 'success' :
                                     suspect.status === 'Under Severe Surveillance' ? 'warning' : 'info'
                               }
+                              sx={{
+                                fontWeight: 'var(--font-weight-medium)',
+                                fontSize: 'var(--label-small-size)',
+                              }}
                             />
                           </Box>
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: 'var(--text-secondary)',
+                              fontSize: 'var(--body-base-size)',
+                            }}
+                          >
                             National ID: {suspect.national_id}
                           </Typography>
                           {suspect.phone_number && (
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: 'var(--text-secondary)',
+                                fontSize: 'var(--body-base-size)',
+                              }}
+                            >
                               Phone: {suspect.phone_number}
                             </Typography>
                           )}
                           {suspect.notes && (
-                            <Typography variant="body2" sx={{ mt: 1 }}>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: 'var(--text-primary)',
+                                fontSize: 'var(--body-base-size)',
+                                mt: 1,
+                              }}
+                            >
                               {suspect.notes}
                             </Typography>
                           )}
-                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: 'var(--text-tertiary)',
+                              fontSize: 'var(--caption-size)',
+                              mt: 1,
+                              display: 'block',
+                            }}
+                          >
                             Added: {formatDate(suspect.created_date)}
                           </Typography>
                         </CardContent>
@@ -911,7 +1141,8 @@ export const CaseDetailPage: React.FC = () => {
           )}
         </Box>
       </Paper>
-    </Container>
+      </Container>
+    </Box>
   );
 };
 

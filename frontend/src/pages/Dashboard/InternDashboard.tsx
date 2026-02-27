@@ -15,14 +15,16 @@ export const InternDashboard: React.FC = () => {
             description: 'Review and triage new complaints',
             icon: <PendingActions />,
             action: () => navigate(ROUTES.COMPLAINTS, { state: { filter: 'Pending' } }),
-            color: '#1976d2',
+            gradient: 'var(--gradient-card-1)',
+            gradientBg: 'var(--gradient-card-1-bg)',
         },
         {
             title: 'All Complaints',
             description: 'View all submitted complaints',
             icon: <Assignment />,
             action: () => navigate(ROUTES.COMPLAINTS),
-            color: '#2e7d32',
+            gradient: 'var(--gradient-card-2)',
+            gradientBg: 'var(--gradient-card-2-bg)',
         },
     ];
 
@@ -30,13 +32,79 @@ export const InternDashboard: React.FC = () => {
         <Grid container spacing={3}>
             {quickActions.map((action, index) => (
                 <Grid item xs={12} sm={6} md={4} key={index}>
-                    <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={action.action}>
-                        <CardContent>
-                            <Box sx={{ color: action.color, mb: 2 }}>{action.icon}</Box>
-                            <Typography variant="h6" gutterBottom>
+                    <Card
+                        className="glass-effect"
+                        sx={{
+                            height: '100%',
+                            cursor: 'pointer',
+                            background: action.gradientBg,
+                            border: '1px solid var(--glass-border)',
+                            borderRadius: 'var(--radius-lg)',
+                            transition: 'var(--transition-base)',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            '&::before': {
+                                content: '""',
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                height: '4px',
+                                background: action.gradient,
+                                opacity: 0,
+                                transition: 'var(--transition-base)',
+                            },
+                            '&:hover': {
+                                transform: 'translateY(-4px)',
+                                boxShadow: 'var(--shadow-glow-lg), var(--shadow-xl)',
+                                background: 'var(--glass-bg-hover)',
+                                '&::before': {
+                                    opacity: 1,
+                                },
+                                '& .action-icon': {
+                                    transform: 'scale(1.1)',
+                                    filter: 'drop-shadow(var(--shadow-glow))',
+                                },
+                            },
+                        }}
+                        onClick={action.action}
+                    >
+                        <CardContent sx={{ p: 3, position: 'relative', zIndex: 1 }}>
+                            <Box
+                                className="action-icon"
+                                sx={{
+                                    mb: 2,
+                                    display: 'inline-flex',
+                                    p: 1.5,
+                                    borderRadius: 'var(--radius-md)',
+                                    background: action.gradient,
+                                    color: 'var(--text-primary)',
+                                    fontSize: '2rem',
+                                    transition: 'var(--transition-base)',
+                                    boxShadow: 'var(--shadow-glow)',
+                                }}
+                            >
+                                {action.icon}
+                            </Box>
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    fontSize: 'var(--heading-h3-size)',
+                                    fontWeight: 'var(--heading-h3-weight)',
+                                    color: 'var(--text-primary)',
+                                    mb: 1,
+                                }}
+                            >
                                 {action.title}
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    fontSize: 'var(--body-base-size)',
+                                    color: 'var(--text-secondary)',
+                                    lineHeight: 'var(--line-height-relaxed)',
+                                }}
+                            >
                                 {action.description}
                             </Typography>
                         </CardContent>
