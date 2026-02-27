@@ -1,7 +1,7 @@
 /**
  * Detective Board - Visual evidence analysis with React Flow
  */
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ReactFlow, {
   Node,
@@ -13,7 +13,6 @@ import ReactFlow, {
   Background,
   Controls,
   MiniMap,
-  MarkerType,
   NodeProps,
   Handle,
   Position,
@@ -37,8 +36,9 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
-  Divider,
-  Badge,
+  Card,
+  CardActionArea,
+  CardContent,
 } from '@mui/material';
 import {
   ArrowBack,
@@ -54,10 +54,11 @@ import {
   Person,
   ChevronLeft,
   ChevronRight,
-  FilterList,
+  Folder,
 } from '@mui/icons-material';
 import { detectiveBoardService } from '@/services/detectiveBoardService';
 import { evidenceService } from '@/services/evidenceService';
+import { caseService } from '@/services/caseService';
 import { Evidence } from '@/types/api';
 import { Loading } from '@/components/common/Loading';
 import { ROUTES } from '@/constants/routes';
@@ -150,7 +151,6 @@ const RedEdge = ({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targe
   const [edgePath] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
   return (
     <>
-      {/* Glow layer */}
       <path
         d={edgePath}
         fill="none"
@@ -170,14 +170,7 @@ const RedEdge = ({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targe
         markerEnd={`url(#red-arrow-${id})`}
       />
       <defs>
-        <marker
-          id={`red-arrow-${id}`}
-          markerWidth="12"
-          markerHeight="12"
-          refX="6"
-          refY="3"
-          orient="auto"
-        >
+        <marker id={`red-arrow-${id}`} markerWidth="12" markerHeight="12" refX="6" refY="3" orient="auto">
           <path d="M0,0 L0,6 L9,3 z" fill={selected ? '#ff6b6b' : '#ff1744'} />
         </marker>
       </defs>
@@ -187,16 +180,111 @@ const RedEdge = ({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targe
 
 const nodeTypes = { evidence: EvidenceNode };
 const edgeTypes = { red: RedEdge };
+const defaultEdgeOptions = { type: 'red', animated: false };
 
-const defaultEdgeOptions = {
-  type: 'red',
-  animated: false,
+// ─── Case Selector (shown when no caseId in URL) ────────────────────────
+const CaseSelector: React.FC = () => {
+  const navigate = useNavigate();
+  const [cases, setCases] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    caseService.getCases({})
+      .then((data: any) => setCases(data.results ?? data))
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  if (isLoading) return <Loading fullScreen />;
+
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        bgcolor: '#050510',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        pt: 8,
+        px: 3,
+      }}
+    >
+      <Box display="flex" alignItems="center" gap={1.5} mb={1}>
+        <Fingerprint sx={{ color: '#ff1744', fontSize: 36 }} />
+        <Typography
+          variant="h4"
+          sx={{ color: '#e0e0e0', fontFamily: "'Courier New', monospace", fontWeight: 700, letterSpacing: 2 }}
+        >
+          DETECTIVE BOARD
+        </Typography>
+      </Box>
+      <Typography variant="body2" sx={{ color: '#546e7a', mb: 5, fontFamily: 'monospace' }}>
+        Select a case to open its detective board
+      </Typography>
+
+      {cases.length === 0 ? (
+        <Box textAlign="center">
+          <Typography sx={{ color: '#546e7a', mb: 2 }}>No cases found.</Typography>
+          <Button variant="outlined" sx={{ color: '#ff1744', borderColor: '#ff174444' }} onClick={() => navigate(ROUTES.CASES)}>
+            Go to Cases
+          </Button>
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+            gap: 2,
+            width: '100%',
+            maxWidth: 900,
+          }}
+        >
+          {cases.map((c: any) => (
+            <Card
+              key={c.id}
+              sx={{
+                bgcolor: '#0a0a1a',
+                border: '1px solid #ff174422',
+                borderRadius: 2,
+                transition: 'all 0.2s',
+                '&:hover': { border: '1px solid #ff174488', boxShadow: '0 0 16px #ff174433' },
+              }}
+            >
+              <CardActionArea onClick={() => navigate(ROUTES.DETECTIVE_BOARD_CASE(c.id))} sx={{ p: 0.5 }}>
+                <CardContent>
+                  <Box display="flex" alignItems="center" gap={1} mb={1}>
+                    <Folder sx={{ color: '#ff1744', fontSize: 20 }} />
+                    <Typography variant="caption" sx={{ color: '#ff1744', fontFamily: 'monospace', fontWeight: 700 }}>
+                      CASE #{c.id}
+                    </Typography>
+                  </Box>
+                  <Typography variant="body1" sx={{ color: '#e0e0e0', fontWeight: 600, mb: 0.5 }}>
+                    {c.title ?? c.name ?? `Case ${c.id}`}
+                  </Typography>
+                  {c.status && (
+                    <Chip
+                      label={c.status}
+                      size="small"
+                      sx={{ height: 18, fontSize: '0.6rem', bgcolor: '#ff174422', color: '#ff7043', border: '1px solid #ff174433' }}
+                    />
+                  )}
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          ))}
+        </Box>
+      )}
+    </Box>
+  );
 };
 
 // ─── Main Page ──────────────────────────────────────────────────────────
 export const DetectiveBoardPage: React.FC = () => {
   const { caseId } = useParams<{ caseId?: string }>();
   const navigate = useNavigate();
+
+  // If no caseId, show case selector instead of redirecting
+  if (!caseId) return <CaseSelector />;
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -212,12 +300,10 @@ export const DetectiveBoardPage: React.FC = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   useEffect(() => {
-    if (!caseId) { navigate(ROUTES.CASES); return; }
     loadData();
   }, [caseId]);
 
   const loadData = async () => {
-    if (!caseId) return;
     setIsLoading(true);
     try {
       const evidenceData = await evidenceService.getEvidence({ case: parseInt(caseId) });
@@ -276,7 +362,6 @@ export const DetectiveBoardPage: React.FC = () => {
   );
 
   const handleSave = async () => {
-    if (!caseId) return;
     setIsSaving(true);
     try {
       const saved = await detectiveBoardService.saveDetectiveBoard({
@@ -293,7 +378,6 @@ export const DetectiveBoardPage: React.FC = () => {
     }
   };
 
-
   const handleAddEvidence = (ev: Evidence) => {
     const existingNode = nodes.find(n => n.id === `evidence-${ev.id}`);
     if (existingNode) {
@@ -303,10 +387,7 @@ export const DetectiveBoardPage: React.FC = () => {
     const newNode: Node = {
       id: `evidence-${ev.id}`,
       type: 'evidence',
-      position: {
-        x: Math.random() * 400 + 100,
-        y: Math.random() * 300 + 100,
-      },
+      position: { x: Math.random() * 400 + 100, y: Math.random() * 300 + 100 },
       data: { label: ev.title, evidence: ev },
     };
     setNodes((nds) => [...nds, newNode]);
@@ -321,7 +402,6 @@ export const DetectiveBoardPage: React.FC = () => {
   const filteredEvidence = filterType
     ? evidenceList.filter(e => e.evidence_type === filterType)
     : evidenceList;
-
   const evidenceTypes = [...new Set(evidenceList.map(e => e.evidence_type))];
 
   if (isLoading) return <Loading fullScreen />;
@@ -371,12 +451,7 @@ export const DetectiveBoardPage: React.FC = () => {
             startIcon={isSaving ? <CircularProgress size={16} color="inherit" /> : <Save />}
             onClick={handleSave}
             disabled={isSaving}
-            sx={{
-              bgcolor: '#ff1744',
-              '&:hover': { bgcolor: '#d50000' },
-              fontWeight: 700,
-              letterSpacing: 1,
-            }}
+            sx={{ bgcolor: '#ff1744', '&:hover': { bgcolor: '#d50000' }, fontWeight: 700, letterSpacing: 1 }}
           >
             {isSaving ? 'SAVING...' : 'SAVE'}
           </Button>
@@ -454,11 +529,7 @@ export const DetectiveBoardPage: React.FC = () => {
                   <ListItemButton
                     onClick={() => handleAddEvidence(ev)}
                     disabled={onBoard}
-                    sx={{
-                      py: 1,
-                      opacity: onBoard ? 0.4 : 1,
-                      '&:hover': { bgcolor: `${cfg.color}11` },
-                    }}
+                    sx={{ py: 1, opacity: onBoard ? 0.4 : 1, '&:hover': { bgcolor: `${cfg.color}11` } }}
                   >
                     <Box sx={{ color: cfg.color, mr: 1, display: 'flex' }}>{cfg.icon}</Box>
                     <ListItemText
@@ -467,10 +538,10 @@ export const DetectiveBoardPage: React.FC = () => {
                       primaryTypographyProps={{ fontSize: '0.78rem', color: '#cfd8dc', fontWeight: onBoard ? 400 : 600 }}
                       secondaryTypographyProps={{ fontSize: '0.65rem', color: cfg.color }}
                     />
-                    {onBoard && (
-                      <Chip label="Added" size="small" sx={{ height: 16, fontSize: '0.55rem', bgcolor: '#1b2a1b', color: '#66bb6a' }} />
-                    )}
-                    {!onBoard && <Add fontSize="small" sx={{ color: '#546e7a' }} />}
+                    {onBoard
+                      ? <Chip label="Added" size="small" sx={{ height: 16, fontSize: '0.55rem', bgcolor: '#1b2a1b', color: '#66bb6a' }} />
+                      : <Add fontSize="small" sx={{ color: '#546e7a' }} />
+                    }
                   </ListItemButton>
                 </ListItem>
               );
@@ -522,35 +593,19 @@ export const DetectiveBoardPage: React.FC = () => {
             multiSelectionKeyCode="Shift"
             style={{ background: '#050510' }}
           >
-            <Background
-              color="#1a1a2e"
-              gap={24}
-              size={1}
-              style={{ opacity: 0.8 }}
-            />
-            <Controls
-              style={{
-                background: '#0a0a1a',
-                border: '1px solid #ff174422',
-                borderRadius: 8,
-              }}
-            />
+            <Background color="#1a1a2e" gap={24} size={1} style={{ opacity: 0.8 }} />
+            <Controls style={{ background: '#0a0a1a', border: '1px solid #ff174422', borderRadius: 8 }} />
             <MiniMap
               nodeColor={(n) => {
                 const ev = n.data?.evidence;
                 if (!ev) return '#37474f';
                 return getEvidenceConfig(ev.evidence_type).color;
               }}
-              style={{
-                background: '#0a0a1a',
-                border: '1px solid #ff174422',
-                borderRadius: 8,
-              }}
+              style={{ background: '#0a0a1a', border: '1px solid #ff174422', borderRadius: 8 }}
               maskColor="rgba(5, 5, 16, 0.7)"
             />
           </ReactFlow>
 
-          {/* Help hint */}
           <Box
             sx={{
               position: 'absolute',
