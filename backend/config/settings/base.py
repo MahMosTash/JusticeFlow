@@ -161,6 +161,10 @@ CORS_ALLOWED_ORIGINS = config(
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)  # Only for development
 
+# Zibal Payment Gateway settings
+ZIBAL_MERCHANT = config('ZIBAL_MERCHANT', default='zibal')  # Use 'zibal' for test mode
+ZIBAL_CALLBACK_BASE_URL = config('ZIBAL_CALLBACK_BASE_URL', default='http://localhost:8000')
+
 # Swagger/OpenAPI settings
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
