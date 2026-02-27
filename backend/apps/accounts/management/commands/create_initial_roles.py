@@ -74,6 +74,8 @@ class Command(BaseCommand):
             {'username': 'intern', 'role': 'Intern (Cadet)', 'first': 'Test', 'last': 'Intern'},
             {'username': 'officer', 'role': 'Police Officer', 'first': 'Test', 'last': 'Officer'},
             {'username': 'detective', 'role': 'Detective', 'first': 'Test', 'last': 'Detective'},
+            {'username': 'sergeant', 'role': 'Sergeant', 'first': 'Test', 'last': 'Sergeant'},
+            {'username': 'captain', 'role': 'Captain', 'first': 'Test', 'last': 'Captain'},
             {'username': 'chief', 'role': 'Police Chief', 'first': 'Test', 'last': 'Chief'},
             {'username': 'user', 'role': 'Basic User', 'first': 'Test', 'last': 'User'},
         ]

@@ -34,6 +34,20 @@ class EvidenceSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'recorded_by', 'created_date', 'verification_date']
 
+    # File fields that DRF returns as absolute URLs — strip to relative /media/... paths
+    # so they work on both dev (port 3000, Vite proxy) and production (port 80, nginx)
+    _FILE_FIELDS = ('image', 'video', 'audio', 'image1', 'image2', 'image3')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        for field in self._FILE_FIELDS:
+            value = data.get(field)
+            if value and isinstance(value, str):
+                # Convert 'http://host:port/media/...' → '/media/...'
+                if '/media/' in value:
+                    data[field] = '/media/' + value.split('/media/', 1)[1]
+        return data
+
     def validate(self, attrs):
         """Validate type-specific requirements."""
         evidence_type = attrs.get('evidence_type', self.instance.evidence_type if self.instance else None)
