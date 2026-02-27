@@ -38,7 +38,7 @@ class CaseWitnessSerializer(serializers.ModelSerializer):
     class Meta:
         model = CaseWitness
         fields = [
-            'id', 'case', 'witness', 'witness_id', 'witness_national_id',
+            'id', 'case', 'witness', 'witness_id', 'witness_name', 'witness_national_id',
             'witness_phone', 'added_date', 'notes'
         ]
         read_only_fields = ['id', 'added_date']

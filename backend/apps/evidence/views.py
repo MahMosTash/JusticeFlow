@@ -85,10 +85,57 @@ class EvidenceViewSet(viewsets.ModelViewSet):
             from rest_framework.exceptions import ValidationError
             raise ValidationError({'case_id': f'Invalid case ID: {case_id}'})
         
-        serializer.save(
+        evidence = serializer.save(
             recorded_by=self.request.user,
             case=case,
         )
+        
+        # Auto-create Witness if witness statement
+        if evidence.evidence_type == 'witness_statement' and evidence.witness_name:
+            from apps.cases.models import CaseWitness
+            from apps.accounts.models import User
+            
+            # See if the recorded_by user matches or if it's completely external
+            # First try to find a user by national ID or phone if provided
+            witness_user = None
+            if evidence.witness_national_id:
+                witness_user = User.objects.filter(national_id=evidence.witness_national_id).first()
+            
+            # Try to get or create witness link
+                CaseWitness.objects.get_or_create(
+                    case=case,
+                    witness=witness_user,
+                    defaults={
+                        'witness_name': evidence.witness_name or (witness_user.get_full_name() if witness_user else ''),
+                        'witness_national_id': evidence.witness_national_id or witness_user.national_id,
+                        'witness_phone': evidence.witness_phone or witness_user.phone_number,
+                        'notes': f"Added via Witness Statement: {evidence.title}"
+                    }
+                )
+            elif evidence.witness_national_id:
+                CaseWitness.objects.get_or_create(
+                    case=case,
+                    witness_national_id=evidence.witness_national_id,
+                    defaults={
+                        'witness_name': evidence.witness_name,
+                        'witness_phone': evidence.witness_phone,
+                        'notes': f"Added via Witness Statement: {evidence.title}"
+                    }
+                )
+            
+        # Send Notification to Detective
+        if case.assigned_detective:
+            from core.models import Notification
+            
+            # Avoid sending notification if the detective themself is the one uploading It
+            if case.assigned_detective != self.request.user:
+                Notification.objects.create(
+                    user=case.assigned_detective,
+                    type='new_evidence',
+                    title='New Evidence Added',
+                    message=f'New "{evidence.get_evidence_type_display()}" evidence ({evidence.title}) was just added to Case #{case.id}.',
+                    related_case=case
+                )
     
     @action(detail=True, methods=['post'], permission_classes=[IsForensicDoctor])
     def verify(self, request, pk=None):

@@ -24,8 +24,9 @@ import {
   MenuItem,
   Divider,
   LinearProgress,
+  Avatar,
 } from '@mui/material';
-import { ArrowBack, CheckCircle, Gavel, HowToVote, PersonSearch } from '@mui/icons-material';
+import { ArrowBack, CheckCircle, Gavel, HowToVote, PersonSearch, RecordVoiceOver } from '@mui/icons-material';
 import { caseService } from '@/services/caseService';
 import { evidenceService } from '@/services/evidenceService';
 import { suspectService } from '@/services/suspectService';
@@ -541,6 +542,54 @@ export const CaseDetailPage: React.FC = () => {
               <Typography variant="h6" gutterBottom>
                 Witnesses ({caseData.witnesses?.length || 0})
               </Typography>
+
+              {!caseData.witnesses || caseData.witnesses.length === 0 ? (
+                <Alert severity="info">No witnesses registered for this case yet. Submit a 'Witness Statement' evidence to add a witness.</Alert>
+              ) : (
+                <Grid container spacing={2} sx={{ mt: 1 }}>
+                  {caseData.witnesses.map((w) => (
+                    <Grid item xs={12} sm={6} md={4} key={w.id}>
+                      <Card variant="outlined" sx={{ height: '100%', position: 'relative' }}>
+                        <CardContent>
+                          <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
+                            <Box display="flex" alignItems="center" gap={1}>
+                              <Avatar sx={{ bgcolor: 'secondary.main', width: 32, height: 32 }}>
+                                <RecordVoiceOver fontSize="small" />
+                              </Avatar>
+                              <Typography variant="subtitle1" fontWeight="bold">
+                                {w.witness_name || w.witness?.full_name || 'Anonymous Witness'}
+                              </Typography>
+                            </Box>
+                            {w.witness && (
+                              <Chip label="User" size="small" color="primary" variant="outlined" />
+                            )}
+                          </Box>
+
+                          <Typography variant="body2" color="text.secondary">
+                            National ID: {w.witness_national_id || w.witness?.national_id || 'N/A'}
+                          </Typography>
+
+                          {(w.witness_phone || w.witness?.phone_number) && (
+                            <Typography variant="body2" color="text.secondary">
+                              Phone: {w.witness_phone || w.witness?.phone_number}
+                            </Typography>
+                          )}
+
+                          {w.notes && (
+                            <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic' }}>
+                              {w.notes}
+                            </Typography>
+                          )}
+
+                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                            Added: {formatDate(w.added_date)}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
             </Box>
           )}
 
