@@ -59,92 +59,234 @@ export const RewardSubmitPage: React.FC = () => {
         }
     };
 
+    const commonTextFieldSx = {
+        '& .MuiOutlinedInput-root': {
+            background: 'var(--input-bg)',
+            borderRadius: 'var(--radius-md)',
+            color: 'var(--text-primary)',
+            '& fieldset': {
+                borderColor: 'var(--glass-border)',
+            },
+            '&:hover fieldset': {
+                borderColor: 'var(--accent-primary)',
+            },
+            '&.Mui-focused fieldset': {
+                borderColor: 'var(--accent-primary)',
+                boxShadow: 'var(--shadow-glow)',
+            },
+        },
+        '& .MuiInputLabel-root': {
+            color: 'var(--text-secondary)',
+            '&.Mui-focused': {
+                color: 'var(--accent-primary)',
+            },
+        },
+    };
+
     if (success) {
         return (
-            <Container maxWidth="md" sx={{ py: 4 }}>
-                <Alert severity="success" sx={{ mb: 2 }}>
-                    Your information has been submitted successfully. It will be reviewed by an officer. You will be redirected shortly...
-                </Alert>
-                <Button variant="outlined" onClick={() => navigate(ROUTES.HOME)}>
-                    Back to Dashboard
-                </Button>
-            </Container>
+            <Box
+                sx={{
+                    minHeight: '100vh',
+                    background: 'var(--gradient-page-bg)',
+                    position: 'relative',
+                    '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'var(--radial-glow-combined)',
+                        pointerEvents: 'none',
+                        zIndex: 0,
+                    },
+                }}
+            >
+                <Container maxWidth="md" sx={{ py: 6, position: 'relative', zIndex: 1 }}>
+                    <Alert severity="success" sx={{ mb: 2 }}>
+                        Your information has been submitted successfully. It will be reviewed by an officer. You will be redirected shortly...
+                    </Alert>
+                    <Button
+                        variant="outlined"
+                        onClick={() => navigate(ROUTES.HOME)}
+                        sx={{
+                            borderColor: 'var(--glass-border)',
+                            color: 'var(--text-secondary)',
+                            '&:hover': {
+                                borderColor: 'var(--accent-primary)',
+                                color: 'var(--accent-primary)',
+                                background: 'var(--accent-primary-light)',
+                            },
+                        }}
+                    >
+                        Back to Dashboard
+                    </Button>
+                </Container>
+            </Box>
         );
     }
 
     return (
-        <Container maxWidth="md" sx={{ py: 4 }}>
-            <Typography variant="h4" component="h1" gutterBottom>
-                Submit Information
-            </Typography>
-            <Typography variant="body1" color="text.secondary" paragraph>
-                If you have reliable information regarding a case or criminal activity, please submit it below.
-                If your information leads to an arrest or case resolution, you may be eligible for a reward.
-            </Typography>
+        <Box
+            sx={{
+                minHeight: '100vh',
+                background: 'var(--gradient-page-bg)',
+                position: 'relative',
+                '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'var(--radial-glow-combined)',
+                    pointerEvents: 'none',
+                    zIndex: 0,
+                },
+            }}
+        >
+            <Container maxWidth="md" sx={{ py: 6, position: 'relative', zIndex: 1 }}>
+                <Typography
+                    variant="h1"
+                    component="h1"
+                    sx={{
+                        fontSize: 'var(--heading-h1-size)',
+                        fontWeight: 'var(--heading-h1-weight)',
+                        lineHeight: 'var(--heading-h1-line-height)',
+                        letterSpacing: 'var(--heading-h1-letter-spacing)',
+                        background: 'var(--gradient-accent)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                        mb: 2,
+                    }}
+                >
+                    Submit Information
+                </Typography>
+                <Typography
+                    variant="body1"
+                    sx={{
+                        fontSize: 'var(--body-large-size)',
+                        color: 'var(--text-secondary)',
+                        mb: 4,
+                        lineHeight: 'var(--line-height-relaxed)',
+                    }}
+                >
+                    If you have reliable information regarding a case or criminal activity, please submit it below.
+                    If your information leads to an arrest or case resolution, you may be eligible for a reward.
+                </Typography>
 
-            <Card variant="outlined">
-                <CardContent>
-                    {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+                <Card
+                    className="glass-effect"
+                    variant="outlined"
+                    sx={{
+                        background: 'var(--glass-bg)',
+                        border: '1px solid var(--glass-border)',
+                        borderRadius: 'var(--radius-lg)',
+                        boxShadow: 'var(--shadow-lg)',
+                    }}
+                >
+                    <CardContent sx={{ p: 3 }}>
+                        {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
-                    <Box component="form" onSubmit={handleSubmit} noValidate>
-                        <TextField
-                            select
-                            margin="normal"
-                            fullWidth
-                            id="case"
-                            label="Related Case (Optional)"
-                            value={selectedCase}
-                            onChange={(e) => setSelectedCase(e.target.value as number)}
-                            disabled={loadingCases}
-                            InputProps={{
-                                endAdornment: loadingCases ? <CircularProgress size={20} /> : null
-                            }}
-                        >
-                            <MenuItem value="">
-                                <em>None / General Information</em>
-                            </MenuItem>
-                            {cases.map((c) => (
-                                <MenuItem key={c.id} value={c.id}>
-                                    #{c.id} - {c.title}
+                        <Box component="form" onSubmit={handleSubmit} noValidate>
+                            <TextField
+                                select
+                                margin="normal"
+                                fullWidth
+                                id="case"
+                                label="Related Case (Optional)"
+                                value={selectedCase}
+                                onChange={(e) => setSelectedCase(e.target.value as number)}
+                                disabled={loadingCases}
+                                InputProps={{
+                                    endAdornment: loadingCases ? <CircularProgress size={20} sx={{ color: 'var(--accent-primary)' }} /> : null
+                                }}
+                                sx={commonTextFieldSx}
+                            >
+                                <MenuItem value="">
+                                    <em>None / General Information</em>
                                 </MenuItem>
-                            ))}
-                        </TextField>
+                                {cases.map((c) => (
+                                    <MenuItem key={c.id} value={c.id}>
+                                        #{c.id} - {c.title}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
 
-                        <TextField
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="information"
-                            label="Detailed Information"
-                            name="information"
-                            multiline
-                            rows={6}
-                            value={information}
-                            onChange={(e) => setInformation(e.target.value)}
-                            placeholder="Please provide as much specific detail as possible (locations, descriptions, times, etc.)"
-                        />
+                            <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                id="information"
+                                label="Detailed Information"
+                                name="information"
+                                multiline
+                                rows={6}
+                                value={information}
+                                onChange={(e) => setInformation(e.target.value)}
+                                placeholder="Please provide as much specific detail as possible (locations, descriptions, times, etc.)"
+                                sx={commonTextFieldSx}
+                            />
 
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            size="large"
-                            sx={{ mt: 3, mb: 2 }}
-                            disabled={submitting || !information.trim()}
-                        >
-                            {submitting ? 'Submitting...' : 'Submit Information'}
-                        </Button>
+                            <Button
+                                type="submit"
+                                fullWidth
+                                variant="contained"
+                                size="large"
+                                sx={{
+                                    mt: 3,
+                                    mb: 2,
+                                    background: 'var(--gradient-accent)',
+                                    color: 'var(--text-primary)',
+                                    boxShadow: 'var(--button-shadow)',
+                                    borderRadius: 'var(--radius-md)',
+                                    py: 1.5,
+                                    fontWeight: 'var(--font-weight-semibold)',
+                                    textTransform: 'none',
+                                    fontSize: 'var(--button-large-size)',
+                                    '&:hover': {
+                                        background: 'var(--gradient-accent-hover)',
+                                        boxShadow: 'var(--button-shadow-hover)',
+                                        transform: 'translateY(-2px)',
+                                    },
+                                    '&:disabled': {
+                                        opacity: 0.6,
+                                    },
+                                    transition: 'var(--transition-base)',
+                                }}
+                                disabled={submitting || !information.trim()}
+                            >
+                                {submitting ? 'Submitting...' : 'Submit Information'}
+                            </Button>
 
-                        <Button
-                            fullWidth
-                            variant="outlined"
-                            onClick={() => navigate(-1)}
-                        >
-                            Cancel
-                        </Button>
-                    </Box>
-                </CardContent>
-            </Card>
-        </Container>
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                onClick={() => navigate(-1)}
+                                sx={{
+                                    borderColor: 'var(--glass-border)',
+                                    color: 'var(--text-secondary)',
+                                    borderRadius: 'var(--radius-md)',
+                                    py: 1.5,
+                                    fontWeight: 'var(--font-weight-medium)',
+                                    textTransform: 'none',
+                                    fontSize: 'var(--button-base-size)',
+                                    '&:hover': {
+                                        borderColor: 'var(--accent-primary)',
+                                        color: 'var(--accent-primary)',
+                                        background: 'var(--accent-primary-light)',
+                                    },
+                                    transition: 'var(--transition-base)',
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                        </Box>
+                    </CardContent>
+                </Card>
+            </Container>
+        </Box>
     );
 };
