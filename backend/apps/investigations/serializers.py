@@ -74,13 +74,24 @@ class InterrogationSerializer(serializers.ModelSerializer):
 class GuiltScoreSerializer(serializers.ModelSerializer):
     """Serializer for GuiltScore model."""
     suspect = SuspectListSerializer(read_only=True)
+    suspect_id = serializers.PrimaryKeyRelatedField(
+        queryset=Suspect.objects.all(),
+        source='suspect',
+        write_only=True
+    )
     case = CaseListSerializer(read_only=True)
+    case_id = serializers.PrimaryKeyRelatedField(
+        queryset=Case.objects.all(),
+        source='case',
+        write_only=True
+    )
     assigned_by = UserDetailSerializer(read_only=True)
     
     class Meta:
         model = GuiltScore
         fields = [
-            'id', 'suspect', 'case', 'assigned_by', 'score', 'justification', 'assigned_date'
+            'id', 'suspect', 'suspect_id', 'case', 'case_id',
+            'assigned_by', 'score', 'justification', 'assigned_date'
         ]
         read_only_fields = ['id', 'assigned_date']
     
