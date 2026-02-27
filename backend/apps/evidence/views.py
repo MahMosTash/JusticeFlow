@@ -10,8 +10,6 @@ from core.permissions import IsForensicDoctor
 from .models import Evidence
 from .serializers import EvidenceSerializer, EvidenceVerificationSerializer
 from apps.accounts.models import User
-from apps.notifications.models import Notification
-
 
 class EvidenceViewSet(viewsets.ModelViewSet):
     serializer_class = EvidenceSerializer
@@ -100,13 +98,6 @@ class EvidenceViewSet(viewsets.ModelViewSet):
                     f'Dr. {doctor.full_name or doctor.username} has updated their '
                     f'review of biological evidence "{evidence.title}" for case "{case.title}".'
                 )
-            Notification.objects.create(
-                user=detective,
-                type='new_evidence',
-                title=title,
-                message=message,
-                related_case=case,
-            )
 
         return Response(EvidenceSerializer(evidence).data, status=status.HTTP_200_OK)
 
