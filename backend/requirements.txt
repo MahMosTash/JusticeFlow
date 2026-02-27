@@ -10,4 +10,5 @@ python-decouple==3.8
 setuptools<70  # Required for pkg_resources compatibility with Python 3.12
 gunicorn==21.2.0  # Production WSGI server
 whitenoise==6.6.0  # Static file serving
+requests==2.31.0  # HTTP client for Zibal payment gateway API
 
