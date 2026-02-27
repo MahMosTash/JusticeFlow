@@ -164,6 +164,7 @@ export const EvidenceListPage: React.FC = () => {
                     <TableCell>ID</TableCell>
                     <TableCell>Title</TableCell>
                     <TableCell>Type</TableCell>
+                    <TableCell>Verification</TableCell>
                     <TableCell>Recorded By</TableCell>
                     <TableCell>Created Date</TableCell>
                     <TableCell>Actions</TableCell>
@@ -211,6 +212,31 @@ export const EvidenceListPage: React.FC = () => {
                               fontSize: 'var(--label-small-size)',
                             }}
                           />
+                        </TableCell>
+                        <TableCell>
+                          {item.evidence_type === 'biological' && item.verified_by_forensic_doctor && (
+                            <Chip
+                              label={item.is_valid ? 'Valid' : 'Invalid'}
+                              color={item.is_valid ? 'success' : 'error'}
+                              size="small"
+                              sx={{
+                                fontWeight: 'var(--font-weight-medium)',
+                                fontSize: 'var(--label-small-size)',
+                              }}
+                            />
+                          )}
+                          {item.evidence_type === 'biological' && !item.verified_by_forensic_doctor && (
+                            <Chip
+                              label="Pending"
+                              color="warning"
+                              size="small"
+                              sx={{
+                                fontWeight: 'var(--font-weight-medium)',
+                                fontSize: 'var(--label-small-size)',
+                              }}
+                            />
+                          )}
+                          {item.evidence_type !== 'biological' && '-'}
                         </TableCell>
                         <TableCell>
                           {item.recorded_by?.full_name || item.recorded_by?.username}
