@@ -442,284 +442,274 @@ export const CaseDetailPage: React.FC = () => {
                   {formatDateTime(caseData.created_date)}
                 </Typography>
               </Grid>
-            )}
-            {caseData.incident_date && (
+
+              {caseData.incident_date && (
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body2" color="text.secondary">
+                    Incident Date
+                  </Typography>
+                  <Typography variant="body1">
+                    {formatDate(caseData.incident_date)}
+                    {caseData.incident_time && ` at ${caseData.incident_time}`}
+                  </Typography>
+                </Grid>
+              )}
+              {caseData.incident_location && (
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body2" color="text.secondary">
+                    Incident Location
+                  </Typography>
+                  <Typography variant="body1">{caseData.incident_location}</Typography>
+                </Grid>
+              )}
               <Grid item xs={12} sm={6}>
                 <Typography variant="body2" color="text.secondary">
-                  Incident Date
+                  Registered Participants
                 </Typography>
                 <Typography variant="body1">
-                  {formatDate(caseData.incident_date)}
-                  {caseData.incident_time && ` at ${caseData.incident_time}`}
+                  {caseData.complainants?.length || 0} Complainants · {caseData.witnesses?.length || 0} Witnesses
                 </Typography>
               </Grid>
-            )}
-            {caseData.incident_location && (
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body2" color="text.secondary">
-                  Incident Location
-                </Typography>
-                <Typography variant="body1">{caseData.incident_location}</Typography>
-              </Grid>
-            )}
-            <Grid item xs={12} sm={6}>
-              <Typography variant="body2" color="text.secondary">
-                Registered Participants
-              </Typography>
-              <Typography variant="body1">
-                {caseData.complainants?.length || 0} Complainants · {caseData.witnesses?.length || 0} Witnesses
-              </Typography>
             </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      <Paper>
-        <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)} variant="scrollable" scrollButtons="auto">
-          <Tab label={`Evidence (${caseData.evidence_count || evidenceList.length || 0})`} />
-          <Tab label={`Suspects (${caseData.suspects_count || suspectsList.length || 0})`} />
-          <Tab label={`Complainants (${caseData.complainants?.length || 0})`} />
-          <Tab label={`Witnesses (${caseData.witnesses?.length || 0})`} />
-          <Tab label="Interrogation" icon={<PersonSearch fontSize="small" />} iconPosition="start" />
-        </Tabs>
+        <Paper>
+          <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)} variant="scrollable" scrollButtons="auto">
+            <Tab label={`Evidence (${caseData.evidence_count || evidenceList.length || 0})`} />
+            <Tab label={`Suspects (${caseData.suspects_count || suspectsList.length || 0})`} />
+            <Tab label={`Complainants (${caseData.complainants?.length || 0})`} />
+            <Tab label={`Witnesses (${caseData.witnesses?.length || 0})`} />
+            <Tab label="Interrogation" icon={<PersonSearch fontSize="small" />} iconPosition="start" />
+          </Tabs>
 
-        <Box p={3}>
-          {activeTab === 0 && (
-            <Box>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontSize: 'var(--heading-h3-size)',
-                    fontWeight: 'var(--heading-h3-weight)',
-                    color: 'var(--text-primary)',
-                  }}
-                >
-                  Evidence ({caseData.evidence_count || 0})
-                </Typography>
-                <Box display="flex" gap={1}>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => navigate(`${ROUTES.EVIDENCE}?case=${caseData.id}`)}
+          <Box p={3}>
+            {activeTab === 0 && (
+              <Box>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                  <Typography
+                    variant="h6"
                     sx={{
-                      borderColor: 'var(--glass-border)',
-                      color: 'var(--text-secondary)',
-                      '&:hover': {
-                        borderColor: 'var(--accent-primary)',
-                        color: 'var(--accent-primary)',
-                        background: 'var(--accent-primary-light)',
-                      },
-                    }}
-                  >
-                    View All Evidence
-                  </Button>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() => navigate(`/evidence/create?case=${caseData.id}`)}
-                    sx={{
-                      background: 'var(--gradient-accent)',
+                      fontSize: 'var(--heading-h3-size)',
+                      fontWeight: 'var(--heading-h3-weight)',
                       color: 'var(--text-primary)',
-                      boxShadow: 'var(--button-shadow)',
-                      '&:hover': {
-                        background: 'var(--gradient-accent-hover)',
-                        boxShadow: 'var(--button-shadow-hover)',
-                      },
                     }}
                   >
-                    Add Evidence
-                  </Button>
+                    Evidence ({caseData.evidence_count || 0})
+                  </Typography>
+                  <Box display="flex" gap={1}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => navigate(`${ROUTES.EVIDENCE}?case=${caseData.id}`)}
+                      sx={{
+                        borderColor: 'var(--glass-border)',
+                        color: 'var(--text-secondary)',
+                        '&:hover': {
+                          borderColor: 'var(--accent-primary)',
+                          color: 'var(--accent-primary)',
+                          background: 'var(--accent-primary-light)',
+                        },
+                      }}
+                    >
+                      View All Evidence
+                    </Button>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => navigate(`/evidence/create?case=${caseData.id}`)}
+                      sx={{
+                        background: 'var(--gradient-accent)',
+                        color: 'var(--text-primary)',
+                        boxShadow: 'var(--button-shadow)',
+                        '&:hover': {
+                          background: 'var(--gradient-accent-hover)',
+                          boxShadow: 'var(--button-shadow-hover)',
+                        },
+                      }}
+                    >
+                      Add Evidence
+                    </Button>
+                  </Box>
                 </Box>
-              </Box>
-              {evidenceLoading ? (
-                <CardSkeleton />
-              ) : evidenceList.length === 0 ? (
-                <Typography
-                  sx={{
-                    color: 'var(--text-secondary)',
-                    fontSize: 'var(--body-base-size)',
-                  }}
-                >
-                  No evidence recorded yet.
-                </Typography>
-              ) : (
-                <Grid container spacing={2}>
-                  {evidenceList.map((item) => (
-                    <Grid item xs={12} sm={6} key={item.id}>
-                      <Card
-                        className="glass-effect"
-                        variant="outlined"
-                        sx={{
-                          cursor: 'pointer',
-                          background: 'var(--glass-bg)',
-                          border: '1px solid var(--glass-border)',
-                          borderRadius: 'var(--radius-md)',
-                          transition: 'var(--transition-base)',
-                          '&:hover': {
-                            boxShadow: 'var(--shadow-glow-lg), var(--shadow-lg)',
-                            transform: 'translateY(-2px)',
-                            borderColor: 'var(--accent-primary)',
-                          },
-                        }}
-                        onClick={() => navigate(ROUTES.EVIDENCE_DETAIL(item.id))}
-                      >
-                        <CardContent>
-                          <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                            <Typography
-                              variant="subtitle1"
-                              sx={{
-                                fontWeight: 'var(--font-weight-semibold)',
-                                fontSize: 'var(--heading-h4-size)',
-                                color: 'var(--text-primary)',
-                              }}
-                            >
-                              {item.title}
-                            </Typography>
-                            <Chip
-                              label={item.evidence_type.replace('_', ' ')}
-                              size="small"
-                              color={
-                                item.evidence_type === 'witness_statement' ? 'info' :
-                                  item.evidence_type === 'biological' ? 'error' :
-                                    item.evidence_type === 'vehicle' ? 'warning' :
-                                      item.evidence_type === 'identification' ? 'primary' : 'default'
-                              }
-                              sx={{
-                                fontWeight: 'var(--font-weight-medium)',
-                                fontSize: 'var(--label-small-size)',
-                              }}
-                            />
-                          </Box>
-                          {item.description && (
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: 'var(--text-secondary)',
-                                fontSize: 'var(--body-base-size)',
-                              }}
-                              noWrap
-                            >
-                              {item.description}
-                            </Typography>
-                          )}
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              color: 'var(--text-tertiary)',
-                              fontSize: 'var(--caption-size)',
-                              mt: 1,
-                              display: 'block',
-                            }}
-                          >
-                            Recorded: {formatDate(item.created_date)}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
-              )}
-            </Box>
-          )}
-          {activeTab === 1 && (
-            <Box>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontSize: 'var(--heading-h3-size)',
-                    fontWeight: 'var(--heading-h3-weight)',
-                    color: 'var(--text-primary)',
-                  }}
-                >
-                  Suspects ({caseData.suspects_count || 0})
-                </Typography>
-                {(hasRole('Detective') || hasRole('Sergeant')) && (
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() => setSuspectDialogOpen(true)}
+                {evidenceLoading ? (
+                  <CardSkeleton />
+                ) : evidenceList.length === 0 ? (
+                  <Typography
                     sx={{
-                      background: 'var(--gradient-accent)',
-                      color: 'var(--text-primary)',
-                      boxShadow: 'var(--button-shadow)',
-                      '&:hover': {
-                        background: 'var(--gradient-accent-hover)',
-                        boxShadow: 'var(--button-shadow-hover)',
-                      },
+                      color: 'var(--text-secondary)',
+                      fontSize: 'var(--body-base-size)',
                     }}
                   >
-                    Add Suspect
-                  </Button>
+                    No evidence recorded yet.
+                  </Typography>
+                ) : (
+                  <Grid container spacing={2}>
+                    {evidenceList.map((item) => (
+                      <Grid item xs={12} sm={6} key={item.id}>
+                        <Card
+                          className="glass-effect"
+                          variant="outlined"
+                          sx={{
+                            cursor: 'pointer',
+                            background: 'var(--glass-bg)',
+                            border: '1px solid var(--glass-border)',
+                            borderRadius: 'var(--radius-md)',
+                            transition: 'var(--transition-base)',
+                            '&:hover': {
+                              boxShadow: 'var(--shadow-glow-lg), var(--shadow-lg)',
+                              transform: 'translateY(-2px)',
+                              borderColor: 'var(--accent-primary)',
+                            },
+                          }}
+                          onClick={() => navigate(ROUTES.EVIDENCE_DETAIL(item.id))}
+                        >
+                          <CardContent>
+                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                              <Typography
+                                variant="subtitle1"
+                                sx={{
+                                  fontWeight: 'var(--font-weight-semibold)',
+                                  fontSize: 'var(--heading-h4-size)',
+                                  color: 'var(--text-primary)',
+                                }}
+                              >
+                                {item.title}
+                              </Typography>
+                              <Chip
+                                label={item.evidence_type.replace('_', ' ')}
+                                size="small"
+                                color={
+                                  item.evidence_type === 'witness_statement' ? 'info' :
+                                    item.evidence_type === 'biological' ? 'error' :
+                                      item.evidence_type === 'vehicle' ? 'warning' :
+                                        item.evidence_type === 'identification' ? 'primary' : 'default'
+                                }
+                                sx={{
+                                  fontWeight: 'var(--font-weight-medium)',
+                                  fontSize: 'var(--label-small-size)',
+                                }}
+                              />
+                            </Box>
+                            {item.description && (
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: 'var(--text-secondary)',
+                                  fontSize: 'var(--body-base-size)',
+                                }}
+                                noWrap
+                              >
+                                {item.description}
+                              </Typography>
+                            )}
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                color: 'var(--text-tertiary)',
+                                fontSize: 'var(--caption-size)',
+                                mt: 1,
+                                display: 'block',
+                              }}
+                            >
+                              Recorded: {formatDate(item.created_date)}
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
                 )}
               </Box>
+            )}
+            {activeTab === 1 && (
+              <Box>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontSize: 'var(--heading-h3-size)',
+                      fontWeight: 'var(--heading-h3-weight)',
+                      color: 'var(--text-primary)',
+                    }}
+                  >
+                    Suspects ({caseData.suspects_count || 0})
+                  </Typography>
+                  {(hasRole('Detective') || hasRole('Sergeant')) && (
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => setSuspectDialogOpen(true)}
+                      sx={{
+                        background: 'var(--gradient-accent)',
+                        color: 'var(--text-primary)',
+                        boxShadow: 'var(--button-shadow)',
+                        '&:hover': {
+                          background: 'var(--gradient-accent-hover)',
+                          boxShadow: 'var(--button-shadow-hover)',
+                        },
+                      }}
+                    >
+                      Add Suspect
+                    </Button>
+                  )}
+                </Box>
 
-              {suspectsLoading ? (
-                <CardSkeleton />
-              ) : suspectsList.length === 0 ? (
-                <Typography
-                  sx={{
-                    color: 'var(--text-secondary)',
-                    fontSize: 'var(--body-base-size)',
-                  }}
-                >
-                  No suspects recorded yet.
-                </Typography>
-              ) : (
-                <Grid container spacing={2}>
-                  {suspectsList.map((suspect) => (
-                    <Grid item xs={12} sm={6} key={suspect.id}>
-                      <Card
-                        className="glass-effect"
-                        variant="outlined"
-                        sx={{
-                          background: 'var(--glass-bg)',
-                          border: '1px solid var(--glass-border)',
-                          borderRadius: 'var(--radius-md)',
-                          transition: 'var(--transition-base)',
-                          '&:hover': {
-                            boxShadow: 'var(--shadow-glow-lg), var(--shadow-lg)',
-                            transform: 'translateY(-2px)',
-                          },
-                        }}
-                      >
-                        <CardContent>
-                          <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                            <Typography
-                              variant="subtitle1"
-                              sx={{
-                                fontWeight: 'var(--font-weight-semibold)',
-                                fontSize: 'var(--heading-h4-size)',
-                                color: 'var(--text-primary)',
-                              }}
-                            >
-                              {suspect.name}
-                            </Typography>
-                            <Chip
-                              label={suspect.status}
-                              size="small"
-                              color={
-                                suspect.status === 'Arrested' ? 'error' :
-                                  suspect.status === 'Cleared' ? 'success' :
-                                    suspect.status === 'Under Severe Surveillance' ? 'warning' : 'info'
-                              }
-                              sx={{
-                                fontWeight: 'var(--font-weight-medium)',
-                                fontSize: 'var(--label-small-size)',
-                              }}
-                            />
-                          </Box>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: 'var(--text-secondary)',
-                              fontSize: 'var(--body-base-size)',
-                            }}
-                          >
-                            National ID: {suspect.national_id}
-                          </Typography>
-                          {suspect.phone_number && (
+                {suspectsLoading ? (
+                  <CardSkeleton />
+                ) : suspectsList.length === 0 ? (
+                  <Typography
+                    sx={{
+                      color: 'var(--text-secondary)',
+                      fontSize: 'var(--body-base-size)',
+                    }}
+                  >
+                    No suspects recorded yet.
+                  </Typography>
+                ) : (
+                  <Grid container spacing={2}>
+                    {suspectsList.map((suspect) => (
+                      <Grid item xs={12} sm={6} key={suspect.id}>
+                        <Card
+                          className="glass-effect"
+                          variant="outlined"
+                          sx={{
+                            background: 'var(--glass-bg)',
+                            border: '1px solid var(--glass-border)',
+                            borderRadius: 'var(--radius-md)',
+                            transition: 'var(--transition-base)',
+                            '&:hover': {
+                              boxShadow: 'var(--shadow-glow-lg), var(--shadow-lg)',
+                              transform: 'translateY(-2px)',
+                            },
+                          }}
+                        >
+                          <CardContent>
+                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                              <Typography
+                                variant="subtitle1"
+                                sx={{
+                                  fontWeight: 'var(--font-weight-semibold)',
+                                  fontSize: 'var(--heading-h4-size)',
+                                  color: 'var(--text-primary)',
+                                }}
+                              >
+                                {suspect.name}
+                              </Typography>
+                              <Chip
+                                label={suspect.status}
+                                size="small"
+                                color={
+                                  suspect.status === 'Arrested' ? 'error' :
+                                    suspect.status === 'Cleared' ? 'success' :
+                                      suspect.status === 'Under Severe Surveillance' ? 'warning' : 'info'
+                                }
+                                sx={{
+                                  fontWeight: 'var(--font-weight-medium)',
+                                  fontSize: 'var(--label-small-size)',
+                                }}
+                              />
+                            </Box>
                             <Typography
                               variant="body2"
                               sx={{
@@ -727,111 +717,121 @@ export const CaseDetailPage: React.FC = () => {
                                 fontSize: 'var(--body-base-size)',
                               }}
                             >
-                              Phone: {suspect.phone_number}
+                              National ID: {suspect.national_id}
                             </Typography>
-                          )}
-                          {suspect.notes && (
+                            {suspect.phone_number && (
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: 'var(--text-secondary)',
+                                  fontSize: 'var(--body-base-size)',
+                                }}
+                              >
+                                Phone: {suspect.phone_number}
+                              </Typography>
+                            )}
+                            {suspect.notes && (
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: 'var(--text-primary)',
+                                  fontSize: 'var(--body-base-size)',
+                                  mt: 1,
+                                }}
+                              >
+                                {suspect.notes}
+                              </Typography>
+                            )}
                             <Typography
-                              variant="body2"
+                              variant="caption"
                               sx={{
-                                color: 'var(--text-primary)',
-                                fontSize: 'var(--body-base-size)',
+                                color: 'var(--text-tertiary)',
+                                fontSize: 'var(--caption-size)',
                                 mt: 1,
+                                display: 'block',
                               }}
                             >
-                              {suspect.notes}
+                              Added: {formatDate(suspect.created_date)}
                             </Typography>
-                          )}
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              color: 'var(--text-tertiary)',
-                              fontSize: 'var(--caption-size)',
-                              mt: 1,
-                              display: 'block',
-                            }}
-                          >
-                            Added: {formatDate(suspect.created_date)}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
-              )}
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                )}
 
-              <SuspectFormDialog
-                open={suspectDialogOpen}
-                onClose={() => setSuspectDialogOpen(false)}
-                caseId={caseData.id}
-                onSuspectAdded={handleSuspectAdded}
-              />
-            </Box>
-          )}
-          {activeTab === 2 && (
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                Complainants ({caseData.complainants?.length || 0})
-              </Typography>
-            </Box>
-          )}
-          {activeTab === 3 && (
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                Witnesses ({caseData.witnesses?.length || 0})
-              </Typography>
+                <SuspectFormDialog
+                  open={suspectDialogOpen}
+                  onClose={() => setSuspectDialogOpen(false)}
+                  caseId={caseData.id}
+                  onSuspectAdded={handleSuspectAdded}
+                />
+              </Box>
+            )}
+            {activeTab === 2 && (
+              <Box>
+                <Typography variant="h6" gutterBottom>
+                  Complainants ({caseData.complainants?.length || 0})
+                </Typography>
+              </Box>
+            )}
+            {activeTab === 3 && (
+              <Box>
+                <Typography variant="h6" gutterBottom>
+                  Witnesses ({caseData.witnesses?.length || 0})
+                </Typography>
 
-              {!caseData.witnesses || caseData.witnesses.length === 0 ? (
-                <Alert severity="info">No witnesses registered for this case yet. Submit a 'Witness Statement' evidence to add a witness.</Alert>
-              ) : (
-                <Grid container spacing={2} sx={{ mt: 1 }}>
-                  {caseData.witnesses.map((w) => (
-                    <Grid item xs={12} sm={6} md={4} key={w.id}>
-                      <Card variant="outlined" sx={{ height: '100%', position: 'relative' }}>
-                        <CardContent>
-                          <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
-                            <Box display="flex" alignItems="center" gap={1}>
-                              <Avatar sx={{ bgcolor: 'secondary.main', width: 32, height: 32 }}>
-                                <RecordVoiceOver fontSize="small" />
-                              </Avatar>
-                              <Typography variant="subtitle1" fontWeight="bold">
-                                {w.witness_name || w.witness?.full_name || 'Anonymous Witness'}
-                              </Typography>
+                {!caseData.witnesses || caseData.witnesses.length === 0 ? (
+                  <Alert severity="info">No witnesses registered for this case yet. Submit a 'Witness Statement' evidence to add a witness.</Alert>
+                ) : (
+                  <Grid container spacing={2} sx={{ mt: 1 }}>
+                    {caseData.witnesses.map((w) => (
+                      <Grid item xs={12} sm={6} md={4} key={w.id}>
+                        <Card variant="outlined" sx={{ height: '100%', position: 'relative' }}>
+                          <CardContent>
+                            <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
+                              <Box display="flex" alignItems="center" gap={1}>
+                                <Avatar sx={{ bgcolor: 'secondary.main', width: 32, height: 32 }}>
+                                  <RecordVoiceOver fontSize="small" />
+                                </Avatar>
+                                <Typography variant="subtitle1" fontWeight="bold">
+                                  {w.witness_name || w.witness?.full_name || 'Anonymous Witness'}
+                                </Typography>
+                              </Box>
+                              {w.witness && (
+                                <Chip label="User" size="small" color="primary" variant="outlined" />
+                              )}
                             </Box>
-                            {w.witness && (
-                              <Chip label="User" size="small" color="primary" variant="outlined" />
-                            )}
-                          </Box>
 
-                          <Typography variant="body2" color="text.secondary">
-                            National ID: {w.witness_national_id || w.witness?.national_id || 'N/A'}
-                          </Typography>
-
-                          {(w.witness_phone || w.witness?.phone_number) && (
                             <Typography variant="body2" color="text.secondary">
-                              Phone: {w.witness_phone || w.witness?.phone_number}
+                              National ID: {w.witness_national_id || w.witness?.national_id || 'N/A'}
                             </Typography>
-                          )}
 
-                          {w.notes && (
-                            <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic' }}>
-                              {w.notes}
+                            {(w.witness_phone || w.witness?.phone_number) && (
+                              <Typography variant="body2" color="text.secondary">
+                                Phone: {w.witness_phone || w.witness?.phone_number}
+                              </Typography>
+                            )}
+
+                            {w.notes && (
+                              <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic' }}>
+                                {w.notes}
+                              </Typography>
+                            )}
+
+                            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                              Added: {formatDate(w.added_date)}
                             </Typography>
-                          )}
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                )}
+              </Box>
+            )}
 
-                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                            Added: {formatDate(w.added_date)}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
-              )}
-            </Box>
-          )}
-
-          {/* ═══════════════════════════════════════════════════════════
+            {/* ═══════════════════════════════════════════════════════════
               INTERROGATION TAB (tab index 4)
               Role-based panels:
                 • Sergeant / Detective → Submit guilt score
@@ -839,308 +839,308 @@ export const CaseDetailPage: React.FC = () => {
                 • Police Chief        → Approve critical decisions
                 • Everyone            → Read-only scores & decisions
           ═══════════════════════════════════════════════════════════ */}
-          {activeTab === 4 && (
-            <Box>
-              {interrogationLoading && <LinearProgress sx={{ mb: 2 }} />}
+            {activeTab === 4 && (
+              <Box>
+                {interrogationLoading && <LinearProgress sx={{ mb: 2 }} />}
 
-              {/* ── 1. Guilt Score Form (Sergeant / Detective) ─────── */}
-              {(hasRole('Sergeant') || hasRole('Detective')) && (
-                <Card variant="outlined" sx={{ mb: 3, border: '1px solid', borderColor: 'warning.main' }}>
-                  <CardContent>
-                    <Box display="flex" alignItems="center" gap={1} mb={2}>
-                      <PersonSearch color="warning" />
-                      <Typography variant="h6">Submit Guilt Score</Typography>
-                    </Box>
+                {/* ── 1. Guilt Score Form (Sergeant / Detective) ─────── */}
+                {(hasRole('Sergeant') || hasRole('Detective')) && (
+                  <Card variant="outlined" sx={{ mb: 3, border: '1px solid', borderColor: 'warning.main' }}>
+                    <CardContent>
+                      <Box display="flex" alignItems="center" gap={1} mb={2}>
+                        <PersonSearch color="warning" />
+                        <Typography variant="h6">Submit Guilt Score</Typography>
+                      </Box>
 
-                    {scoreSuccess && (
-                      <Alert severity="success" sx={{ mb: 2 }} onClose={() => setScoreSuccess(false)}>
-                        Guilt score submitted successfully!
-                      </Alert>
-                    )}
-                    {scoreError && (
-                      <Alert severity="error" sx={{ mb: 2 }} onClose={() => setScoreError(null)}>
-                        {scoreError}
-                      </Alert>
-                    )}
+                      {scoreSuccess && (
+                        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setScoreSuccess(false)}>
+                          Guilt score submitted successfully!
+                        </Alert>
+                      )}
+                      {scoreError && (
+                        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setScoreError(null)}>
+                          {scoreError}
+                        </Alert>
+                      )}
 
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={4}>
-                        <FormControl fullWidth size="small">
-                          <InputLabel>Arrested Suspect</InputLabel>
-                          <Select
-                            id="guilt-score-suspect"
-                            value={selectedSuspectId}
-                            label="Arrested Suspect"
-                            onChange={(e) => setSelectedSuspectId(e.target.value as number)}
-                          >
-                            {suspectsList.length === 0 && (
-                              <MenuItem disabled>No suspects in this case yet</MenuItem>
-                            )}
-                            {suspectsList.map((s) => (
-                              <MenuItem key={s.id} value={s.id}>
-                                {s.name || `Suspect #${s.id}`}
-                                <Chip label={s.status} size="small" sx={{ ml: 1 }}
-                                  color={s.status === 'Arrested' ? 'error' : s.status === 'Cleared' ? 'success' : 'default'}
-                                />
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      </Grid>
-
-                      <Grid item xs={12} sm={8}>
-                        <Typography variant="body2" gutterBottom>
-                          Guilt Score: <strong>{guiltScoreValue} / 10</strong>
-                        </Typography>
-                        <Slider
-                          id="guilt-score-slider"
-                          value={guiltScoreValue}
-                          min={1}
-                          max={10}
-                          step={1}
-                          marks
-                          valueLabelDisplay="auto"
-                          onChange={(_, v) => setGuiltScoreValue(v as number)}
-                          color="warning"
-                        />
-                      </Grid>
-
-                      <Grid item xs={12}>
-                        <TextField
-                          id="guilt-score-justification"
-                          label="Justification"
-                          multiline
-                          rows={3}
-                          fullWidth
-                          value={guiltJustification}
-                          onChange={(e) => setGuiltJustification(e.target.value)}
-                          placeholder="Describe the observations and evidence supporting this score..."
-                        />
-                      </Grid>
-
-                      <Grid item xs={12}>
-                        <Button
-                          variant="contained"
-                          color="warning"
-                          disabled={!selectedSuspectId || !guiltJustification.trim() || scoreSubmitting}
-                          onClick={handleSubmitGuiltScore}
-                        >
-                          {scoreSubmitting ? 'Submitting...' : 'Submit Score'}
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* ── 2. All Submitted Guilt Scores (read-only) ─────── */}
-              <Typography variant="h6" gutterBottom>
-                Guilt Scores ({guiltScores.length})
-              </Typography>
-              {guiltScores.length === 0 ? (
-                <Typography color="text.secondary" sx={{ mb: 3 }}>
-                  No guilt scores submitted yet.
-                </Typography>
-              ) : (
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                  {guiltScores.map((gs) => (
-                    <Grid item xs={12} sm={6} key={gs.id}>
-                      <Card variant="outlined">
-                        <CardContent>
-                          <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                            <Typography variant="subtitle2">
-                              {(gs.assigned_by as any)?.full_name || (gs.assigned_by as any)?.username}
-                            </Typography>
-                            <Chip
-                              label={`${gs.score} / 10`}
-                              color={gs.score >= 7 ? 'error' : gs.score >= 4 ? 'warning' : 'success'}
-                              size="small"
-                            />
-                          </Box>
-                          <Typography variant="body2" color="text.secondary">{gs.justification}</Typography>
-                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                            {formatDateTime(gs.assigned_date)}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
-              )}
-
-              <Divider sx={{ my: 2 }} />
-
-              {/* ── 3. Captain Decision Form ───────────────────────── */}
-              {hasRole('Captain') && (
-                <Card variant="outlined" sx={{ mb: 3, border: '1px solid', borderColor: 'primary.main' }}>
-                  <CardContent>
-                    <Box display="flex" alignItems="center" gap={1} mb={2}>
-                      <Gavel color="primary" />
-                      <Typography variant="h6">Make Captain Decision</Typography>
-                    </Box>
-
-                    {decisionSuccess && (
-                      <Alert severity="success" sx={{ mb: 2 }} onClose={() => setDecisionSuccess(false)}>
-                        Decision recorded successfully!
-                      </Alert>
-                    )}
-                    {decisionError && (
-                      <Alert severity="error" sx={{ mb: 2 }} onClose={() => setDecisionError(null)}>
-                        {decisionError}
-                      </Alert>
-                    )}
-
-                    {guiltScores.length < 2 && (
-                      <Alert severity="warning" sx={{ mb: 2 }}>
-                        Waiting for scores from both Sergeant and Detective before making a decision.
-                      </Alert>
-                    )}
-
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={4}>
-                        <FormControl fullWidth size="small">
-                          <InputLabel>Suspect</InputLabel>
-                          <Select
-                            id="captain-decision-suspect"
-                            value={captainSuspectId}
-                            label="Suspect"
-                            onChange={(e) => setCaptainSuspectId(e.target.value as number)}
-                          >
-                            {suspectsList.length === 0 && (
-                              <MenuItem disabled>No suspects in this case yet</MenuItem>
-                            )}
-                            {suspectsList.map((s) => (
-                              <MenuItem key={s.id} value={s.id}>
-                                {s.name || `Suspect #${s.id}`}
-                                <Chip label={s.status} size="small" sx={{ ml: 1 }}
-                                  color={s.status === 'Arrested' ? 'error' : s.status === 'Cleared' ? 'success' : 'default'}
-                                />
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      </Grid>
-
-                      <Grid item xs={12} sm={4}>
-                        <FormControl fullWidth size="small">
-                          <InputLabel>Decision</InputLabel>
-                          <Select
-                            id="captain-decision-type"
-                            value={captainDecision}
-                            label="Decision"
-                            onChange={(e) => setCaptainDecision(e.target.value as any)}
-                          >
-                            <MenuItem value="Approve Arrest">Approve Arrest</MenuItem>
-                            <MenuItem value="Reject">Reject</MenuItem>
-                            <MenuItem value="Request More Evidence">Request More Evidence</MenuItem>
-                          </Select>
-                        </FormControl>
-                      </Grid>
-
-                      <Grid item xs={12}>
-                        <TextField
-                          id="captain-decision-comments"
-                          label="Comments"
-                          multiline
-                          rows={3}
-                          fullWidth
-                          value={captainComments}
-                          onChange={(e) => setCaptainComments(e.target.value)}
-                          placeholder="Summarise the evidence, statements, and guilt scores that inform this decision..."
-                        />
-                      </Grid>
-
-                      <Grid item xs={12}>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          startIcon={<Gavel />}
-                          disabled={!captainSuspectId || !captainComments.trim() || decisionSubmitting}
-                          onClick={handleSubmitCaptainDecision}
-                        >
-                          {decisionSubmitting ? 'Submitting...' : 'Record Decision'}
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* ── 4. Captain Decisions List ─────────────────────── */}
-              <Typography variant="h6" gutterBottom>
-                Captain Decisions ({captainDecisions.length})
-              </Typography>
-              {captainDecisions.length === 0 ? (
-                <Typography color="text.secondary" sx={{ mb: 3 }}>No decisions recorded yet.</Typography>
-              ) : (
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                  {captainDecisions.map((dec) => (
-                    <Grid item xs={12} key={dec.id}>
-                      <Card variant="outlined" sx={{
-                        borderColor: dec.decision === 'Approve Arrest' ? 'success.main' :
-                          dec.decision === 'Reject' ? 'error.main' : 'warning.main'
-                      }}>
-                        <CardContent>
-                          <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
-                            <Box>
-                              <Chip
-                                label={dec.decision}
-                                color={dec.decision === 'Approve Arrest' ? 'success' : dec.decision === 'Reject' ? 'error' : 'warning'}
-                                sx={{ mr: 1 }}
-                              />
-                              {dec.requires_chief_approval && (
-                                <Chip
-                                  label={dec.chief_approval === null ? '⏳ Awaiting Chief' : dec.chief_approval ? '✅ Chief Approved' : '❌ Chief Rejected'}
-                                  color={dec.chief_approval === null ? 'default' : dec.chief_approval ? 'success' : 'error'}
-                                  size="small"
-                                />
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} sm={4}>
+                          <FormControl fullWidth size="small">
+                            <InputLabel>Arrested Suspect</InputLabel>
+                            <Select
+                              id="guilt-score-suspect"
+                              value={selectedSuspectId}
+                              label="Arrested Suspect"
+                              onChange={(e) => setSelectedSuspectId(e.target.value as number)}
+                            >
+                              {suspectsList.length === 0 && (
+                                <MenuItem disabled>No suspects in this case yet</MenuItem>
                               )}
-                            </Box>
-                            <Typography variant="caption" color="text.secondary">
-                              {formatDateTime(dec.decided_at)}
-                            </Typography>
-                          </Box>
-                          {dec.comments && (
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{dec.comments}</Typography>
-                          )}
+                              {suspectsList.map((s) => (
+                                <MenuItem key={s.id} value={s.id}>
+                                  {s.name || `Suspect #${s.id}`}
+                                  <Chip label={s.status} size="small" sx={{ ml: 1 }}
+                                    color={s.status === 'Arrested' ? 'error' : s.status === 'Cleared' ? 'success' : 'default'}
+                                  />
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        </Grid>
 
-                          {/* Police Chief approval buttons */}
-                          {hasRole('Police Chief') && dec.requires_chief_approval && dec.chief_approval === null && (
-                            <Box display="flex" gap={1} mt={1}>
-                              <Button
-                                id={`chief-approve-${dec.id}`}
+                        <Grid item xs={12} sm={8}>
+                          <Typography variant="body2" gutterBottom>
+                            Guilt Score: <strong>{guiltScoreValue} / 10</strong>
+                          </Typography>
+                          <Slider
+                            id="guilt-score-slider"
+                            value={guiltScoreValue}
+                            min={1}
+                            max={10}
+                            step={1}
+                            marks
+                            valueLabelDisplay="auto"
+                            onChange={(_, v) => setGuiltScoreValue(v as number)}
+                            color="warning"
+                          />
+                        </Grid>
+
+                        <Grid item xs={12}>
+                          <TextField
+                            id="guilt-score-justification"
+                            label="Justification"
+                            multiline
+                            rows={3}
+                            fullWidth
+                            value={guiltJustification}
+                            onChange={(e) => setGuiltJustification(e.target.value)}
+                            placeholder="Describe the observations and evidence supporting this score..."
+                          />
+                        </Grid>
+
+                        <Grid item xs={12}>
+                          <Button
+                            variant="contained"
+                            color="warning"
+                            disabled={!selectedSuspectId || !guiltJustification.trim() || scoreSubmitting}
+                            onClick={handleSubmitGuiltScore}
+                          >
+                            {scoreSubmitting ? 'Submitting...' : 'Submit Score'}
+                          </Button>
+                        </Grid>
+                      </Grid>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* ── 2. All Submitted Guilt Scores (read-only) ─────── */}
+                <Typography variant="h6" gutterBottom>
+                  Guilt Scores ({guiltScores.length})
+                </Typography>
+                {guiltScores.length === 0 ? (
+                  <Typography color="text.secondary" sx={{ mb: 3 }}>
+                    No guilt scores submitted yet.
+                  </Typography>
+                ) : (
+                  <Grid container spacing={2} sx={{ mb: 3 }}>
+                    {guiltScores.map((gs) => (
+                      <Grid item xs={12} sm={6} key={gs.id}>
+                        <Card variant="outlined">
+                          <CardContent>
+                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                              <Typography variant="subtitle2">
+                                {(gs.assigned_by as any)?.full_name || (gs.assigned_by as any)?.username}
+                              </Typography>
+                              <Chip
+                                label={`${gs.score} / 10`}
+                                color={gs.score >= 7 ? 'error' : gs.score >= 4 ? 'warning' : 'success'}
                                 size="small"
-                                variant="contained"
-                                color="success"
-                                startIcon={<HowToVote />}
-                                disabled={chiefApproving === dec.id}
-                                onClick={() => handleChiefApproval(dec.id, true)}
-                              >
-                                Approve
-                              </Button>
-                              <Button
-                                id={`chief-reject-${dec.id}`}
-                                size="small"
-                                variant="outlined"
-                                color="error"
-                                disabled={chiefApproving === dec.id}
-                                onClick={() => handleChiefApproval(dec.id, false)}
-                              >
-                                Reject
-                              </Button>
+                              />
                             </Box>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
-              )}
-              {chiefError && <Alert severity="error">{chiefError}</Alert>}
-            </Box>
-          )}
-        </Box>
-      </Paper>
+                            <Typography variant="body2" color="text.secondary">{gs.justification}</Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                              {formatDateTime(gs.assigned_date)}
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                )}
+
+                <Divider sx={{ my: 2 }} />
+
+                {/* ── 3. Captain Decision Form ───────────────────────── */}
+                {hasRole('Captain') && (
+                  <Card variant="outlined" sx={{ mb: 3, border: '1px solid', borderColor: 'primary.main' }}>
+                    <CardContent>
+                      <Box display="flex" alignItems="center" gap={1} mb={2}>
+                        <Gavel color="primary" />
+                        <Typography variant="h6">Make Captain Decision</Typography>
+                      </Box>
+
+                      {decisionSuccess && (
+                        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setDecisionSuccess(false)}>
+                          Decision recorded successfully!
+                        </Alert>
+                      )}
+                      {decisionError && (
+                        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setDecisionError(null)}>
+                          {decisionError}
+                        </Alert>
+                      )}
+
+                      {guiltScores.length < 2 && (
+                        <Alert severity="warning" sx={{ mb: 2 }}>
+                          Waiting for scores from both Sergeant and Detective before making a decision.
+                        </Alert>
+                      )}
+
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} sm={4}>
+                          <FormControl fullWidth size="small">
+                            <InputLabel>Suspect</InputLabel>
+                            <Select
+                              id="captain-decision-suspect"
+                              value={captainSuspectId}
+                              label="Suspect"
+                              onChange={(e) => setCaptainSuspectId(e.target.value as number)}
+                            >
+                              {suspectsList.length === 0 && (
+                                <MenuItem disabled>No suspects in this case yet</MenuItem>
+                              )}
+                              {suspectsList.map((s) => (
+                                <MenuItem key={s.id} value={s.id}>
+                                  {s.name || `Suspect #${s.id}`}
+                                  <Chip label={s.status} size="small" sx={{ ml: 1 }}
+                                    color={s.status === 'Arrested' ? 'error' : s.status === 'Cleared' ? 'success' : 'default'}
+                                  />
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        </Grid>
+
+                        <Grid item xs={12} sm={4}>
+                          <FormControl fullWidth size="small">
+                            <InputLabel>Decision</InputLabel>
+                            <Select
+                              id="captain-decision-type"
+                              value={captainDecision}
+                              label="Decision"
+                              onChange={(e) => setCaptainDecision(e.target.value as any)}
+                            >
+                              <MenuItem value="Approve Arrest">Approve Arrest</MenuItem>
+                              <MenuItem value="Reject">Reject</MenuItem>
+                              <MenuItem value="Request More Evidence">Request More Evidence</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Grid>
+
+                        <Grid item xs={12}>
+                          <TextField
+                            id="captain-decision-comments"
+                            label="Comments"
+                            multiline
+                            rows={3}
+                            fullWidth
+                            value={captainComments}
+                            onChange={(e) => setCaptainComments(e.target.value)}
+                            placeholder="Summarise the evidence, statements, and guilt scores that inform this decision..."
+                          />
+                        </Grid>
+
+                        <Grid item xs={12}>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<Gavel />}
+                            disabled={!captainSuspectId || !captainComments.trim() || decisionSubmitting}
+                            onClick={handleSubmitCaptainDecision}
+                          >
+                            {decisionSubmitting ? 'Submitting...' : 'Record Decision'}
+                          </Button>
+                        </Grid>
+                      </Grid>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* ── 4. Captain Decisions List ─────────────────────── */}
+                <Typography variant="h6" gutterBottom>
+                  Captain Decisions ({captainDecisions.length})
+                </Typography>
+                {captainDecisions.length === 0 ? (
+                  <Typography color="text.secondary" sx={{ mb: 3 }}>No decisions recorded yet.</Typography>
+                ) : (
+                  <Grid container spacing={2} sx={{ mb: 3 }}>
+                    {captainDecisions.map((dec) => (
+                      <Grid item xs={12} key={dec.id}>
+                        <Card variant="outlined" sx={{
+                          borderColor: dec.decision === 'Approve Arrest' ? 'success.main' :
+                            dec.decision === 'Reject' ? 'error.main' : 'warning.main'
+                        }}>
+                          <CardContent>
+                            <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
+                              <Box>
+                                <Chip
+                                  label={dec.decision}
+                                  color={dec.decision === 'Approve Arrest' ? 'success' : dec.decision === 'Reject' ? 'error' : 'warning'}
+                                  sx={{ mr: 1 }}
+                                />
+                                {dec.requires_chief_approval && (
+                                  <Chip
+                                    label={dec.chief_approval === null ? '⏳ Awaiting Chief' : dec.chief_approval ? '✅ Chief Approved' : '❌ Chief Rejected'}
+                                    color={dec.chief_approval === null ? 'default' : dec.chief_approval ? 'success' : 'error'}
+                                    size="small"
+                                  />
+                                )}
+                              </Box>
+                              <Typography variant="caption" color="text.secondary">
+                                {formatDateTime(dec.decided_at)}
+                              </Typography>
+                            </Box>
+                            {dec.comments && (
+                              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{dec.comments}</Typography>
+                            )}
+
+                            {/* Police Chief approval buttons */}
+                            {hasRole('Police Chief') && dec.requires_chief_approval && dec.chief_approval === null && (
+                              <Box display="flex" gap={1} mt={1}>
+                                <Button
+                                  id={`chief-approve-${dec.id}`}
+                                  size="small"
+                                  variant="contained"
+                                  color="success"
+                                  startIcon={<HowToVote />}
+                                  disabled={chiefApproving === dec.id}
+                                  onClick={() => handleChiefApproval(dec.id, true)}
+                                >
+                                  Approve
+                                </Button>
+                                <Button
+                                  id={`chief-reject-${dec.id}`}
+                                  size="small"
+                                  variant="outlined"
+                                  color="error"
+                                  disabled={chiefApproving === dec.id}
+                                  onClick={() => handleChiefApproval(dec.id, false)}
+                                >
+                                  Reject
+                                </Button>
+                              </Box>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                )}
+                {chiefError && <Alert severity="error">{chiefError}</Alert>}
+              </Box>
+            )}
+          </Box>
+        </Paper>
       </Container>
     </Box>
   );
