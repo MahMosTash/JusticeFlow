@@ -59,99 +59,265 @@ export const PayBillsPage: React.FC = () => {
     });
 
     return (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-                <Typography variant="h4" component="h1">
-                    Pay Bills & Fines
-                </Typography>
-            </Box>
-
-            <Typography variant="body1" color="text.secondary" paragraph>
-                Use this portal to search for an arrested suspect and pay their pending Bail or Court Fines to authorize their release.
-            </Typography>
-
-            <TextField
-                fullWidth
-                placeholder="Search by Suspect Name, National ID, or Case Title..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                sx={{ mb: 4 }}
-                InputProps={{
-                    startAdornment: (
-                        <InputAdornment position="start">
-                            <Search />
-                        </InputAdornment>
-                    ),
-                }}
-            />
-
-            {error && (
-                <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
-                    {error}
-                </Alert>
-            )}
-
-            {loading ? (
-                <CardSkeleton count={3} />
-            ) : filteredBills.length === 0 ? (
-                <Card variant="outlined" sx={{ textAlign: 'center', py: 5, bgcolor: 'background.default' }}>
-                    <Typography color="text.secondary">
-                        {bills.length === 0 ? 'No pending bills or fines in the entire system.' : 'No bills match your search criteria.'}
+        <Box
+            sx={{
+                minHeight: '100vh',
+                background: 'var(--gradient-page-bg)',
+                position: 'relative',
+                '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'var(--radial-glow-combined)',
+                    pointerEvents: 'none',
+                    zIndex: 0,
+                },
+            }}
+        >
+            <Container maxWidth="lg" sx={{ py: 6, position: 'relative', zIndex: 1 }}>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+                    <Typography
+                        variant="h1"
+                        component="h1"
+                        sx={{
+                            fontSize: 'var(--heading-h1-size)',
+                            fontWeight: 'var(--heading-h1-weight)',
+                            lineHeight: 'var(--heading-h1-line-height)',
+                            letterSpacing: 'var(--heading-h1-letter-spacing)',
+                            background: 'var(--gradient-accent)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                        }}
+                    >
+                        Pay Bills & Fines
                     </Typography>
-                </Card>
-            ) : (
-                <Grid container spacing={3}>
-                    {filteredBills.map((bill) => (
-                        <Grid item xs={12} md={6} key={bill.id}>
-                            <Card variant="outlined" sx={{
-                                border: '2px solid',
-                                borderColor: bill.type === 'Fine' ? 'error.light' : 'warning.light',
-                                display: 'flex', flexDirection: 'column', height: '100%'
-                            }}>
-                                <CardContent sx={{ flexGrow: 1 }}>
-                                    <Box display="flex" justifyContent="space-between" mb={2}>
-                                        <Typography variant="h6" color={bill.type === 'Fine' ? 'error.main' : 'warning.main'}>
-                                            {bill.type} Payment
+                </Box>
+
+                <Typography
+                    variant="body1"
+                    sx={{
+                        fontSize: 'var(--body-large-size)',
+                        color: 'var(--text-secondary)',
+                        mb: 4,
+                        lineHeight: 'var(--line-height-relaxed)',
+                    }}
+                >
+                    Use this portal to search for an arrested suspect and pay their pending Bail or Court Fines to authorize their release.
+                </Typography>
+
+                <TextField
+                    fullWidth
+                    placeholder="Search by Suspect Name, National ID, or Case Title..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    sx={{
+                        mb: 4,
+                        '& .MuiOutlinedInput-root': {
+                            background: 'var(--input-bg)',
+                            borderRadius: 'var(--radius-md)',
+                            color: 'var(--text-primary)',
+                            '& fieldset': {
+                                borderColor: 'var(--glass-border)',
+                            },
+                            '&:hover fieldset': {
+                                borderColor: 'var(--accent-primary)',
+                            },
+                            '&.Mui-focused fieldset': {
+                                borderColor: 'var(--accent-primary)',
+                                boxShadow: 'var(--shadow-glow)',
+                            },
+                        },
+                        '& .MuiInputLabel-root': {
+                            color: 'var(--text-secondary)',
+                            '&.Mui-focused': {
+                                color: 'var(--accent-primary)',
+                            },
+                        },
+                    }}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <Search sx={{ color: 'var(--text-secondary)' }} />
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+
+                {error && (
+                    <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
+                        {error}
+                    </Alert>
+                )}
+
+                {loading ? (
+                    <CardSkeleton count={3} />
+                ) : filteredBills.length === 0 ? (
+                    <Card
+                        className="glass-effect"
+                        variant="outlined"
+                        sx={{
+                            textAlign: 'center',
+                            py: 5,
+                            background: 'var(--glass-bg)',
+                            border: '1px solid var(--glass-border)',
+                            borderRadius: 'var(--radius-lg)',
+                            boxShadow: 'var(--shadow-lg)',
+                        }}
+                    >
+                        <Typography
+                            sx={{
+                                color: 'var(--text-secondary)',
+                                fontSize: 'var(--body-base-size)',
+                            }}
+                        >
+                            {bills.length === 0 ? 'No pending bills or fines in the entire system.' : 'No bills match your search criteria.'}
+                        </Typography>
+                    </Card>
+                ) : (
+                    <Grid container spacing={3}>
+                        {filteredBills.map((bill) => (
+                            <Grid item xs={12} md={6} key={bill.id}>
+                                <Card
+                                    className="glass-effect"
+                                    variant="outlined"
+                                    sx={{
+                                        border: '2px solid',
+                                        borderColor: bill.type === 'Fine' ? 'var(--accent-error)' : 'var(--accent-warning)',
+                                        background: 'var(--glass-bg)',
+                                        borderRadius: 'var(--radius-lg)',
+                                        boxShadow: 'var(--shadow-lg)',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        height: '100%',
+                                        transition: 'var(--transition-base)',
+                                        '&:hover': {
+                                            boxShadow: 'var(--shadow-glow-lg), var(--shadow-xl)',
+                                            transform: 'translateY(-4px)',
+                                        },
+                                    }}
+                                >
+                                    <CardContent sx={{ flexGrow: 1 }}>
+                                        <Box display="flex" justifyContent="space-between" mb={2}>
+                                            <Typography
+                                                variant="h6"
+                                                sx={{
+                                                    color: bill.type === 'Fine' ? 'var(--accent-error)' : 'var(--accent-warning)',
+                                                    fontSize: 'var(--heading-h4-size)',
+                                                    fontWeight: 'var(--heading-h4-weight)',
+                                                }}
+                                            >
+                                                {bill.type} Payment
+                                            </Typography>
+                                            <Chip
+                                                label={`${Number(bill.amount).toLocaleString()} IRR`}
+                                                sx={{
+                                                    fontWeight: 'var(--font-weight-bold)',
+                                                    fontSize: 'var(--label-base-size)',
+                                                    background: 'var(--gradient-accent)',
+                                                    color: 'var(--text-primary)',
+                                                }}
+                                            />
+                                        </Box>
+
+                                        <Typography
+                                            variant="subtitle2"
+                                            sx={{
+                                                color: 'var(--text-secondary)',
+                                                fontSize: 'var(--label-base-size)',
+                                                display: 'block',
+                                                mb: 0.5,
+                                            }}
+                                        >
+                                            Suspect
                                         </Typography>
-                                        <Chip
-                                            label={`${Number(bill.amount).toLocaleString()} IRR`}
-                                            color="primary"
-                                            sx={{ fontWeight: 'bold' }}
-                                        />
+                                        <Typography
+                                            variant="body1"
+                                            sx={{
+                                                fontWeight: 'var(--font-weight-medium)',
+                                                fontSize: 'var(--body-base-size)',
+                                                color: 'var(--text-primary)',
+                                                mb: 2,
+                                            }}
+                                        >
+                                            {bill.suspect.suspect_name}
+                                        </Typography>
+
+                                        <Typography
+                                            variant="subtitle2"
+                                            sx={{
+                                                color: 'var(--text-secondary)',
+                                                fontSize: 'var(--label-base-size)',
+                                                mt: 1,
+                                                display: 'block',
+                                                mb: 0.5,
+                                            }}
+                                        >
+                                            Case
+                                        </Typography>
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                fontSize: 'var(--body-base-size)',
+                                                color: 'var(--text-primary)',
+                                                mb: 2,
+                                            }}
+                                        >
+                                            #{bill.case.id} — {bill.case.title}
+                                        </Typography>
+
+                                        <Typography
+                                            variant="caption"
+                                            sx={{
+                                                color: 'var(--text-secondary)',
+                                                fontSize: 'var(--caption-size)',
+                                                display: 'block',
+                                                mt: 2,
+                                            }}
+                                        >
+                                            Issued: {formatDateTime(bill.created_date)}
+                                        </Typography>
+                                    </CardContent>
+                                    <Box p={2} pt={0}>
+                                        <Button
+                                            variant="contained"
+                                            color={bill.type === 'Fine' ? 'error' : 'warning'}
+                                            fullWidth
+                                            startIcon={<Payment />}
+                                            onClick={() => handlePay(bill)}
+                                            disabled={processingId !== null}
+                                            sx={{
+                                                background: bill.type === 'Fine' ? 'var(--accent-error)' : 'var(--gradient-accent)',
+                                                color: 'var(--text-primary)',
+                                                boxShadow: 'var(--button-shadow)',
+                                                borderRadius: 'var(--radius-md)',
+                                                py: 1.5,
+                                                fontWeight: 'var(--font-weight-semibold)',
+                                                textTransform: 'none',
+                                                fontSize: 'var(--button-base-size)',
+                                                '&:hover': {
+                                                    background: bill.type === 'Fine' ? 'var(--accent-error)' : 'var(--gradient-accent-hover)',
+                                                    boxShadow: 'var(--button-shadow-hover)',
+                                                },
+                                                '&:disabled': {
+                                                    opacity: 0.6,
+                                                },
+                                                transition: 'var(--transition-base)',
+                                            }}
+                                        >
+                                            {processingId === bill.id ? 'Connecting to Gateway...' : `Pay ${bill.type} via Zibal`}
+                                        </Button>
+                                        {processingId === bill.id && <LinearProgress sx={{ mt: 1, color: 'var(--accent-primary)' }} />}
                                     </Box>
-
-                                    <Typography variant="subtitle2" color="text.secondary">Suspect</Typography>
-                                    <Typography variant="body1" fontWeight={500} gutterBottom>
-                                        {bill.suspect.suspect_name}
-                                    </Typography>
-
-                                    <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1 }}>Case</Typography>
-                                    <Typography variant="body2" gutterBottom>
-                                        #{bill.case.id} — {bill.case.title}
-                                    </Typography>
-
-                                    <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 2 }}>
-                                        Issued: {formatDateTime(bill.created_date)}
-                                    </Typography>
-                                </CardContent>
-                                <Box p={2} pt={0}>
-                                    <Button
-                                        variant="contained"
-                                        color={bill.type === 'Fine' ? 'error' : 'warning'}
-                                        fullWidth
-                                        startIcon={<Payment />}
-                                        onClick={() => handlePay(bill)}
-                                        disabled={processingId !== null}
-                                    >
-                                        {processingId === bill.id ? 'Connecting to Gateway...' : `Pay ${bill.type} via Zibal`}
-                                    </Button>
-                                    {processingId === bill.id && <LinearProgress sx={{ mt: 1 }} />}
-                                </Box>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
-            )}
-        </Container>
+                                </Card>
+                            </Grid>
+                        ))}
+                    </Grid>
+                )}
+            </Container>
+        </Box>
     );
 };
