@@ -90,35 +90,46 @@ class EvidenceViewSet(viewsets.ModelViewSet):
             case=case,
         )
         
-        # Auto-create Witness if witness statement
-        if evidence.evidence_type == 'witness_statement' and evidence.witness_name:
+        # Auto-create Witness record if this is a witness statement
+        if evidence.evidence_type == 'witness_statement':
             from apps.cases.models import CaseWitness
             from apps.accounts.models import User
             
-            # See if the recorded_by user matches or if it's completely external
-            # First try to find a user by national ID or phone if provided
-            witness_user = None
-            if evidence.witness_national_id:
-                witness_user = User.objects.filter(national_id=evidence.witness_national_id).first()
+            w_name = evidence.witness_name
+            w_national_id = evidence.witness_national_id
+            w_phone = evidence.witness_phone
             
-            # Try to get or create witness link
-                CaseWitness.objects.get_or_create(
+            # 1. Try to find a matching system user by national ID
+            witness_user = None
+            if w_national_id:
+                witness_user = User.objects.filter(national_id=w_national_id).first()
+            
+            # 2. Logic for CaseWitness creation
+            if witness_user:
+                # Registered User
+                CaseWitness.objects.update_or_create(
                     case=case,
                     witness=witness_user,
                     defaults={
-                        'witness_name': evidence.witness_name or (witness_user.get_full_name() if witness_user else ''),
-                        'witness_national_id': evidence.witness_national_id or witness_user.national_id,
-                        'witness_phone': evidence.witness_phone or witness_user.phone_number,
+                        'witness_name': w_name or witness_user.get_full_name(),
+                        'witness_national_id': w_national_id or witness_user.national_id,
+                        'witness_phone': w_phone or witness_user.phone_number,
                         'notes': f"Added via Witness Statement: {evidence.title}"
                     }
                 )
-            elif evidence.witness_national_id:
-                CaseWitness.objects.get_or_create(
-                    case=case,
-                    witness_national_id=evidence.witness_national_id,
+            elif w_national_id or w_name:
+                # External Witness (at least one identifier provided - unique by case+national_id if ID exists)
+                lookup_keys = {'case': case}
+                if w_national_id:
+                    lookup_keys['witness_national_id'] = w_national_id
+                else:
+                    lookup_keys['witness_name'] = w_name
+                
+                CaseWitness.objects.update_or_create(
+                    **lookup_keys,
                     defaults={
-                        'witness_name': evidence.witness_name,
-                        'witness_phone': evidence.witness_phone,
+                        'witness_name': w_name or "Unknown Witness",
+                        'witness_phone': w_phone,
                         'notes': f"Added via Witness Statement: {evidence.title}"
                     }
                 )

@@ -378,16 +378,24 @@ export const CaseDetailPage: React.FC = () => {
                 <Typography variant="body1">{caseData.incident_location}</Typography>
               </Grid>
             )}
+            <Grid item xs={12} sm={6}>
+              <Typography variant="body2" color="text.secondary">
+                Registered Participants
+              </Typography>
+              <Typography variant="body1">
+                {caseData.complainants?.length || 0} Complainants · {caseData.witnesses?.length || 0} Witnesses
+              </Typography>
+            </Grid>
           </Grid>
         </CardContent>
       </Card>
 
       <Paper>
         <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)} variant="scrollable" scrollButtons="auto">
-          <Tab label="Evidence" />
-          <Tab label="Suspects" />
-          <Tab label="Complainants" />
-          <Tab label="Witnesses" />
+          <Tab label={`Evidence (${caseData.evidence_count || evidenceList.length || 0})`} />
+          <Tab label={`Suspects (${caseData.suspects_count || suspectsList.length || 0})`} />
+          <Tab label={`Complainants (${caseData.complainants?.length || 0})`} />
+          <Tab label={`Witnesses (${caseData.witnesses?.length || 0})`} />
           <Tab label="Interrogation" icon={<PersonSearch fontSize="small" />} iconPosition="start" />
         </Tabs>
 

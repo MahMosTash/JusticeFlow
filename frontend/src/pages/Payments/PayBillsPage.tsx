@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import {
     Container, Typography, Box, Card, CardContent, Grid, Button,
-    Alert, LinearProgress, Chip, TextField, InputAdornment
+    Alert, TextField, InputAdornment
 } from '@mui/material';
 import { Search, Payment } from '@mui/icons-material';
 import { paymentService, BailFine } from '@/services/paymentService';
-import { formatDateTime } from '@/utils/dateUtils';
 import { CardSkeleton } from '@/components/common/Skeleton';
+
+import chavoshiImg from '@/assets/Chavoshi.png';
 
 export const PayBillsPage: React.FC = () => {
     const [bills, setBills] = useState<BailFine[]>([]);
@@ -59,99 +60,213 @@ export const PayBillsPage: React.FC = () => {
     });
 
     return (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-                <Typography variant="h4" component="h1">
-                    Pay Bills & Fines
-                </Typography>
-            </Box>
-
-            <Typography variant="body1" color="text.secondary" paragraph>
-                Use this portal to search for an arrested suspect and pay their pending Bail or Court Fines to authorize their release.
-            </Typography>
-
-            <TextField
-                fullWidth
-                placeholder="Search by Suspect Name, National ID, or Case Title..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                sx={{ mb: 4 }}
-                InputProps={{
-                    startAdornment: (
-                        <InputAdornment position="start">
-                            <Search />
-                        </InputAdornment>
-                    ),
+        <Container maxWidth="lg" sx={{ py: 4, position: 'relative' }}>
+            {/* Animated Chavoshi Splash Effect */}
+            <Box
+                component="img"
+                src={chavoshiImg}
+                alt="Chavoshi Splash"
+                sx={{
+                    position: 'fixed',
+                    zIndex: 9999,
+                    pointerEvents: 'none',
+                    width: 'auto',
+                    maxHeight: '400px',
+                    animation: 'chavoshiSplash 3s forwards cubic-bezier(0.4, 0, 0.2, 1)',
+                    '@keyframes chavoshiSplash': {
+                        '0%': {
+                            opacity: 0,
+                            transform: 'translate(-50%, -50%) scale(0.3) rotate(-10deg)',
+                            left: '50%',
+                            top: '50%',
+                        },
+                        '20%': {
+                            opacity: 1,
+                            transform: 'translate(-50%, -50%) scale(1.1) rotate(0deg)',
+                            left: '50%',
+                            top: '50%',
+                        },
+                        '40%': {
+                            opacity: 1,
+                            transform: 'translate(-50%, -50%) scale(1) rotate(0deg)',
+                            left: '50%',
+                            top: '50%',
+                        },
+                        '100%': {
+                            opacity: 0,
+                            transform: 'translate(-50%, -50%) scale(0.5) rotate(0deg)',
+                            left: '50%',
+                            top: '50%',
+                        }
+                    }
                 }}
             />
 
-            {error && (
-                <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
-                    {error}
-                </Alert>
-            )}
+            <Grid container spacing={4}>
+                {/* ── LEFT COLUMN: TITLE, FILTERS, BILLS ── */}
+                <Grid item xs={12} md={8}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                        <Typography variant="h4" component="h1" fontWeight="bold">
+                            Legal Billing & Fines
+                        </Typography>
+                    </Box>
 
-            {loading ? (
-                <CardSkeleton count={3} />
-            ) : filteredBills.length === 0 ? (
-                <Card variant="outlined" sx={{ textAlign: 'center', py: 5, bgcolor: 'background.default' }}>
-                    <Typography color="text.secondary">
-                        {bills.length === 0 ? 'No pending bills or fines in the entire system.' : 'No bills match your search criteria.'}
+                    <Typography variant="body1" color="text.secondary" paragraph>
+                        Search for a suspect or defendant to pay their pending Bail or Fines.
+                        Payments are processed securely via the Zibal IPG.
                     </Typography>
-                </Card>
-            ) : (
-                <Grid container spacing={3}>
-                    {filteredBills.map((bill) => (
-                        <Grid item xs={12} md={6} key={bill.id}>
-                            <Card variant="outlined" sx={{
-                                border: '2px solid',
-                                borderColor: bill.type === 'Fine' ? 'error.light' : 'warning.light',
-                                display: 'flex', flexDirection: 'column', height: '100%'
-                            }}>
-                                <CardContent sx={{ flexGrow: 1 }}>
-                                    <Box display="flex" justifyContent="space-between" mb={2}>
-                                        <Typography variant="h6" color={bill.type === 'Fine' ? 'error.main' : 'warning.main'}>
-                                            {bill.type} Payment
-                                        </Typography>
-                                        <Chip
-                                            label={`${Number(bill.amount).toLocaleString()} IRR`}
-                                            color="primary"
-                                            sx={{ fontWeight: 'bold' }}
-                                        />
-                                    </Box>
 
-                                    <Typography variant="subtitle2" color="text.secondary">Suspect</Typography>
-                                    <Typography variant="body1" fontWeight={500} gutterBottom>
-                                        {bill.suspect.suspect_name}
-                                    </Typography>
+                    <TextField
+                        fullWidth
+                        placeholder="Search by Suspect Name, National ID, or Case Title..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        sx={{ mb: 4, bgcolor: 'background.paper' }}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <Search />
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
 
-                                    <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1 }}>Case</Typography>
-                                    <Typography variant="body2" gutterBottom>
-                                        #{bill.case.id} — {bill.case.title}
-                                    </Typography>
+                    {error && (
+                        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
+                            {error}
+                        </Alert>
+                    )}
 
-                                    <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 2 }}>
-                                        Issued: {formatDateTime(bill.created_date)}
-                                    </Typography>
-                                </CardContent>
-                                <Box p={2} pt={0}>
-                                    <Button
-                                        variant="contained"
-                                        color={bill.type === 'Fine' ? 'error' : 'warning'}
-                                        fullWidth
-                                        startIcon={<Payment />}
-                                        onClick={() => handlePay(bill)}
-                                        disabled={processingId !== null}
-                                    >
-                                        {processingId === bill.id ? 'Connecting to Gateway...' : `Pay ${bill.type} via Zibal`}
-                                    </Button>
-                                    {processingId === bill.id && <LinearProgress sx={{ mt: 1 }} />}
-                                </Box>
-                            </Card>
+                    {loading ? (
+                        <CardSkeleton count={2} />
+                    ) : filteredBills.length === 0 ? (
+                        <Card variant="outlined" sx={{ textAlign: 'center', py: 5, bgcolor: 'background.default', borderStyle: 'dashed' }}>
+                            <Typography color="text.secondary">
+                                {bills.length === 0 ? 'No pending bills found in the judicial system.' : 'No bills match your search.'}
+                            </Typography>
+                        </Card>
+                    ) : (
+                        <Grid container spacing={2}>
+                            {filteredBills.map((bill) => (
+                                <Grid item xs={12} key={bill.id}>
+                                    <Card variant="outlined" sx={{
+                                        border: '1px solid',
+                                        borderColor: 'divider',
+                                        display: 'flex',
+                                        flexDirection: { xs: 'column', sm: 'row' },
+                                        overflow: 'hidden',
+                                        transition: 'all 0.2s',
+                                        '&:hover': { boxShadow: 2, borderColor: bill.type === 'Fine' ? 'error.main' : 'warning.main' }
+                                    }}>
+                                        <Box sx={{
+                                            width: { xs: '100%', sm: '12px' },
+                                            bgcolor: bill.type === 'Fine' ? 'error.main' : 'warning.main'
+                                        }} />
+
+                                        <CardContent sx={{ flexGrow: 1, py: 2 }}>
+                                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                                                <Typography variant="subtitle2" color={bill.type === 'Fine' ? 'error.main' : 'warning.main'} fontWeight="bold" sx={{ textTransform: 'uppercase' }}>
+                                                    {bill.type}
+                                                </Typography>
+                                                <Typography variant="h6" fontWeight="bold">
+                                                    {Number(bill.amount).toLocaleString()} <Typography component="span" variant="caption">IRR</Typography>
+                                                </Typography>
+                                            </Box>
+
+                                            <Grid container spacing={1}>
+                                                <Grid item xs={12} sm={6}>
+                                                    <Typography variant="caption" color="text.secondary">SUSPECT</Typography>
+                                                    <Typography variant="body1" fontWeight={500}>{bill.suspect.suspect_name}</Typography>
+                                                </Grid>
+                                                <Grid item xs={12} sm={6}>
+                                                    <Typography variant="caption" color="text.secondary">CASE REFERENCE</Typography>
+                                                    <Typography variant="body2">#{bill.case.id} — {bill.case.title}</Typography>
+                                                </Grid>
+                                            </Grid>
+                                        </CardContent>
+
+                                        <Box p={2} display="flex" alignItems="center" bgcolor="action.hover">
+                                            <Button
+                                                variant="contained"
+                                                color={bill.type === 'Fine' ? 'error' : 'warning'}
+                                                startIcon={<Payment />}
+                                                onClick={() => handlePay(bill)}
+                                                disabled={processingId !== null}
+                                                size="large"
+                                            >
+                                                {processingId === bill.id ? 'Connecting...' : 'Pay'}
+                                            </Button>
+                                        </Box>
+                                    </Card>
+                                </Grid>
+                            ))}
                         </Grid>
-                    ))}
+                    )}
                 </Grid>
-            )}
+
+                {/* ── RIGHT COLUMN: DECORATIVE SECTION ── */}
+                <Grid item xs={12} md={4}>
+                    <Card variant="outlined" sx={{
+                        height: '100%',
+                        bgcolor: 'background.paper',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        overflow: 'hidden',
+                        minHeight: '400px'
+                    }}>
+                        <Box sx={{ position: 'relative', flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 3, textAlign: 'center' }}>
+                            {/* Animated Settle Effect */}
+                            <Box
+                                component="img"
+                                src={chavoshiImg}
+                                alt="Chavoshi"
+                                sx={{
+                                    width: '100%',
+                                    maxWidth: '280px',
+                                    height: 'auto',
+                                    opacity: 0,
+                                    animation: 'chavoshiSettle 1.5s forwards ease-out',
+                                    animationDelay: '2.5s', // Starts as splash ends
+                                    '@keyframes chavoshiSettle': {
+                                        '0%': {
+                                            opacity: 0,
+                                            transform: 'translateY(20px) scale(0.9)',
+                                        },
+                                        '100%': {
+                                            opacity: 1,
+                                            transform: 'translateY(0) scale(1)',
+                                        }
+                                    }
+                                }}
+                            />
+
+                            <Box mt={3} sx={{ opacity: 0, animation: 'fadeIn 1s forwards ease-out', animationDelay: '3.5s' }}>
+                                <Typography variant="h6" color="primary" gutterBottom fontWeight="bold">
+                                    Judicial Support
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    Helping citizens resolve legal financial obligations through modern interfaces.
+                                </Typography>
+                            </Box>
+                        </Box>
+
+                        <Box sx={{ p: 2, bgcolor: 'primary.main', color: 'primary.contrastText' }}>
+                            <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                                Justice Flow System — 2026
+                            </Typography>
+                        </Box>
+                    </Card>
+                </Grid>
+            </Grid>
+
+            <style>
+                {`
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                `}
+            </style>
         </Container>
     );
 };
