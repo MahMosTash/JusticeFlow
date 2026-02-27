@@ -5,11 +5,11 @@ from rest_framework import serializers
 from apps.investigations.models import Suspect, Interrogation, GuiltScore, CaptainDecision
 from apps.accounts.serializers import UserDetailSerializer
 from apps.cases.serializers import CaseListSerializer
+from apps.cases.models import Case
 
 
 class SuspectSerializer(serializers.ModelSerializer):
     """Serializer for Suspect model."""
-    from apps.cases.models import Case
     case = CaseListSerializer(read_only=True)
     case_id = serializers.PrimaryKeyRelatedField(
         queryset=Case.objects.all(),
@@ -74,13 +74,24 @@ class InterrogationSerializer(serializers.ModelSerializer):
 class GuiltScoreSerializer(serializers.ModelSerializer):
     """Serializer for GuiltScore model."""
     suspect = SuspectListSerializer(read_only=True)
+    suspect_id = serializers.PrimaryKeyRelatedField(
+        queryset=Suspect.objects.all(),
+        source='suspect',
+        write_only=True
+    )
     case = CaseListSerializer(read_only=True)
+    case_id = serializers.PrimaryKeyRelatedField(
+        queryset=Case.objects.all(),
+        source='case',
+        write_only=True
+    )
     assigned_by = UserDetailSerializer(read_only=True)
     
     class Meta:
         model = GuiltScore
         fields = [
-            'id', 'suspect', 'case', 'assigned_by', 'score', 'justification', 'assigned_date'
+            'id', 'suspect', 'suspect_id', 'case', 'case_id',
+            'assigned_by', 'score', 'justification', 'assigned_date'
         ]
         read_only_fields = ['id', 'assigned_date']
     
@@ -89,6 +100,15 @@ class GuiltScoreSerializer(serializers.ModelSerializer):
         if not (1 <= value <= 10):
             raise serializers.ValidationError('Guilt score must be between 1 and 10.')
         return value
+
+    def validate(self, attrs):
+        """Validate that the current user hasn't already scored this suspect."""
+        request = self.context.get('request')
+        if request and request.user:
+            suspect = attrs.get('suspect')
+            if suspect and GuiltScore.objects.filter(suspect=suspect, assigned_by=request.user).exists():
+                raise serializers.ValidationError('You have already submitted a guilt score for this suspect.')
+        return attrs
 
 
 class CaptainDecisionSerializer(serializers.ModelSerializer):
@@ -113,7 +133,15 @@ class CaptainDecisionCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = CaptainDecision
-        fields = ['case', 'suspect', 'decision', 'comments']
+        fields = [
+            'case', 'suspect', 'decision', 'comments', 
+            'requires_chief_approval', 'chief_approval', 
+            'chief_approved_by', 'chief_approval_date'
+        ]
+        read_only_fields = [
+            'requires_chief_approval', 'chief_approval', 
+            'chief_approved_by', 'chief_approval_date'
+        ]
     
     def validate(self, attrs):
         """Validate decision requirements."""

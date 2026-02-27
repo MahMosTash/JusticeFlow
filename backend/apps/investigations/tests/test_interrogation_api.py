@@ -65,8 +65,8 @@ class GuiltScoreAPITest(APITestCase):
         """Sergeant submits a valid guilt score → 201 with correct fields."""
         self._auth(self.sergeant)
         payload = {
-            'suspect': self.suspect.pk,
-            'case': self.case.pk,
+            'suspect_id': self.suspect.pk,
+            'case_id': self.case.pk,
             'score': 7,
             'justification': 'Suspect had no alibi and was identified by two witnesses.',
         }
@@ -84,8 +84,8 @@ class GuiltScoreAPITest(APITestCase):
         """Detective submits a valid guilt score → 201."""
         self._auth(self.detective)
         payload = {
-            'suspect': self.suspect.pk,
-            'case': self.case.pk,
+            'suspect_id': self.suspect.pk,
+            'case_id': self.case.pk,
             'score': 9,
             'justification': 'Fingerprints matched at the scene.',
         }
@@ -102,8 +102,8 @@ class GuiltScoreAPITest(APITestCase):
         """Same user cannot submit two scores for the same suspect → 400."""
         self._auth(self.sergeant)
         payload = {
-            'suspect': self.suspect.pk,
-            'case': self.case.pk,
+            'suspect_id': self.suspect.pk,
+            'case_id': self.case.pk,
             'score': 5,
             'justification': 'First score.',
         }
@@ -126,8 +126,8 @@ class GuiltScoreAPITest(APITestCase):
 
         for bad_score in (0, 11, -1, 100):
             payload = {
-                'suspect': self.suspect.pk,
-                'case': self.case.pk,
+                'suspect_id': self.suspect.pk,
+                'case_id': self.case.pk,
                 'score': bad_score,
                 'justification': 'Testing boundary.',
             }

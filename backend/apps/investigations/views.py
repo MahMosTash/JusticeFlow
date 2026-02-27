@@ -153,24 +153,32 @@ class GuiltScoreViewSet(viewsets.ModelViewSet):
     """
     queryset = GuiltScore.objects.all()
     serializer_class = GuiltScoreSerializer
-    permission_classes = [IsDetectiveOrSergeant]
-    
+
+    def get_permissions(self):
+        """
+        Read (list/retrieve) → any authenticated user (captain needs to see scores).
+        Write (create/update/delete) → Detective or Sergeant only.
+        """
+        if self.action in ('list', 'retrieve'):
+            return [IsAuthenticated()]
+        return [IsDetectiveOrSergeant()]
+
     def get_queryset(self):
         """Filter guilt scores."""
         queryset = GuiltScore.objects.select_related('suspect', 'case', 'assigned_by')
-        
+
         # Filter by suspect
         suspect_id = self.request.query_params.get('suspect', None)
         if suspect_id:
             queryset = queryset.filter(suspect_id=suspect_id)
-        
+
         # Filter by case
         case_id = self.request.query_params.get('case', None)
         if case_id:
             queryset = queryset.filter(case_id=case_id)
-        
+
         return queryset
-    
+
     def perform_create(self, serializer):
         """Create guilt score and set assigned_by."""
         serializer.save(assigned_by=self.request.user)

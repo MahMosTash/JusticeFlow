@@ -29,6 +29,10 @@ import {
   AccountTree,
   Logout,
   Home,
+  Gavel,
+  LocalAtm,
+  Person,
+  VerifiedUser,
 } from '@mui/icons-material';
 import { useAuth } from '@/hooks/useAuth';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -88,6 +92,30 @@ export const Layout: React.FC = () => {
       icon: <Report />,
       path: ROUTES.REPORTS,
       show: permissions.isOfficer() || permissions.isInvestigator(),
+    },
+    {
+      text: 'Trials',
+      icon: <Gavel />,
+      path: ROUTES.TRIALS,
+      show: permissions.isJudge(),
+    },
+    {
+      text: 'My Rewards',
+      icon: <LocalAtm />,
+      path: ROUTES.REWARDS_MY,
+      show: permissions.isBasicUser(),
+    },
+    {
+      text: 'Review Submissions',
+      icon: <Person />,
+      path: ROUTES.REWARDS_REVIEW,
+      show: permissions.isOfficer() || permissions.isInvestigator() || permissions.isPoliceChief(),
+    },
+    {
+      text: 'Verify Rewards',
+      icon: <VerifiedUser />,
+      path: ROUTES.REWARD_VERIFY,
+      show: permissions.isOfficer() || permissions.isInvestigator() || permissions.isCaptain() || permissions.isPoliceChief(),
     },
   ].filter((item) => item.show);
 

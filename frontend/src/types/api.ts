@@ -201,9 +201,47 @@ export interface BoardEvidenceConnection {
   created_at: string;
 }
 
+export interface TrialDossierSuspect {
+  id: number; name: string; national_id: string; phone_number: string;
+  status: string; notes: string; arrest_date: string | null;
+}
+export interface TrialDossierGuiltScore {
+  id: number; score: number; justification: string;
+  assigned_date: string; assigned_by: User;
+  suspect: { id: number; name: string };
+}
+export interface TrialDossierDecision {
+  id: number; decision: string; comments: string; decided_at: string;
+  decided_by: User; requires_chief_approval: boolean;
+  chief_approval: boolean | null; chief_approved_by: User | null;
+  suspect: { id: number; name: string };
+}
+export interface TrialDossierEvidence {
+  id: number; title: string; evidence_type: string;
+  description: string; recorded_by: User; created_date: string;
+}
+export interface TrialDossierComplaint {
+  id: number; title: string; description: string;
+  status: string; created_date: string; submitted_by: User;
+}
+export interface TrialDossierCase extends Omit<Case, 'complainants' | 'witnesses'> {
+  suspects: TrialDossierSuspect[];
+  guilt_scores: TrialDossierGuiltScore[];
+  captain_decisions: TrialDossierDecision[];
+  evidence_items: TrialDossierEvidence[];
+  complaints: TrialDossierComplaint[];
+  complainants: Array<{ id: number; full_name: string; national_id: string; phone_number: string; notes: string }>;
+  witnesses: Array<{ id: number; witness_name: string | null; witness_national_id: string; witness_phone: string; notes: string }>;
+}
+
 export interface Trial {
   id: number;
-  case: Case;
+  // List view fields
+  case_id?: number;
+  case_title?: string;
+  case_severity?: string;
+  // Detail view — full dossier
+  case: TrialDossierCase | Case;
   judge: User;
   trial_date: string | null;
   verdict_date: string | null;

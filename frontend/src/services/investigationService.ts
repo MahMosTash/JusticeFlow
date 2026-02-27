@@ -79,7 +79,10 @@ export const investigationService = {
   },
 
   createGuiltScore: async (data: Partial<GuiltScore>): Promise<GuiltScore> => {
-    const response = await api.post<GuiltScore>('/investigations/guilt-scores/', data);
+    // Backend serializer uses suspect_id / case_id as write-only FK fields
+    const { suspect, case: caseId, ...rest } = data as any;
+    const payload = { ...rest, suspect_id: suspect, case_id: caseId };
+    const response = await api.post<GuiltScore>('/investigations/guilt-scores/', payload);
     return response.data;
   },
 

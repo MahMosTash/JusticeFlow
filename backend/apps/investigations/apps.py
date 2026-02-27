@@ -5,4 +5,7 @@ class InvestigationsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'apps.investigations'
     verbose_name = 'Investigations'
+    
+    def ready(self):
+        import apps.investigations.signals
 
