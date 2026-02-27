@@ -53,9 +53,8 @@ export const PayBillsPage: React.FC = () => {
     const filteredBills = bills.filter(b => {
         const query = searchQuery.toLowerCase();
         return (
-            b.suspect.name.toLowerCase().includes(query) ||
-            b.suspect.national_id.includes(query) ||
-            b.case.title.toLowerCase().includes(query)
+            b.suspect.suspect_name.toLowerCase().includes(query) ||
+            (b.case && b.case.title.toLowerCase().includes(query))
         );
     });
 
@@ -123,7 +122,7 @@ export const PayBillsPage: React.FC = () => {
 
                                     <Typography variant="subtitle2" color="text.secondary">Suspect</Typography>
                                     <Typography variant="body1" fontWeight={500} gutterBottom>
-                                        {bill.suspect.name} <Typography component="span" variant="caption" color="text.secondary">({bill.suspect.national_id})</Typography>
+                                        {bill.suspect.suspect_name}
                                     </Typography>
 
                                     <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1 }}>Case</Typography>

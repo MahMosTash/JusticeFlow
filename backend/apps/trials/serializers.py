@@ -200,11 +200,11 @@ class TrialCreateSerializer(serializers.ModelSerializer):
 class TrialVerdictSerializer(serializers.ModelSerializer):
     """Serializer for recording verdict."""
 
+    fine_amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
+
     class Meta:
         model = Trial
-        fields = ['verdict', 'punishment_title', 'punishment_description', 'notes']
-
-    fine_amount = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
+        fields = ['verdict', 'punishment_title', 'punishment_description', 'notes', 'fine_amount']
 
     def validate(self, attrs):
         verdict = attrs.get('verdict')

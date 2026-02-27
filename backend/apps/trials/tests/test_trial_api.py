@@ -101,6 +101,23 @@ class TrialAPITest(APITestCase):
         self.case.refresh_from_db()
         self.assertEqual(self.case.status, 'Resolved')
 
+    def test_judge_records_guilty_verdict_with_fine(self):
+        self.case.severity = 'Level 3'
+        self.case.save()
+        trial = Trial.objects.create(case=self.case, judge=self.judge)
+        self._auth(self.judge)
+        url = reverse('trial-record-verdict', kwargs={'pk': trial.pk})
+        payload = {
+            'verdict': 'Guilty',
+            'punishment_title': '5 Years Imprisonment',
+            'punishment_description': 'Convicted',
+            'fine_amount': '500000',
+        }
+        resp = self.client.post(url, payload, format='json')
+        print(resp.data)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(resp.data['verdict'], 'Guilty')
+
     # ── 5. Guilty verdict without punishment is rejected ────────────────────
     def test_guilty_verdict_without_punishment_rejected(self):
         trial = Trial.objects.create(case=self.case, judge=self.judge)

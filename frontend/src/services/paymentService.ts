@@ -10,8 +10,8 @@ export interface BailFine {
     };
     suspect: {
         id: number;
-        name: string;
-        national_id: string;
+        suspect_name: string;
+        status?: string;
     };
     amount: string;
     type: 'Bail' | 'Fine';
