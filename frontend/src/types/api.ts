@@ -128,7 +128,8 @@ export interface Evidence {
 
 export interface Suspect {
   id: number;
-  case: number;
+  case_id?: number;
+  case?: number;
   user: User | null;
   name: string;
   national_id: string;
