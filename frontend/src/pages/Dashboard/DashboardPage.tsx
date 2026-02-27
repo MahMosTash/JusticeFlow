@@ -3,7 +3,7 @@
  */
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Typography } from '@mui/material';
+import { Container, Typography, Box } from '@mui/material';
 import { useAuth } from '@/hooks/useAuth';
 import { usePermissions } from '@/hooks/usePermissions';
 import { ROUTES } from '@/constants/routes';
@@ -51,15 +51,57 @@ export const DashboardPage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Dashboard
-      </Typography>
-      <Typography variant="body1" color="text.secondary" gutterBottom sx={{ mb: 3 }}>
-        Welcome, {user.full_name || user.username}
-      </Typography>
-      {renderDashboard()}
-    </Container>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: 'var(--gradient-page-bg)',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'var(--radial-glow-combined)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        },
+      }}
+    >
+      <Container maxWidth="lg" sx={{ py: 6, position: 'relative', zIndex: 1 }}>
+        <Box sx={{ mb: 4 }}>
+          <Typography
+            variant="h1"
+            component="h1"
+            sx={{
+              fontSize: 'var(--heading-h1-size)',
+              fontWeight: 'var(--heading-h1-weight)',
+              lineHeight: 'var(--heading-h1-line-height)',
+              letterSpacing: 'var(--heading-h1-letter-spacing)',
+              background: 'var(--gradient-accent)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              mb: 2,
+            }}
+          >
+            Dashboard
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              fontSize: 'var(--body-large-size)',
+              color: 'var(--text-secondary)',
+              fontWeight: 'var(--font-weight-normal)',
+            }}
+          >
+            Welcome back, {user.full_name || user.username}
+          </Typography>
+        </Box>
+        {renderDashboard()}
+      </Container>
+    </Box>
   );
 };
 

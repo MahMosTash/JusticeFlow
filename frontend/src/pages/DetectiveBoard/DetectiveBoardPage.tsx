@@ -201,31 +201,78 @@ const CaseSelector: React.FC = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        bgcolor: '#050510',
+        background: 'var(--gradient-page-bg)',
+        position: 'relative',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         pt: 8,
         px: 3,
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'var(--radial-glow-combined)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        },
       }}
     >
-      <Box display="flex" alignItems="center" gap={1.5} mb={1}>
-        <Fingerprint sx={{ color: '#ff1744', fontSize: 36 }} />
+      <Box display="flex" alignItems="center" gap={1.5} mb={1} sx={{ position: 'relative', zIndex: 1 }}>
+        <Fingerprint sx={{ color: 'var(--accent-primary)', fontSize: 36 }} />
         <Typography
           variant="h4"
-          sx={{ color: '#e0e0e0', fontFamily: "'Courier New', monospace", fontWeight: 700, letterSpacing: 2 }}
+          sx={{
+            color: 'var(--text-primary)',
+            fontFamily: "'Manrope', sans-serif",
+            fontWeight: 'var(--font-weight-extrabold)',
+            letterSpacing: 2,
+            fontSize: 'var(--heading-h1-size)',
+          }}
         >
           DETECTIVE BOARD
         </Typography>
       </Box>
-      <Typography variant="body2" sx={{ color: '#546e7a', mb: 5, fontFamily: 'monospace' }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: 'var(--text-secondary)',
+          mb: 5,
+          fontFamily: "'Manrope', sans-serif",
+          fontSize: 'var(--body-base-size)',
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
         Select a case to open its detective board
       </Typography>
 
       {cases.length === 0 ? (
-        <Box textAlign="center">
-          <Typography sx={{ color: '#546e7a', mb: 2 }}>No cases found.</Typography>
-          <Button variant="outlined" sx={{ color: '#ff1744', borderColor: '#ff174444' }} onClick={() => navigate(ROUTES.CASES)}>
+        <Box textAlign="center" sx={{ position: 'relative', zIndex: 1 }}>
+          <Typography
+            sx={{
+              color: 'var(--text-secondary)',
+              mb: 2,
+              fontSize: 'var(--body-base-size)',
+            }}
+          >
+            No cases found.
+          </Typography>
+          <Button
+            variant="outlined"
+            sx={{
+              color: 'var(--accent-primary)',
+              borderColor: 'var(--glass-border)',
+              '&:hover': {
+                borderColor: 'var(--accent-primary)',
+                background: 'var(--accent-primary-light)',
+              },
+            }}
+            onClick={() => navigate(ROUTES.CASES)}
+          >
             Go to Cases
           </Button>
         </Box>
@@ -237,35 +284,65 @@ const CaseSelector: React.FC = () => {
             gap: 2,
             width: '100%',
             maxWidth: 900,
+            position: 'relative',
+            zIndex: 1,
           }}
         >
           {cases.map((c: any) => (
             <Card
               key={c.id}
+              className="glass-effect"
               sx={{
-                bgcolor: '#0a0a1a',
-                border: '1px solid #ff174422',
-                borderRadius: 2,
-                transition: 'all 0.2s',
-                '&:hover': { border: '1px solid #ff174488', boxShadow: '0 0 16px #ff174433' },
+                background: 'var(--glass-bg)',
+                border: '1px solid var(--glass-border)',
+                borderRadius: 'var(--radius-md)',
+                transition: 'var(--transition-base)',
+                '&:hover': {
+                  border: '1px solid var(--accent-primary)',
+                  boxShadow: 'var(--shadow-glow-lg), var(--shadow-lg)',
+                  transform: 'translateY(-2px)',
+                },
               }}
             >
               <CardActionArea onClick={() => navigate(ROUTES.DETECTIVE_BOARD_CASE(c.id))} sx={{ p: 0.5 }}>
                 <CardContent>
                   <Box display="flex" alignItems="center" gap={1} mb={1}>
-                    <Folder sx={{ color: '#ff1744', fontSize: 20 }} />
-                    <Typography variant="caption" sx={{ color: '#ff1744', fontFamily: 'monospace', fontWeight: 700 }}>
+                    <Folder sx={{ color: 'var(--accent-primary)', fontSize: 20 }} />
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: 'var(--accent-primary)',
+                        fontFamily: "'Manrope', sans-serif",
+                        fontWeight: 'var(--font-weight-bold)',
+                        fontSize: 'var(--label-base-size)',
+                      }}
+                    >
                       CASE #{c.id}
                     </Typography>
                   </Box>
-                  <Typography variant="body1" sx={{ color: '#e0e0e0', fontWeight: 600, mb: 0.5 }}>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: 'var(--text-primary)',
+                      fontWeight: 'var(--font-weight-semibold)',
+                      mb: 0.5,
+                      fontSize: 'var(--body-base-size)',
+                    }}
+                  >
                     {c.title ?? c.name ?? `Case ${c.id}`}
                   </Typography>
                   {c.status && (
                     <Chip
                       label={c.status}
                       size="small"
-                      sx={{ height: 18, fontSize: '0.6rem', bgcolor: '#ff174422', color: '#ff7043', border: '1px solid #ff174433' }}
+                      sx={{
+                        height: 18,
+                        fontSize: 'var(--label-small-size)',
+                        bgcolor: 'var(--accent-primary-light)',
+                        color: 'var(--accent-primary)',
+                        border: '1px solid var(--glass-border)',
+                        fontWeight: 'var(--font-weight-medium)',
+                      }}
                     />
                   )}
                 </CardContent>
@@ -418,24 +495,33 @@ export const DetectiveBoardPage: React.FC = () => {
           justifyContent: 'space-between',
           px: 2,
           py: 1,
-          bgcolor: '#0a0a1a',
-          borderBottom: '1px solid #ff174422',
+          background: 'var(--bg-elevated)',
+          borderBottom: '1px solid var(--glass-border)',
           flexShrink: 0,
           zIndex: 10,
         }}
       >
         <Box display="flex" alignItems="center" gap={1}>
-          <IconButton onClick={() => navigate(ROUTES.CASES)} sx={{ color: '#ff1744' }}>
+          <IconButton
+            onClick={() => navigate(ROUTES.CASES)}
+            sx={{
+              color: 'var(--accent-primary)',
+              '&:hover': {
+                background: 'var(--accent-primary-light)',
+              },
+            }}
+          >
             <ArrowBack />
           </IconButton>
           <Typography
             variant="h6"
             sx={{
-              color: '#e0e0e0',
-              fontFamily: "'Courier New', monospace",
-              fontWeight: 700,
+              color: 'var(--text-primary)',
+              fontFamily: "'Manrope', sans-serif",
+              fontWeight: 'var(--font-weight-bold)',
               letterSpacing: 1,
-              '& span': { color: '#ff1744' },
+              fontSize: 'var(--heading-h3-size)',
+              '& span': { color: 'var(--accent-primary)' },
             }}
           >
             DETECTIVE BOARD <span>#{caseId}</span>
@@ -444,7 +530,15 @@ export const DetectiveBoardPage: React.FC = () => {
 
         <Box display="flex" gap={1}>
           <Tooltip title="Remove selected nodes/edges">
-            <IconButton onClick={handleRemoveSelected} sx={{ color: '#ff5252' }}>
+            <IconButton
+              onClick={handleRemoveSelected}
+              sx={{
+                color: 'var(--accent-error)',
+                '&:hover': {
+                  background: 'var(--error-bg)',
+                },
+              }}
+            >
               <Delete />
             </IconButton>
           </Tooltip>
@@ -453,7 +547,20 @@ export const DetectiveBoardPage: React.FC = () => {
             startIcon={isSaving ? <CircularProgress size={16} color="inherit" /> : <Save />}
             onClick={handleSave}
             disabled={isSaving}
-            sx={{ bgcolor: '#ff1744', '&:hover': { bgcolor: '#d50000' }, fontWeight: 700, letterSpacing: 1 }}
+            sx={{
+              background: 'var(--gradient-accent)',
+              color: 'var(--text-primary)',
+              boxShadow: 'var(--button-shadow)',
+              '&:hover': {
+                background: 'var(--gradient-accent-hover)',
+                boxShadow: 'var(--button-shadow-hover)',
+              },
+              fontWeight: 'var(--font-weight-bold)',
+              letterSpacing: 1,
+              '&:disabled': {
+                opacity: 0.6,
+              },
+            }}
           >
             {isSaving ? 'SAVING...' : 'SAVE'}
           </Button>
@@ -471,35 +578,58 @@ export const DetectiveBoardPage: React.FC = () => {
             sx: {
               position: 'relative',
               width: 260,
-              bgcolor: '#0a0a1a',
-              borderRight: '1px solid #ff174422',
+              background: 'var(--bg-elevated)',
+              borderRight: '1px solid var(--glass-border)',
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
             },
           }}
         >
-          <Box sx={{ p: 1.5, borderBottom: '1px solid #ff174422' }}>
-            <Typography variant="caption" sx={{ color: '#ff1744', fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', fontFamily: 'monospace' }}>
+          <Box sx={{ p: 1.5, borderBottom: '1px solid var(--glass-border)' }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: 'var(--accent-primary)',
+                fontWeight: 'var(--font-weight-bold)',
+                letterSpacing: 2,
+                textTransform: 'uppercase',
+                fontFamily: "'Manrope', sans-serif",
+                fontSize: 'var(--label-base-size)',
+              }}
+            >
               Evidence Items
             </Typography>
-            <Typography variant="caption" sx={{ color: '#546e7a', display: 'block', mt: 0.25 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: 'var(--text-secondary)',
+                display: 'block',
+                mt: 0.25,
+                fontSize: 'var(--caption-size)',
+              }}
+            >
               Click to add to board
             </Typography>
           </Box>
 
           {/* Type filters */}
-          <Box sx={{ p: 1, borderBottom: '1px solid #ff174422', display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+          <Box sx={{ p: 1, borderBottom: '1px solid var(--glass-border)', display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
             <Chip
               label="All"
               size="small"
               onClick={() => setFilterType(null)}
               sx={{
-                bgcolor: filterType === null ? '#ff174433' : 'transparent',
-                border: `1px solid ${filterType === null ? '#ff1744' : '#37474f'}`,
-                color: filterType === null ? '#ff1744' : '#78909c',
-                fontSize: '0.65rem',
+                bgcolor: filterType === null ? 'var(--accent-primary-light)' : 'transparent',
+                border: `1px solid ${filterType === null ? 'var(--accent-primary)' : 'var(--glass-border)'}`,
+                color: filterType === null ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                fontSize: 'var(--label-small-size)',
                 cursor: 'pointer',
+                fontWeight: 'var(--font-weight-medium)',
+                '&:hover': {
+                  bgcolor: 'var(--accent-primary-light)',
+                  borderColor: 'var(--accent-primary)',
+                },
               }}
             />
             {evidenceTypes.map(type => {
@@ -511,11 +641,16 @@ export const DetectiveBoardPage: React.FC = () => {
                   size="small"
                   onClick={() => setFilterType(type === filterType ? null : type)}
                   sx={{
-                    bgcolor: filterType === type ? `${cfg.color}22` : 'transparent',
-                    border: `1px solid ${filterType === type ? cfg.color : '#37474f'}`,
-                    color: filterType === type ? cfg.color : '#78909c',
-                    fontSize: '0.65rem',
+                    bgcolor: filterType === type ? 'var(--accent-primary-light)' : 'transparent',
+                    border: `1px solid ${filterType === type ? 'var(--accent-primary)' : 'var(--glass-border)'}`,
+                    color: filterType === type ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                    fontSize: 'var(--label-small-size)',
                     cursor: 'pointer',
+                    fontWeight: 'var(--font-weight-medium)',
+                    '&:hover': {
+                      bgcolor: 'var(--accent-primary-light)',
+                      borderColor: 'var(--accent-primary)',
+                    },
                   }}
                 />
               );
@@ -565,13 +700,15 @@ export const DetectiveBoardPage: React.FC = () => {
             top: '50%',
             transform: 'translateY(-50%)',
             zIndex: 20,
-            bgcolor: '#0a0a1a',
-            border: '1px solid #ff174444',
-            color: '#ff1744',
+            background: 'var(--bg-elevated)',
+            border: '1px solid var(--glass-border)',
+            color: 'var(--accent-primary)',
             width: 20,
             height: 48,
-            borderRadius: '0 4px 4px 0',
-            '&:hover': { bgcolor: '#ff174422' },
+            borderRadius: '0 var(--radius-md) var(--radius-md) 0',
+            '&:hover': {
+              background: 'var(--accent-primary-light)',
+            },
             transition: 'left 0.2s',
           }}
         >
@@ -609,21 +746,30 @@ export const DetectiveBoardPage: React.FC = () => {
           </ReactFlow>
 
           <Box
+            className="glass-effect"
             sx={{
               position: 'absolute',
               bottom: 16,
               left: '50%',
               transform: 'translateX(-50%)',
-              bgcolor: '#0a0a1a99',
-              border: '1px solid #ff174422',
-              borderRadius: 2,
+              background: 'var(--glass-bg)',
+              border: '1px solid var(--glass-border)',
+              borderRadius: 'var(--radius-md)',
               px: 2,
               py: 0.75,
               backdropFilter: 'blur(8px)',
             }}
           >
-            <Typography variant="caption" sx={{ color: '#546e7a', fontFamily: 'monospace' }}>
-              Drag to connect nodes • <span style={{ color: '#ff1744' }}>Red lines</span> show connections • Delete key removes selected
+            <Typography
+              variant="caption"
+              sx={{
+                color: 'var(--text-secondary)',
+                fontFamily: "'Manrope', sans-serif",
+                fontSize: 'var(--caption-size)',
+                '& span': { color: 'var(--accent-primary)' },
+              }}
+            >
+              Drag to connect nodes • <span>Lines</span> show connections • Delete key removes selected
             </Typography>
           </Box>
         </Box>
