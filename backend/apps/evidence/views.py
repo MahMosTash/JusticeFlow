@@ -22,6 +22,8 @@ class EvidenceViewSet(viewsets.ModelViewSet):
     
     def get_serializer_class(self):
         if self.action == 'list':
+            if self.request.query_params.get('detailed', '').lower() == 'true':
+                return EvidenceSerializer
             return EvidenceListSerializer
         elif self.action == 'verify':
             return EvidenceVerificationSerializer
@@ -174,11 +176,12 @@ class EvidenceViewSet(viewsets.ModelViewSet):
         # Create notification for detective if case has one
         if evidence.case.assigned_detective:
             from core.models import Notification
+            status_str = "VALID" if evidence.is_valid else "INVALID"
             Notification.objects.create(
                 user=evidence.case.assigned_detective,
                 type='new_evidence',
                 title='Evidence Verified',
-                message=f'Biological evidence "{evidence.title}" has been verified.',
+                message=f'Biological evidence "{evidence.title}" has been verified as {status_str} by the Forensic Doctor.',
                 related_case=evidence.case
             )
         

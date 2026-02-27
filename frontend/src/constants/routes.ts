@@ -23,6 +23,7 @@ export const ROUTES = {
   REWARDS_REVIEW: '/rewards/review',
   REWARD_SUBMIT: '/rewards/submit',
   REWARD_VERIFY: '/rewards/verify',
+  FORENSIC_DASHBOARD: '/forensic',
   TRIALS: '/trials',
   TRIAL_DETAIL: (id: number | string) => `/trials/${id}`,
   PAY_BILLS: '/pay-bills',

@@ -34,6 +34,7 @@ import {
   Person,
   VerifiedUser,
   Payment,
+  Science,
 } from '@mui/icons-material';
 import { useAuth } from '@/hooks/useAuth';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -105,6 +106,12 @@ export const Layout: React.FC = () => {
       icon: <LocalAtm />,
       path: ROUTES.REWARDS_MY,
       show: permissions.isBasicUser(),
+    },
+    {
+      text: 'Lab & Forensics',
+      icon: <Science />,
+      path: ROUTES.FORENSIC_DASHBOARD,
+      show: permissions.isForensicDoctor(),
     },
     {
       text: 'Pay Bills & Fines',

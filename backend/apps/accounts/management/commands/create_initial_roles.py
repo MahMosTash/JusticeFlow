@@ -78,6 +78,7 @@ class Command(BaseCommand):
             {'username': 'captain', 'role': 'Captain', 'first': 'Test', 'last': 'Captain'},
             {'username': 'chief', 'role': 'Police Chief', 'first': 'Test', 'last': 'Chief'},
             {'username': 'judge', 'role': 'Judge', 'first': 'Test', 'last': 'Judge'},
+            {'username': 'doctor', 'role': 'Forensic Doctor', 'first': 'Test', 'last': 'Doctor'},
             {'username': 'user', 'role': 'Basic User', 'first': 'Test', 'last': 'User'},
         ]
         

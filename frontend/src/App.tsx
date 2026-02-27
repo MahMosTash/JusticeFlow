@@ -34,6 +34,7 @@ import { RewardReviewPage } from './pages/Rewards/RewardReviewPage';
 import { RewardVerificationPage } from './pages/Rewards/RewardVerificationPage';
 import { PayBillsPage } from './pages/Payments/PayBillsPage';
 import { PaymentCallbackPage } from './pages/Payments/PaymentCallbackPage';
+import { ForensicDashboardPage } from './pages/Forensic/ForensicDashboardPage';
 import { ROUTES } from './constants/routes';
 
 const theme = createTheme({
@@ -231,7 +232,7 @@ const theme = createTheme({
           backgroundColor: '#0d0a0a !important',
           background: '#0d0a0a !important',
         },
-        },
+      },
     },
   },
 });
@@ -273,6 +274,7 @@ const AppRoutes: React.FC = () => {
         <Route path={ROUTES.REWARD_VERIFY} element={<RewardVerificationPage />} />
         <Route path={ROUTES.TRIALS} element={<TrialsListPage />} />
         <Route path={ROUTES.TRIAL_DETAIL(':id')} element={<TrialPage />} />
+        <Route path={ROUTES.FORENSIC_DASHBOARD} element={<ForensicDashboardPage />} />
         <Route path={ROUTES.PAY_BILLS} element={<PayBillsPage />} />
         <Route path={ROUTES.PAY_CALLBACK} element={<PaymentCallbackPage />} />
         <Route path={ROUTES.ADMIN_USERS} element={<UserManagementPage />} />
