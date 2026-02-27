@@ -1,143 +1,147 @@
-"""
-Views for evidence app.
-"""
+# backend/apps/evidence/views.py
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.db import transaction
+from rest_framework.views import APIView
+from django.utils import timezone
+
 from core.permissions import IsForensicDoctor
 from .models import Evidence
-from .serializers import (
-    EvidenceSerializer, EvidenceListSerializer, EvidenceVerificationSerializer
-)
+from .serializers import EvidenceSerializer, EvidenceVerificationSerializer
+from apps.accounts.models import User
+from apps.notifications.models import Notification
 
 
 class EvidenceViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for Evidence management.
-    """
-    queryset = Evidence.objects.all()
+    serializer_class = EvidenceSerializer
     permission_classes = [IsAuthenticated]
-    
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return EvidenceListSerializer
-        elif self.action == 'verify':
-            return EvidenceVerificationSerializer
-        return EvidenceSerializer
-    
+
     def get_queryset(self):
-        """Filter evidence based on case and type."""
         queryset = Evidence.objects.select_related(
             'case', 'recorded_by', 'verified_by_forensic_doctor'
-        )
-        
-        # Filter by case
-        case_id = self.request.query_params.get('case', None)
+        ).all()
+
+        case_id = self.request.query_params.get('case')
         if case_id:
             queryset = queryset.filter(case_id=case_id)
-        
-        # Filter by evidence type
-        evidence_type = self.request.query_params.get('evidence_type', None)
+
+        evidence_type = self.request.query_params.get('evidence_type')
         if evidence_type:
             queryset = queryset.filter(evidence_type=evidence_type)
-        
-        # Filter by verification status (for biological evidence)
-        verified = self.request.query_params.get('verified', None)
+
+        verified = self.request.query_params.get('verified')
         if verified is not None:
             if verified.lower() == 'true':
-                queryset = queryset.filter(
-                    evidence_type='biological',
-                    verified_by_forensic_doctor__isnull=False
-                )
-            else:
-                queryset = queryset.filter(
-                    evidence_type='biological',
-                    verified_by_forensic_doctor__isnull=True
-                )
-        
+                queryset = queryset.filter(verified_by_forensic_doctor__isnull=False)
+            elif verified.lower() == 'false':
+                queryset = queryset.filter(verified_by_forensic_doctor__isnull=True)
+
         return queryset
-    
-    def get_permissions(self):
-        """Set permissions based on action."""
-        if self.action == 'verify':
-            return [IsForensicDoctor()]
-        return [IsAuthenticated()]
-    
+
     def perform_create(self, serializer):
-        """Create evidence — resolve case from request data (accepts both 'case' and 'case_id')."""
-        from apps.cases.models import Case
-        
-        # Accept both field names: case_id (new) or case (legacy)
-        case_id = (
-            self.request.data.get('case_id')
-            or self.request.data.get('case')
-        )
-        
-        if not case_id:
-            from rest_framework.exceptions import ValidationError
-            raise ValidationError({'case_id': 'Case is required.'})
-        
-        try:
-            case = Case.objects.get(pk=int(case_id))
-        except (Case.DoesNotExist, ValueError, TypeError):
-            from rest_framework.exceptions import ValidationError
-            raise ValidationError({'case_id': f'Invalid case ID: {case_id}'})
-        
-        serializer.save(
-            recorded_by=self.request.user,
-            case=case,
-        )
-    
-    @action(detail=True, methods=['post'], permission_classes=[IsForensicDoctor])
+        serializer.save(recorded_by=self.request.user)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsForensicDoctor])
     def verify(self, request, pk=None):
         """
-        Verify biological evidence (Forensic Doctor only).
+        Forensic doctors can verify OR update their review at any time.
+        Removing the one-shot block so doctors can refine comments.
         """
         evidence = self.get_object()
-        
+
         if evidence.evidence_type != 'biological':
             return Response(
-                {'error': 'Only biological evidence can be verified'},
+                {'error': 'Only biological evidence can be verified by a forensic doctor.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        if evidence.is_verified():
-            return Response(
-                {'error': 'Evidence is already verified'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        serializer = self.get_serializer(evidence, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        
-        # Create notification for detective if case has one
-        if evidence.case.assigned_detective:
-            from core.models import Notification
-            Notification.objects.create(
-                user=evidence.case.assigned_detective,
-                type='new_evidence',
-                title='Evidence Verified',
-                message=f'Biological evidence "{evidence.title}" has been verified.',
-                related_case=evidence.case
-            )
-        
-        return Response(serializer.data)
-    
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
-    def by_type(self, request):
-        """Get evidence grouped by type."""
-        evidence_types = Evidence.EVIDENCE_TYPE_CHOICES
-        result = {}
-        
-        for evidence_type, display_name in evidence_types:
-            count = self.get_queryset().filter(evidence_type=evidence_type).count()
-            result[evidence_type] = {
-                'display_name': display_name,
-                'count': count
-            }
-        
-        return Response(result)
 
+        serializer = EvidenceVerificationSerializer(
+            evidence, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+
+        # Resolve doctor by national_id supplied, or fall back to the requesting user
+        national_id = request.data.get('verified_by_national_id', '').strip()
+        doctor = request.user
+        if national_id:
+            try:
+                doctor = User.objects.get(national_id=national_id)
+            except User.DoesNotExist:
+                return Response(
+                    {'error': 'No user found with that national ID.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        is_first_verification = evidence.verified_by_forensic_doctor is None
+
+        evidence.verified_by_forensic_doctor = doctor
+        evidence.verified_by_national_id = national_id or request.user.national_id
+        evidence.verification_date = timezone.now()
+        evidence.verification_notes = request.data.get(
+            'verification_notes', evidence.verification_notes
+        )
+        evidence.save()
+
+        # Notify the detective assigned to the case only on first verification
+        # (re-submissions send a lighter "updated" notification)
+        case = evidence.case
+        detective = getattr(case, 'assigned_detective', None)
+        if detective:
+            if is_first_verification:
+                title = 'Biological Evidence Verified'
+                message = (
+                    f'Dr. {doctor.full_name or doctor.username} has verified '
+                    f'biological evidence "{evidence.title}" for case "{case.title}".'
+                )
+            else:
+                title = 'Forensic Review Updated'
+                message = (
+                    f'Dr. {doctor.full_name or doctor.username} has updated their '
+                    f'review of biological evidence "{evidence.title}" for case "{case.title}".'
+                )
+            Notification.objects.create(
+                user=detective,
+                type='new_evidence',
+                title=title,
+                message=message,
+                related_case=case,
+            )
+
+        return Response(EvidenceSerializer(evidence).data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated, IsForensicDoctor])
+    def unanswered_biological(self, request):
+        """
+        Returns all biological evidence that has NOT yet been reviewed
+        by any forensic doctor.  This is the doctor's primary work queue.
+        """
+        queryset = Evidence.objects.filter(
+            evidence_type='biological',
+            verified_by_forensic_doctor__isnull=True,
+        ).select_related('case', 'recorded_by').order_by('-created_date')
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def by_type(self, request):
+        from django.db.models import Count
+        type_counts = (
+            Evidence.objects.values('evidence_type')
+            .annotate(count=Count('id'))
+        )
+        result = {}
+        type_display = dict(Evidence.EVIDENCE_TYPES)
+        for item in type_counts:
+            t = item['evidence_type']
+            result[t] = {
+                'display_name': type_display.get(t, t),
+                'count': item['count'],
+            }
+        return Response(result)

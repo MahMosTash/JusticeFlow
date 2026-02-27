@@ -1,119 +1,40 @@
-"""
-Serializers for evidence app.
-"""
+# backend/apps/evidence/serializers.py
 from rest_framework import serializers
-from apps.evidence.models import Evidence
-from apps.accounts.serializers import UserDetailSerializer
-from apps.cases.serializers import CaseListSerializer
-from apps.cases.models import Case
+from .models import Evidence
+from apps.accounts.serializers import UserSerializer
 
 
 class EvidenceSerializer(serializers.ModelSerializer):
-    """Serializer for Evidence model."""
-    case = CaseListSerializer(read_only=True)
-    case_id = serializers.IntegerField(write_only=True, required=False)
-    recorded_by = UserDetailSerializer(read_only=True)
-    verified_by_forensic_doctor = UserDetailSerializer(read_only=True)
-    
+    recorded_by = UserSerializer(read_only=True)
+    verified_by_forensic_doctor = UserSerializer(read_only=True)
+    case = serializers.SerializerMethodField()
+
     class Meta:
         model = Evidence
-        fields = [
-            'id', 'title', 'description', 'evidence_type', 'case', 'case_id',
-            'recorded_by', 'created_date',
-            # Witness Statement fields
-            'transcript', 'witness_name', 'witness_national_id', 'witness_phone',
-            'image', 'video', 'audio',
-            # Biological Evidence fields
-            'evidence_category', 'image1', 'image2', 'image3',
-            'verified_by_forensic_doctor', 'verified_by_national_id',
-            'verification_date', 'verification_notes',
-            # Vehicle Evidence fields
-            'model', 'color', 'license_plate', 'serial_number',
-            # Identification Document fields
-            'full_name', 'metadata'
+        fields = '__all__'
+        read_only_fields = [
+            'recorded_by',
+            'verified_by_forensic_doctor',
+            'verification_date',
+            'created_date',
         ]
-        read_only_fields = ['id', 'recorded_by', 'created_date', 'verification_date']
 
-    # File fields that DRF returns as absolute URLs — strip to relative /media/... paths
-    # so they work on both dev (port 3000, Vite proxy) and production (port 80, nginx)
-    _FILE_FIELDS = ('image', 'video', 'audio', 'image1', 'image2', 'image3')
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        for field in self._FILE_FIELDS:
-            value = data.get(field)
-            if value and isinstance(value, str):
-                # Convert 'http://host:port/media/...' → '/media/...'
-                if '/media/' in value:
-                    data[field] = '/media/' + value.split('/media/', 1)[1]
-        return data
-
-    def validate(self, attrs):
-        """Validate type-specific requirements."""
-        evidence_type = attrs.get('evidence_type', self.instance.evidence_type if self.instance else None)
-        
-        if evidence_type == 'witness_statement':
-            if not attrs.get('transcript'):
-                raise serializers.ValidationError({'transcript': 'Transcript is required for witness statements.'})
-        
-        elif evidence_type == 'biological':
-            if not attrs.get('image1'):
-                raise serializers.ValidationError({'image1': 'At least one image is required for biological evidence.'})
-        
-        elif evidence_type == 'vehicle':
-            license_plate = attrs.get('license_plate', '')
-            serial_number = attrs.get('serial_number', '')
-            if license_plate and serial_number:
-                raise serializers.ValidationError('Cannot have both license_plate and serial_number.')
-            if not license_plate and not serial_number:
-                raise serializers.ValidationError('Must have either license_plate or serial_number.')
-            if not attrs.get('model') or not attrs.get('color'):
-                raise serializers.ValidationError('Model and color are required for vehicle evidence.')
-        
-        elif evidence_type == 'identification':
-            if not attrs.get('full_name'):
-                raise serializers.ValidationError({'full_name': 'Full name is required for identification documents.'})
-        
-        return attrs
-    
-    def create(self, validated_data):
-        """Create evidence and set recorded_by."""
-        # Remove case_id — case is set in perform_create
-        validated_data.pop('case_id', None)
-        validated_data['recorded_by'] = self.context['request'].user
-        return super().create(validated_data)
-
-
-class EvidenceListSerializer(serializers.ModelSerializer):
-    """Lightweight serializer for evidence lists."""
-    recorded_by = serializers.StringRelatedField()
-    case = serializers.StringRelatedField()
-    
-    class Meta:
-        model = Evidence
-        fields = [
-            'id', 'title', 'evidence_type', 'case', 'recorded_by', 'created_date'
-        ]
+    def get_case(self, obj):
+        case = obj.case
+        detective = case.assigned_detective
+        return {
+            'id': case.id,
+            'title': case.title,
+            'severity': case.severity,
+            'status': case.status,
+            'created_by': str(case.created_by),
+            'assigned_detective': str(detective) if detective else None,
+            'created_date': case.created_date.isoformat() if case.created_date else None,
+        }
 
 
 class EvidenceVerificationSerializer(serializers.ModelSerializer):
-    """Serializer for verifying biological evidence."""
-    verified_by_forensic_doctor = UserDetailSerializer(read_only=True)
-    
+    """Used only for the /verify/ action — accepts the writable fields."""
     class Meta:
         model = Evidence
-        fields = [
-            'id', 'verified_by_forensic_doctor', 'verified_by_national_id',
-            'verification_date', 'verification_notes', 'is_verified'
-        ]
-        read_only_fields = ['id', 'verification_date']
-    
-    def update(self, instance, validated_data):
-        """Update verification fields."""
-        from django.utils import timezone
-        if instance.evidence_type != 'biological':
-            raise serializers.ValidationError('Only biological evidence can be verified.')
-        
-        validated_data['verified_by_forensic_doctor'] = self.context['request'].user
-        validated_data['verification_date'] = timezone.now()
-        return super().update(instance, validated_data)
+        fields = ['verified_by_national_id', 'verification_notes']

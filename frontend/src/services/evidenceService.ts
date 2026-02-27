@@ -1,13 +1,9 @@
-/**
- * Evidence service
- */
+// src/services/evidenceService.ts
 import api from './api';
 import { Evidence, PaginatedResponse } from '@/types/api';
 
 export const evidenceService = {
-  /**
-   * Get all evidence
-   */
+  /** Get all evidence (filterable) */
   getEvidence: async (params?: {
     case?: number;
     evidence_type?: string;
@@ -19,29 +15,21 @@ export const evidenceService = {
     return response.data;
   },
 
-  /**
-   * Get evidence by ID
-   */
+  /** Get single evidence item */
   getEvidenceById: async (id: number): Promise<Evidence> => {
     const response = await api.get<Evidence>(`/evidence/${id}/`);
     return response.data;
   },
 
-  /**
-   * Create evidence
-   */
+  /** Create evidence (multipart) */
   createEvidence: async (data: FormData): Promise<Evidence> => {
     const response = await api.post<Evidence>('/evidence/', data, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
   },
 
-  /**
-   * Update evidence
-   */
+  /** Update evidence */
   updateEvidence: async (id: number, data: Partial<Evidence> | FormData): Promise<Evidence> => {
     const headers: Record<string, string> = {};
     if (data instanceof FormData) {
@@ -52,7 +40,8 @@ export const evidenceService = {
   },
 
   /**
-   * Verify biological evidence
+   * Verify / update review of biological evidence.
+   * Doctors can call this multiple times to refine comments.
    */
   verifyEvidence: async (
     id: number,
@@ -66,13 +55,27 @@ export const evidenceService = {
   },
 
   /**
-   * Get evidence by type
+   * Forensic Doctor work queue —
+   * biological evidence that has NOT been reviewed yet.
    */
-  getEvidenceByType: async (): Promise<Record<string, { display_name: string; count: number }>> => {
+  getUnansweredBiological: async (params?: {
+    page?: number;
+    page_size?: number;
+  }): Promise<PaginatedResponse<Evidence>> => {
+    const response = await api.get<PaginatedResponse<Evidence>>(
+      '/evidence/unanswered_biological/',
+      { params }
+    );
+    return response.data;
+  },
+
+  /** Evidence count broken down by type */
+  getEvidenceByType: async (): Promise<
+    Record<string, { display_name: string; count: number }>
+  > => {
     const response = await api.get<Record<string, { display_name: string; count: number }>>(
       '/evidence/by_type/'
     );
     return response.data;
   },
 };
-
