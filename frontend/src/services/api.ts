@@ -19,6 +19,11 @@ api.interceptors.request.use(
     if (token && config.headers) {
       config.headers.Authorization = `Token ${token}`;
     }
+    // When sending FormData let the browser set Content-Type (multipart/form-data + boundary)
+    // Forcing application/json breaks file uploads and files are never stored.
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
     return config;
   },
   (error: AxiosError) => {

@@ -24,7 +24,7 @@ export const usePermissions = () => {
     canCreateCase: () => hasAnyRole([ROLES.POLICE_OFFICER, ROLES.PATROL_OFFICER, ROLES.POLICE_CHIEF]),
     canReviewComplaint: () => hasAnyRole([ROLES.INTERN, ROLES.POLICE_OFFICER]),
     canManageEvidence: () => hasAnyRole([ROLES.DETECTIVE, ROLES.SERGEANT, ROLES.POLICE_OFFICER]),
-    canUseDetectiveBoard: () => hasRole(ROLES.DETECTIVE),
+    canUseDetectiveBoard: () => hasAnyRole([ROLES.DETECTIVE, ROLES.SERGEANT, ROLES.CAPTAIN]),
     canViewMostWanted: () => true, // Public page
   };
 };
