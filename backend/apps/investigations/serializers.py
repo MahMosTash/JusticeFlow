@@ -5,11 +5,11 @@ from rest_framework import serializers
 from apps.investigations.models import Suspect, Interrogation, GuiltScore, CaptainDecision
 from apps.accounts.serializers import UserDetailSerializer
 from apps.cases.serializers import CaseListSerializer
+from apps.cases.models import Case
 
 
 class SuspectSerializer(serializers.ModelSerializer):
     """Serializer for Suspect model."""
-    from apps.cases.models import Case
     case = CaseListSerializer(read_only=True)
     case_id = serializers.PrimaryKeyRelatedField(
         queryset=Case.objects.all(),
