@@ -405,6 +405,7 @@ export const DetectiveBoardPage: React.FC = () => {
         } else {
           initNodesFromEvidence(evList);
         }
+
       } catch {
         initNodesFromEvidence(evList);
       }
